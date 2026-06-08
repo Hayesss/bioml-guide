@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --white: #FFFFFF;
+  --off-white: #FAFAFA;
+  --warm-white: #F5F5F0;
+  --ink: #1A1A1A;
+  --ink-light: #4A4A4A;
+  --ink-muted: #8A8A8A;
+  --accent: #1E3A5F;
+  --accent-light: #E8EDF2;
+  --accent-dl: #2D5A3D;
+  --accent-dl-light: #E8F0E9;
+  --border: #E5E5E5;
+  --border-light: #EEEEEE;
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink);
+    background-color: var(--white);
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: 'JetBrains Mono', monospace; background: #F0F0F0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  pre code { padding: 0; background: none; }
+}
