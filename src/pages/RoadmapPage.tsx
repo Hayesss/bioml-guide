@@ -74,10 +74,11 @@ export default function RoadmapPage() {
                         <Box size={14} style={{ color: '#1E3A5F' }} />
                         <h4 className="text-sm font-semibold" style={{ color: '#1E3A5F' }}>机器学习</h4>
                       </div>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-3">
                         {stage.mlTopics.map((topic) => (
-                          <li key={topic} className="text-sm flex items-start gap-2" style={{ color: '#4A4A4A' }}>
-                            <span style={{ color: '#1E3A5F' }}>•</span> {topic}
+                          <li key={topic.name}>
+                            <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{topic.name}</div>
+                            <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
                           </li>
                         ))}
                       </ul>
@@ -88,10 +89,11 @@ export default function RoadmapPage() {
                         <Cpu size={14} style={{ color: '#2D5A3D' }} />
                         <h4 className="text-sm font-semibold" style={{ color: '#2D5A3D' }}>深度学习</h4>
                       </div>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-3">
                         {stage.dlTopics.map((topic) => (
-                          <li key={topic} className="text-sm flex items-start gap-2" style={{ color: '#4A4A4A' }}>
-                            <span style={{ color: '#2D5A3D' }}>•</span> {topic}
+                          <li key={topic.name}>
+                            <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{topic.name}</div>
+                            <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
                           </li>
                         ))}
                       </ul>
@@ -103,11 +105,12 @@ export default function RoadmapPage() {
                       <Calculator size={14} style={{ color: '#8A8A8A' }} />
                       <h4 className="text-sm font-semibold" style={{ color: '#4A4A4A' }}>数学基础</h4>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {stage.mathTopics.map((topic) => (
-                        <span key={topic} className="text-xs px-2.5 py-1 rounded border" style={{ borderColor: '#E5E5E5', color: '#8A8A8A' }}>
-                          {topic}
-                        </span>
+                        <div key={topic.name}>
+                          <div className="font-medium text-xs" style={{ color: '#4A4A4A' }}>{topic.name}</div>
+                          <div className="text-xs mt-0.5" style={{ color: '#8A8A8A', lineHeight: 1.5 }}>{topic.description}</div>
+                        </div>
                       ))}
                     </div>
                   </div>

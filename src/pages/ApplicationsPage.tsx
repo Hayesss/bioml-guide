@@ -35,25 +35,20 @@ export default function ApplicationsPage() {
                   <FlaskConical size={14} style={{ color: '#1E3A5F' }} />
                   <h3 className="text-sm font-semibold" style={{ color: '#1E3A5F' }}>机器学习方法</h3>
                 </div>
-                <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr style={{ backgroundColor: '#FAFAFA' }}>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>方法</th>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>用途</th>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>应用</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {app.mlMethods.map((m) => (
-                        <tr key={m.name} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                          <td className="px-3 py-2 font-medium" style={{ color: '#1A1A1A' }}>{m.name}</td>
-                          <td className="px-3 py-2" style={{ color: '#8A8A8A' }}>{m.description}</td>
-                          <td className="px-3 py-2" style={{ color: '#8A8A8A' }}>{m.useCase}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {app.mlMethods.map((m) => (
+                    <div key={m.name} className="border rounded-lg p-3" style={{ borderColor: '#EEEEEE' }}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{m.name}</span>
+                        <div className="flex gap-1">
+                          {m.tools.map((t) => (
+                            <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{m.description}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -62,25 +57,20 @@ export default function ApplicationsPage() {
                   <BookOpen size={14} style={{ color: '#2D5A3D' }} />
                   <h3 className="text-sm font-semibold" style={{ color: '#2D5A3D' }}>深度学习方法</h3>
                 </div>
-                <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr style={{ backgroundColor: '#FAFAFA' }}>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>方法</th>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>架构</th>
-                        <th className="text-left px-3 py-2 font-medium" style={{ color: '#4A4A4A' }}>应用</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {app.dlMethods.map((m) => (
-                        <tr key={m.name} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                          <td className="px-3 py-2 font-medium" style={{ color: '#1A1A1A' }}>{m.name}</td>
-                          <td className="px-3 py-2" style={{ color: '#8A8A8A' }}>{m.description}</td>
-                          <td className="px-3 py-2" style={{ color: '#8A8A8A' }}>{m.useCase}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {app.dlMethods.map((m) => (
+                    <div key={m.name} className="border rounded-lg p-3" style={{ borderColor: '#EEEEEE' }}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{m.name}</span>
+                        <div className="flex gap-1">
+                          {m.tools.map((t) => (
+                            <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#E8F0E9', color: '#2D5A3D' }}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{m.description}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
