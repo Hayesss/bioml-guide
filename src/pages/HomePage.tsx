@@ -1,9 +1,36 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, Microscope, ArrowRight, Dna, Brain, FlaskConical, Layers } from 'lucide-react';
-import { stages } from '../data/roadmap';
-import { applications } from '../data/applications';
+import { useData } from '../hooks/useData';
+
+interface Stage {
+  id: number;
+  name: string;
+  nameEn: string;
+  duration: string;
+  description: string;
+  mlTopics: { name: string; description: string }[];
+}
+
+interface Application {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  dlMethods: { name: string }[];
+}
 
 export default function HomePage() {
+  const stages = useData<Stage[]>('roadmap');
+  const applications = useData<Application[]>('applications');
+
+  if (!stages || !applications) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-20">
       {/* Hero */}
@@ -93,11 +120,11 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-1.5">
                 {stage.mlTopics.slice(0, 3).map((topic) => (
                   <span
-                    key={topic}
+                    key={topic.name}
                     className="text-xs px-2 py-0.5 rounded border"
                     style={{ borderColor: '#EEEEEE', color: '#8A8A8A' }}
                   >
-                    {topic}
+                    {topic.name}
                   </span>
                 ))}
               </div>

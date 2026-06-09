@@ -1,7 +1,25 @@
-import { mathTopics } from '../data/math';
+import { useData } from '../hooks/useData';
 import { Calculator, Leaf, Box, Cpu, BookOpen } from 'lucide-react';
 
+interface MathTopic {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  bioAnalogy: string;
+  bioAnalogyDetail: string;
+  keyConcepts: { name: string; formula: string; description: string }[];
+  resources: { name: string; type: string; url: string }[];
+  mlUsage: string[];
+  dlUsage: string[];
+  difficulty: string;
+}
+
 export default function MathPage() {
+  const mathTopics = useData<MathTopic[]>('math');
+
+  if (!mathTopics) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+
   return (
     <div className="space-y-16">
       <div>

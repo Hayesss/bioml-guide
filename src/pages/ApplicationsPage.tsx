@@ -1,7 +1,23 @@
-import { applications } from '../data/applications';
+import { useData } from '../hooks/useData';
 import { Microscope, FlaskConical, BookOpen, Database } from 'lucide-react';
 
+interface Application {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  mlMethods: { name: string; description: string; tools: string[] }[];
+  dlMethods: { name: string; description: string; tools: string[] }[];
+  datasets: { name: string; description: string; size: string }[];
+  keyPapers: { title: string; authors: string; year: number; venue: string; url: string }[];
+  gettingStarted: string[];
+}
+
 export default function ApplicationsPage() {
+  const applications = useData<Application[]>('applications');
+
+  if (!applications) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+
   return (
     <div className="space-y-16">
       <div>

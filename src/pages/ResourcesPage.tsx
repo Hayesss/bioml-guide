@@ -1,12 +1,37 @@
 import { useState } from 'react';
-import { resources, categories, levels, costs } from '../data/resources';
+import { useData } from '../hooks/useData';
 import { Search, Filter } from 'lucide-react';
 
+interface Resource {
+  id: string;
+  name: string;
+  author: string;
+  category: string;
+  level: string;
+  cost: string;
+  type: string;
+  description: string;
+  url: string;
+  tags: string[];
+}
+
+interface ResourcesData {
+  categories: string[];
+  levels: string[];
+  costs: string[];
+  resources: Resource[];
+}
+
 export default function ResourcesPage() {
+  const data = useData<ResourcesData>('resources');
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('全部');
   const [level, setLevel] = useState('全部');
   const [cost, setCost] = useState('全部');
+
+  if (!data) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+
+  const { categories, levels, costs, resources } = data;
 
   const filtered = resources.filter((r) => {
     if (cat !== '全部' && r.category !== cat) return false;

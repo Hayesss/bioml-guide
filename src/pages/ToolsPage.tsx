@@ -1,10 +1,33 @@
 import { useState } from 'react';
-import { tools, toolCategories } from '../data/tools';
+import { useData } from '../hooks/useData';
 import { Copy, Check, FlaskConical, BookOpen, Terminal } from 'lucide-react';
 
+interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  installCommand: string;
+  difficulty: string;
+  mlRelevant: boolean;
+  dlRelevant: boolean;
+  url: string;
+  tags: string[];
+}
+
+interface ToolsData {
+  toolCategories: string[];
+  tools: Tool[];
+}
+
 export default function ToolsPage() {
+  const data = useData<ToolsData>('tools');
   const [activeCat, setActiveCat] = useState('全部');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  if (!data) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+
+  const { toolCategories, tools } = data;
 
   const filtered = activeCat === '全部'
     ? tools

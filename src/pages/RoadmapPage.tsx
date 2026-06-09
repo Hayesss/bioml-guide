@@ -1,8 +1,23 @@
 import { useState } from 'react';
-import { stages } from '../data/roadmap';
+import { useData } from '../hooks/useData';
 import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp } from 'lucide-react';
 
+interface Stage {
+  id: number;
+  name: string;
+  nameEn: string;
+  duration: string;
+  description: string;
+  mlTopics: { name: string; description: string }[];
+  dlTopics: { name: string; description: string }[];
+  mathTopics: { name: string; description: string }[];
+  tools: string[];
+  projects: { name: string; description: string }[];
+  resources: { name: string; type: string }[];
+}
+
 export default function RoadmapPage() {
+  const stages = useData<Stage[]>('roadmap');
   const [openStage, setOpenStage] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -28,6 +43,8 @@ export default function RoadmapPage() {
       a: '在阶段2结束时，通过实践项目了解各领域的特点。建议结合实验室需求和个人兴趣，在阶段3开始专注特定方向。',
     },
   ];
+
+  if (!stages) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
 
   return (
     <div className="space-y-14">
