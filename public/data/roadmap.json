@@ -73,19 +73,23 @@
       "mathTopics": [
         {
           "name": "线性代数: 向量、矩阵、点积",
-          "description": "向量用于表示基因表达样本，矩阵用于存储整个数据集，点积衡量向量相似度。这些运算是所有机器学习算法的基础，例如计算基因间的相关性或蛋白质嵌入的相似度。"
+          "description": "向量用于表示基因表达样本，矩阵用于存储整个数据集，点积衡量向量相似度。这些运算是所有机器学习算法的基础，例如计算基因间的相关性或蛋白质嵌入的相似度。",
+          "mathId": "linear-algebra"
         },
         {
           "name": "微积分: 导数、偏导数、链式法则",
-          "description": "导数描述函数变化率，偏导数处理多变量函数，链式法则是复合函数求导规则。反向传播算法本质上就是链式法则的系统性应用，用于计算神经网络中数百万参数的梯度。"
+          "description": "导数描述函数变化率，偏导数处理多变量函数，链式法则是复合函数求导规则。反向传播算法本质上就是链式法则的系统性应用，用于计算神经网络中数百万参数的梯度。",
+          "mathId": "calculus"
         },
         {
           "name": "概率基础: 条件概率、贝叶斯定理",
-          "description": "条件概率描述在已知某些信息后的不确定性更新，贝叶斯定理提供从先验到后验的推断框架。在生物信息学中用于评估基因变异的致病概率和从测序数据中推断基因型。"
+          "description": "条件概率描述在已知某些信息后的不确定性更新，贝叶斯定理提供从先验到后验的推断框架。在生物信息学中用于评估基因变异的致病概率和从测序数据中推断基因型。",
+          "mathId": "probability"
         },
         {
           "name": "统计基础: 均值、方差、分布",
-          "description": "描述数据集中趋势和离散程度的基本统计量。在差异基因表达分析中，t检验和方差分析用于判断基因在不同条件下的表达变化是否具有统计学显著性。"
+          "description": "描述数据集中趋势和离散程度的基本统计量。在差异基因表达分析中，t检验和方差分析用于判断基因在不同条件下的表达变化是否具有统计学显著性。",
+          "mathId": "probability"
         }
       ],
       "tools": [
@@ -99,11 +103,13 @@
       "projects": [
         {
           "name": "基因表达分类",
-          "description": "使用k-NN对TCGA基因表达数据进行癌症类型分类"
+          "description": "使用k-NN对TCGA基因表达数据进行癌症类型分类",
+          "starterCode": "from sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.model_selection import train_test_split\nimport pandas as pd\n\n# 加载TCGA基因表达数据\nexpr = pd.read_csv(\"TCGA_BRCA_expr.csv\", index_col=0)\nX_train, X_test, y_train, y_test = train_test_split(\n    expr.values.T, cancer_labels, test_size=0.2)\nmodel = KNeighborsClassifier(n_neighbors=5)\nmodel.fit(X_train, y_train)\nprint(f\"Accuracy: {model.score(X_test, y_test):.3f}\")"
         },
         {
           "name": "DNA序列k-mer聚类",
-          "description": "对不同物种的DNA序列进行k-mer频率聚类分析"
+          "description": "对不同物种的DNA序列进行k-mer频率聚类分析",
+          "starterCode": "from sklearn.cluster import KMeans\nfrom sklearn.feature_extraction.text import CountVectorizer\n\n# 对不同物种DNA序列进行k-mer频率聚类\nsequences = [\"ATCGGGCTA\", \"ATCGGGTTA\", \"GCTTAACCG\", ...]\nkmer_vectorizer = CountVectorizer(analyzer=\"char\", ngram_range=(3, 3))\nkmer_matrix = kmer_vectorizer.fit_transform(sequences)\n\nkmeans = KMeans(n_clusters=4)\nspecies_clusters = kmeans.fit_predict(kmer_matrix.toarray())"
         }
       ],
       "resources": [
@@ -210,23 +216,28 @@
       "mathTopics": [
         {
           "name": "矩阵分解 (SVD, 特征分解)",
-          "description": "将矩阵分解为更简单矩阵的乘积，揭示数据的内在低维结构。在生物信息学中，SVD用于基因表达数据的降噪和缺失值插补，特征分解是PCA的核心步骤，用于发现主导基因表达模式。"
+          "description": "将矩阵分解为更简单矩阵的乘积，揭示数据的内在低维结构。在生物信息学中，SVD用于基因表达数据的降噪和缺失值插补，特征分解是PCA的核心步骤，用于发现主导基因表达模式。",
+          "mathId": "linear-algebra"
         },
         {
           "name": "梯度下降变种 (SGD, Adam, RMSprop)",
-          "description": "改进的优化算法，通过自适应学习率或动量加速收敛。Adam优化器因其自适应性和鲁棒性，成为训练生物信息学深度网络（如蛋白质语言模型和基因组Transformer）的首选。"
+          "description": "改进的优化算法，通过自适应学习率或动量加速收敛。Adam优化器因其自适应性和鲁棒性，成为训练生物信息学深度网络（如蛋白质语言模型和基因组Transformer）的首选。",
+          "mathId": "optimization"
         },
         {
           "name": "概率分布 (正态、伯努利、多项)",
-          "description": "描述随机变量取值规律的概率模型。正态分布用于建模基因表达噪声，伯努利分布描述二分类结果（如突变是否致病），多项分布刻画多类分类问题（如蛋白质亚细胞定位）。"
+          "description": "描述随机变量取值规律的概率模型。正态分布用于建模基因表达噪声，伯努利分布描述二分类结果（如突变是否致病），多项分布刻画多类分类问题（如蛋白质亚细胞定位）。",
+          "mathId": "probability"
         },
         {
           "name": "最大似然估计",
-          "description": "找到使观测数据出现概率最大的模型参数的方法。在生物信息学中用于估计进化模型参数、训练隐马尔可夫模型进行基因注释，是统计建模和深度学习训练的共同基础。"
+          "description": "找到使观测数据出现概率最大的模型参数的方法。在生物信息学中用于估计进化模型参数、训练隐马尔可夫模型进行基因注释，是统计建模和深度学习训练的共同基础。",
+          "mathId": "probability"
         },
         {
           "name": "信息论基础 (熵、交叉熵)",
-          "description": "熵量化随机变量的不确定性，交叉熵衡量两个概率分布之间的差异。交叉熵损失是生物序列分类任务（如DeepVariant的变异检测和ESM的蛋白质分类）的标准优化目标。"
+          "description": "熵量化随机变量的不确定性，交叉熵衡量两个概率分布之间的差异。交叉熵损失是生物序列分类任务（如DeepVariant的变异检测和ESM的蛋白质分类）的标准优化目标。",
+          "mathId": "information-theory"
         }
       ],
       "tools": [
@@ -240,15 +251,18 @@
       "projects": [
         {
           "name": "蛋白质二级结构预测",
-          "description": "使用CNN对蛋白质序列进行二级结构分类"
+          "description": "使用CNN对蛋白质序列进行二级结构分类",
+          "starterCode": "import torch, torch.nn as nn\n\n# CNN预测蛋白质二级结构 (H=α-helix, E=β-sheet, C=coil)\nclass ProteinSSPredictor(nn.Module):\n    def __init__(self, num_amino_acids=21, hidden=128, num_classes=3):\n        super().__init__()\n        self.conv = nn.Conv1d(num_amino_acids, hidden, kernel_size=7, padding=3)\n        self.fc = nn.Linear(hidden, num_classes)\n    def forward(self, x):\n        return self.fc(self.conv(x).mean(dim=-1))\n\nmodel = ProteinSSPredictor()"
         },
         {
           "name": "基因表达降维可视化",
-          "description": "使用PCA和t-SNE对单细胞数据进行降维和可视化"
+          "description": "使用PCA和t-SNE对单细胞数据进行降维和可视化",
+          "starterCode": "import scanpy as sc\n\n# 对单细胞数据进行PCA降维和可视化\nadata = sc.datasets.pbmc3k()\nsc.pp.normalize_total(adata)\nsc.pp.log1p(adata)\nsc.pp.highly_variable_genes(adata, n_top_genes=2000)\n\n# PCA降维 + t-SNE可视化\nsc.tl.pca(adata, n_comps=50)\nsc.pp.neighbors(adata)\nsc.tl.tsne(adata)\nsc.pl.tsne(adata, color=[\"louvain\"])"
         },
         {
           "name": "突变致病性预测",
-          "description": "使用随机森林预测SNP的致病性"
+          "description": "使用随机森林预测SNP的致病性",
+          "starterCode": "import xgboost as xgb\nfrom sklearn.model_selection import cross_val_score\nimport pandas as pd\n\n# 用多维基因组特征预测SNP致病性\nfeatures = pd.read_csv(\"variant_features.csv\")\nX = features.drop(columns=[\"variant_id\", \"pathogenic\"])\ny = features[\"pathogenic\"]\n\nmodel = xgb.XGBClassifier(n_estimators=200, max_depth=6)\nscores = cross_val_score(model, X, y, cv=5, scoring=\"roc_auc\")\nprint(f\"AUC: {scores.mean():.3f} ± {scores.std():.3f}\")"
         }
       ],
       "resources": [
@@ -335,23 +349,28 @@
       "mathTopics": [
         {
           "name": "注意力机制数学推导",
-          "description": "注意力计算涉及查询-键-值(Q, K, V)矩阵的乘法、缩放和softmax归一化。理解这些数学操作有助于设计针对生物序列特性的改进注意力机制，如处理长基因组序列的线性注意力变体。"
+          "description": "注意力计算涉及查询-键-值(Q, K, V)矩阵的乘法、缩放和softmax归一化。理解这些数学操作有助于设计针对生物序列特性的改进注意力机制，如处理长基因组序列的线性注意力变体。",
+          "mathId": "calculus"
         },
         {
           "name": "变分推断基础",
-          "description": "通过优化变分下界(ELBO)来近似难以直接计算的后验分布的方法。在变分自编码器(VAE)中用于单细胞数据建模，能够同时学习低维表示和估计数据的不确定性。"
+          "description": "通过优化变分下界(ELBO)来近似难以直接计算的后验分布的方法。在变分自编码器(VAE)中用于单细胞数据建模，能够同时学习低维表示和估计数据的不确定性。",
+          "mathId": "probability"
         },
         {
           "name": "图论与谱聚类",
-          "description": "图论研究节点和边的数学结构，谱聚类利用图的拉普拉斯矩阵特征向量进行聚类。在生物信息学中用于蛋白质相互作用网络模块发现和基因共表达网络的社区检测。"
+          "description": "图论研究节点和边的数学结构，谱聚类利用图的拉普拉斯矩阵特征向量进行聚类。在生物信息学中用于蛋白质相互作用网络模块发现和基因共表达网络的社区检测。",
+          "mathId": "linear-algebra"
         },
         {
           "name": "优化理论进阶",
-          "description": "包括凸优化、约束优化和非凸优化的数学理论。生物信息学中的许多问题（如蛋白质结构优化和基因网络推断）本质上是非凸优化问题，理解优化理论有助于设计更有效的求解策略。"
+          "description": "包括凸优化、约束优化和非凸优化的数学理论。生物信息学中的许多问题（如蛋白质结构优化和基因网络推断）本质上是非凸优化问题，理解优化理论有助于设计更有效的求解策略。",
+          "mathId": "optimization"
         },
         {
           "name": "拉格朗日乘子法",
-          "description": "将有约束优化问题转化为无约束问题的数学方法。在支持向量机的对偶问题推导和带约束的蛋白质设计优化中发挥核心作用，是处理生物信息学中各种约束条件的强大工具。"
+          "description": "将有约束优化问题转化为无约束问题的数学方法。在支持向量机的对偶问题推导和带约束的蛋白质设计优化中发挥核心作用，是处理生物信息学中各种约束条件的强大工具。",
+          "mathId": "optimization"
         }
       ],
       "tools": [
@@ -364,15 +383,18 @@
       "projects": [
         {
           "name": "DNA序列BERT预训练",
-          "description": "使用Transformer对DNA序列进行预训练和调控区域预测"
+          "description": "使用Transformer对DNA序列进行预训练和调控区域预测",
+          "starterCode": "from transformers import AutoTokenizer, AutoModelForMaskedLM\n\n# 加载预训练的DNA BERT模型进行微调\nmodel_name = \"InstaDeepAI/nucleotide-transformer-500m-human-ref\"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModelForMaskedLM.from_pretrained(model_name)\n\n# 对启动子序列进行调控活性预测\nsequences = [\"ATCG...promoter_sequence...GCTA\", ...]\ninputs = tokenizer(sequences, return_tensors=\"pt\", padding=True)\noutputs = model(**inputs)  # 用于下游调控区域预测"
         },
         {
           "name": "蛋白质接触图预测",
-          "description": "使用注意力机制预测蛋白质残基间接触"
+          "description": "使用注意力机制预测蛋白质残基间接触",
+          "starterCode": "import torch\nimport esm\n\n# 使用ESM-2注意力图预测残基接触\nmodel, alphabet = esm.pretrained.esm2_t33_650M_UR50D()\nbatch_converter = alphabet.get_batch_converter()\n\ndata = [(\"protein\", \"MKTVRQERLQ\")]\n_, _, batch_tokens = batch_converter(data)\nwith torch.no_grad():\n    results = model(batch_tokens, need_head_weights=True)\n    attentions = results[\"attentions\"]  # 用于接触图预测"
         },
         {
           "name": "单细胞数据插补",
-          "description": "使用VAE对单细胞RNA-seq数据进行缺失值插补"
+          "description": "使用VAE对单细胞RNA-seq数据进行缺失值插补",
+          "starterCode": "import scvi\nimport scanpy as sc\n\n# 使用VAE对单细胞RNA-seq数据进行缺失值插补\nadata = sc.read(\"sc_data.h5ad\")\nscvi.model.SCVI.setup_anndata(adata, batch_key=\"batch\")\nmodel = scvi.model.SCVI(adata, n_latent=30)\nmodel.train(max_epochs=200)\n\n# 获取插补后的表达值\nimputed = model.get_normalized_expression()\nadata.layers[\"imputed\"] = imputed"
         }
       ],
       "resources": [
@@ -459,23 +481,28 @@
       "mathTopics": [
         {
           "name": "微分方程与动力系统",
-          "description": "描述变量随时间或空间变化的方程，动力系统研究系统的长期行为。在生物信息学中用于建模基因调控网络的动态行为、蛋白质相互作用动力学和细胞分化轨迹的推断。"
+          "description": "描述变量随时间或空间变化的方程，动力系统研究系统的长期行为。在生物信息学中用于建模基因调控网络的动态行为、蛋白质相互作用动力学和细胞分化轨迹的推断。",
+          "mathId": "calculus"
         },
         {
           "name": "随机过程与马尔可夫链",
-          "description": "描述随机变量随时间演变的数学模型，马尔可夫链假设未来状态仅依赖于当前状态。在生物信息学中用于序列比对（隐马尔可夫模型）、进化过程建模和单细胞轨迹推断。"
+          "description": "描述随机变量随时间演变的数学模型，马尔可夫链假设未来状态仅依赖于当前状态。在生物信息学中用于序列比对（隐马尔可夫模型）、进化过程建模和单细胞轨迹推断。",
+          "mathId": "probability"
         },
         {
           "name": "变分法",
-          "description": "研究泛函极值问题的数学分支，处理函数的函数。在生物信息学中用于推导最优控制问题（如最优实验设计）和连续极限下的优化问题，是统计力学方法的基础。"
+          "description": "研究泛函极值问题的数学分支，处理函数的函数。在生物信息学中用于推导最优控制问题（如最优实验设计）和连续极限下的优化问题，是统计力学方法的基础。",
+          "mathId": "optimization"
         },
         {
           "name": "信息论进阶 (互信息、KL散度)",
-          "description": "互信息衡量两个变量之间的统计依赖性，KL散度衡量两个概率分布的差异。在生物信息学中，互信息用于推断基因调控网络中的直接相互作用，KL散度用于变分推断和生成模型训练。"
+          "description": "互信息衡量两个变量之间的统计依赖性，KL散度衡量两个概率分布的差异。在生物信息学中，互信息用于推断基因调控网络中的直接相互作用，KL散度用于变分推断和生成模型训练。",
+          "mathId": "information-theory"
         },
         {
           "name": "流形学习",
-          "description": "假设高维数据实际分布在一个低维流形上，通过非线性降维揭示数据的内在几何结构。在单细胞数据分析中，流形学习（如UMAP）用于可视化细胞状态连续体和发现分化轨迹。"
+          "description": "假设高维数据实际分布在一个低维流形上，通过非线性降维揭示数据的内在几何结构。在单细胞数据分析中，流形学习（如UMAP）用于可视化细胞状态连续体和发现分化轨迹。",
+          "mathId": "linear-algebra"
         }
       ],
       "tools": [
@@ -489,19 +516,23 @@
       "projects": [
         {
           "name": "蛋白质功能预测",
-          "description": "使用ESM-2嵌入进行蛋白质GO注释预测"
+          "description": "使用ESM-2嵌入进行蛋白质GO注释预测",
+          "starterCode": "from transformers import AutoTokenizer, AutoModel\nfrom sklearn.linear_model import LogisticRegression\nimport torch\n\n# ESM-2嵌入 + 逻辑回归预测蛋白质GO注释\ntokenizer = AutoTokenizer.from_pretrained(\"facebook/esm2_t33_650M_UR50D\")\nmodel = AutoModel.from_pretrained(\"facebook/esm2_t33_650M_UR50D\")\n\ndef get_embedding(sequence):\n    inputs = tokenizer(sequence, return_tensors=\"pt\")\n    with torch.no_grad():\n        return model(**inputs).last_hidden_state.mean(dim=1).numpy()\n\nX_emb = get_embedding(\"MKTVRQERLQ\")\nclassifier = LogisticRegression().fit(X_train_emb, y_go_labels)"
         },
         {
           "name": "基因调控序列设计",
-          "description": "使用扩散模型生成具有特定调控功能的DNA序列"
+          "description": "使用扩散模型生成具有特定调控功能的DNA序列",
+          "starterCode": "import torch\nfrom denoising_diffusion_pytorch import Unet, GaussianDiffusion\n\n# 扩散模型生成具有特定调控功能的DNA序列\nmodel = Unet(dim=64, dim_mults=(1, 2, 4), channels=4)  # 4通道=ATCG\ndiffusion = GaussianDiffusion(model, timesteps=1000)\n\n# 训练: diffusion(one_hot_sequences)\n# 生成: sampled_sequences = diffusion.sample(batch_size=16)\n# 解码: argmax(sampled_sequences[:, :, i]) -> ATCG"
         },
         {
           "name": "药物分子性质预测",
-          "description": "使用图神经网络预测分子ADMET性质"
+          "description": "使用图神经网络预测分子ADMET性质",
+          "starterCode": "import torch\nfrom torch_geometric.nn import GCNConv, global_mean_pool\n\n# 图神经网络预测分子ADMET性质\nclass MoleculeGCN(torch.nn.Module):\n    def __init__(self, num_features, hidden=128):\n        super().__init__()\n        self.conv1 = GCNConv(num_features, hidden)\n        self.conv2 = GCNConv(hidden, hidden)\n        self.fc = torch.nn.Linear(hidden, 1)  # 输出: 毒性/活性预测\n    def forward(self, data):\n        x = self.conv1(data.x, data.edge_index).relu()\n        x = self.conv2(x, data.edge_index).relu()\n        return self.fc(global_mean_pool(x, data.batch))"
         },
         {
           "name": "单细胞注释与批次校正",
-          "description": "使用scVI进行单细胞数据整合与细胞类型注释"
+          "description": "使用scVI进行单细胞数据整合与细胞类型注释",
+          "starterCode": "import scvi\nimport scanpy as sc\n\n# scVI批次校正 + 细胞类型注释\nadata = sc.read(\"multi_batch_sc.h5ad\")\nscvi.model.SCVI.setup_anndata(adata, batch_key=\"batch\")\n\n# 训练scVI进行批次校正\nmodel = scvi.model.SCVI(adata, n_latent=30, n_hidden=128)\nmodel.train()\nadata.obsm[\"X_scVI\"] = model.get_latent_representation()\n\n# 基于校正后的表示进行聚类和注释\nsc.pp.neighbors(adata, use_rep=\"X_scVI\")\nsc.tl.umap(adata)\nsc.tl.leiden(adata, resolution=0.5)"
         }
       ],
       "resources": [

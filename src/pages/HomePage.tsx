@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, Microscope, ArrowRight, Dna, Brain, FlaskConical, Layers } from 'lucide-react';
+import Quiz from '../components/Quiz';
 import { useData } from '../hooks/useData';
 
 interface Stage {
@@ -222,6 +223,16 @@ export default function HomePage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* Self-assessment quiz */}
+      <section>
+        <div className="flex items-center gap-3 mb-6">
+          <Brain size={20} style={{ color: '#1E3A5F' }} />
+          <h2 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>来测一下？</h2>
+          <span className="text-xs" style={{ color: '#8A8A8A' }}>5道生物信息学ML/DL基础题</span>
+        </div>
+        <Quiz />
       </section>
 
       {/* Quick links */}

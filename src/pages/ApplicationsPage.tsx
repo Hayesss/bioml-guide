@@ -1,13 +1,21 @@
+import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
 import { Microscope, FlaskConical, BookOpen, Database } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
+
+interface DecisionGuidance {
+  summary: string;
+  rules: { when: string; use: string; why: string }[];
+}
 
 interface Application {
   id: string;
   name: string;
   description: string;
   color: string;
-  mlMethods: { name: string; description: string; tools: string[] }[];
-  dlMethods: { name: string; description: string; tools: string[] }[];
+  decisionGuidance?: DecisionGuidance;
+  mlMethods: { name: string; description: string; tools: string[]; codeSnippet?: string }[];
+  dlMethods: { name: string; description: string; tools: string[]; codeSnippet?: string }[];
   datasets: { name: string; description: string; size: string }[];
   keyPapers: { title: string; authors: string; year: number; venue: string; url: string }[];
   gettingStarted: string[];
@@ -41,9 +49,35 @@ export default function ApplicationsPage() {
               </div>
               <h2 className="text-xl font-bold" style={{ color: '#1A1A1A' }}>{app.name}</h2>
             </div>
-            <p className="text-sm mb-8 max-w-3xl" style={{ color: '#8A8A8A', lineHeight: 1.7 }}>
+            <p className="text-sm mb-4 max-w-3xl" style={{ color: '#8A8A8A', lineHeight: 1.7 }}>
               {app.description}
             </p>
+
+            {app.decisionGuidance && (
+              <div className="mb-6 border rounded-lg overflow-hidden" style={{ borderColor: app.color + '30' }}>
+                <div className="px-4 py-2" style={{ backgroundColor: app.color + '10', borderBottom: '1px solid ' + app.color + '20' }}>
+                  <span className="text-xs font-semibold" style={{ color: app.color }}>ML 还是 DL？决策指南</span>
+                </div>
+                <div className="p-4">
+                  <p className="text-xs mb-3" style={{ color: '#4A4A4A' }}>
+                    {app.decisionGuidance.summary}
+                  </p>
+                  <div className="space-y-2">
+                    {app.decisionGuidance.rules.map((rule, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs">
+                        <span className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: app.color }} />
+                        <span>
+                          <span className="font-medium" style={{ color: '#1A1A1A' }}>{rule.when}</span>
+                          {' → '}
+                          <span className="font-mono font-medium" style={{ color: app.color }}>{rule.use}</span>
+                          <span style={{ color: '#A0A0A0' }}> ({rule.why})</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
@@ -58,11 +92,16 @@ export default function ApplicationsPage() {
                         <span className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{m.name}</span>
                         <div className="flex gap-1">
                           {m.tools.map((t) => (
-                            <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}>{t}</span>
+                            <Link key={t} to="/tools" className="text-xs px-1.5 py-0.5 rounded font-mono no-underline hover:underline" style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}>{t}</Link>
                           ))}
                         </div>
                       </div>
                       <p className="text-xs" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{m.description}</p>
+                      {m.codeSnippet && (
+                        <div className="mt-2">
+                          <CodeBlock code={m.codeSnippet} label="Code Example" collapsible />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -80,11 +119,16 @@ export default function ApplicationsPage() {
                         <span className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{m.name}</span>
                         <div className="flex gap-1">
                           {m.tools.map((t) => (
-                            <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#E8F0E9', color: '#2D5A3D' }}>{t}</span>
+                            <Link key={t} to="/tools" className="text-xs px-1.5 py-0.5 rounded font-mono no-underline hover:underline" style={{ backgroundColor: '#E8F0E9', color: '#2D5A3D' }}>{t}</Link>
                           ))}
                         </div>
                       </div>
                       <p className="text-xs" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{m.description}</p>
+                      {m.codeSnippet && (
+                        <div className="mt-2">
+                          <CodeBlock code={m.codeSnippet} label="Code Example" collapsible />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

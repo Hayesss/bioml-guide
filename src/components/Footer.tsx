@@ -6,6 +6,7 @@ const footerLinks = [
   { path: '/resources', label: '资源库' },
   { path: '/tools', label: '工具' },
   { path: '/math', label: '数学直觉' },
+  { path: '/cheatsheet', label: '速查表' },
 ];
 
 export default function Footer() {
@@ -15,28 +16,66 @@ export default function Footer() {
       style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E5E5' }}
     >
       <div className="max-w-[1100px] mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-sm" style={{ color: '#8A8A8A' }}>
-            BioML Guide — 生信机器学习与深度学习学习指南
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Brand */}
+          <div>
+            <div className="text-sm font-semibold mb-2" style={{ color: '#1A1A1A' }}>BioML Guide</div>
+            <p className="text-xs mb-1" style={{ color: '#8A8A8A' }}>
+              面向生物信息学研究者的机器学习与深度学习系统学习指南
+            </p>
+            <p className="text-xs" style={{ color: '#8A8A8A' }}>
+              涵盖基因组学、蛋白质科学、单细胞、药物发现等核心领域
+            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-4">
-            {footerLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="text-sm no-underline"
-                style={{ color: '#8A8A8A' }}
-              >
-                {link.label}
-              </Link>
-            ))}
+
+          {/* Quick nav */}
+          <div>
+            <div className="text-xs font-semibold mb-2" style={{ color: '#4A4A4A' }}>页面导航</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {footerLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="text-sm no-underline hover:underline"
+                  style={{ color: '#8A8A8A' }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <div className="text-xs font-semibold mb-2" style={{ color: '#4A4A4A' }}>外部资源</div>
+            <div className="space-y-1">
+              {[
+                { label: 'scikit-learn', url: 'https://scikit-learn.org/' },
+                { label: 'PyTorch', url: 'https://pytorch.org/' },
+                { label: 'Hugging Face', url: 'https://huggingface.co/' },
+                { label: '3Blue1Brown', url: 'https://www.youtube.com/@3blue1brown' },
+                { label: 'AlphaFold', url: 'https://github.com/deepmind/alphafold' },
+              ].map((ext) => (
+                <a
+                  key={ext.label}
+                  href={ext.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm no-underline hover:underline"
+                  style={{ color: '#8A8A8A' }}
+                >
+                  {ext.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
+
         <div
-          className="mt-4 pt-4 border-t text-center text-xs"
+          className="mt-6 pt-4 border-t text-center text-xs"
           style={{ color: '#8A8A8A', borderColor: '#EEEEEE' }}
         >
-          &copy; {new Date().getFullYear()} BioML Guide. All rights reserved.
+          &copy; {new Date().getFullYear()} BioML Guide. Built with React + Vite + Tailwind CSS.
         </div>
       </div>
     </footer>

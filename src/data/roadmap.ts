@@ -6,9 +6,9 @@ export interface Stage {
   description: string;
   mlTopics: { name: string; description: string }[];
   dlTopics: { name: string; description: string }[];
-  mathTopics: { name: string; description: string }[];
+  mathTopics: { name: string; description: string; mathId?: string }[];
   tools: string[];
-  projects: { name: string; description: string }[];
+  projects: { name: string; description: string; starterCode?: string }[];
   resources: { name: string; type: string }[];
 }
 
@@ -39,15 +39,17 @@ export const stages: Stage[] = [
       { name: 'PyTorch/TensorFlow入门', description: '两大主流深度学习框架，提供自动微分和GPU加速功能。PyTorch因其动态计算图和直观的调试体验，成为生物信息学研究中最常用的深度学习框架，广泛用于蛋白质语言和基因组模型开发。' },
     ],
     mathTopics: [
-      { name: '线性代数: 向量、矩阵、点积', description: '向量用于表示基因表达样本，矩阵用于存储整个数据集，点积衡量向量相似度。这些运算是所有机器学习算法的基础，例如计算基因间的相关性或蛋白质嵌入的相似度。' },
-      { name: '微积分: 导数、偏导数、链式法则', description: '导数描述函数变化率，偏导数处理多变量函数，链式法则是复合函数求导规则。反向传播算法本质上就是链式法则的系统性应用，用于计算神经网络中数百万参数的梯度。' },
-      { name: '概率基础: 条件概率、贝叶斯定理', description: '条件概率描述在已知某些信息后的不确定性更新，贝叶斯定理提供从先验到后验的推断框架。在生物信息学中用于评估基因变异的致病概率和从测序数据中推断基因型。' },
-      { name: '统计基础: 均值、方差、分布', description: '描述数据集中趋势和离散程度的基本统计量。在差异基因表达分析中，t检验和方差分析用于判断基因在不同条件下的表达变化是否具有统计学显著性。' },
+      { mathId: 'linear-algebra', name: '线性代数: 向量、矩阵、点积', description: '向量用于表示基因表达样本，矩阵用于存储整个数据集，点积衡量向量相似度。这些运算是所有机器学习算法的基础，例如计算基因间的相关性或蛋白质嵌入的相似度。' },
+      { mathId: 'calculus', name: '微积分: 导数、偏导数、链式法则', description: '导数描述函数变化率，偏导数处理多变量函数，链式法则是复合函数求导规则。反向传播算法本质上就是链式法则的系统性应用，用于计算神经网络中数百万参数的梯度。' },
+      { mathId: 'probability', name: '概率基础: 条件概率、贝叶斯定理', description: '条件概率描述在已知某些信息后的不确定性更新，贝叶斯定理提供从先验到后验的推断框架。在生物信息学中用于评估基因变异的致病概率和从测序数据中推断基因型。' },
+      { mathId: 'probability', name: '统计基础: 均值、方差、分布', description: '描述数据集中趋势和离散程度的基本统计量。在差异基因表达分析中，t检验和方差分析用于判断基因在不同条件下的表达变化是否具有统计学显著性。' },
     ],
     tools: ['Python', 'NumPy', 'Pandas', 'Matplotlib', 'scikit-learn', 'PyTorch'],
     projects: [
-      { name: '基因表达分类', description: '使用k-NN对TCGA基因表达数据进行癌症类型分类' },
-      { name: 'DNA序列k-mer聚类', description: '对不同物种的DNA序列进行k-mer频率聚类分析' },
+      { name: '基因表达分类', description: '使用k-NN对TCGA基因表达数据进行癌症类型分类',
+ },
+      { name: 'DNA序列k-mer聚类', description: '对不同物种的DNA序列进行k-mer频率聚类分析',
+ },
     ],
     resources: [
       { name: 'Andrew Ng机器学习课程', type: '视频课程' },
@@ -85,17 +87,20 @@ export const stages: Stage[] = [
       { name: '迁移学习基础', description: '将在大数据集上预训练的模型参数迁移到相关小数据集任务上的技术。在生物信息学中，使用在大量基因组或蛋白质序列上预训练的模型进行下游任务微调，已成为标准范式。' },
     ],
     mathTopics: [
-      { name: '矩阵分解 (SVD, 特征分解)', description: '将矩阵分解为更简单矩阵的乘积，揭示数据的内在低维结构。在生物信息学中，SVD用于基因表达数据的降噪和缺失值插补，特征分解是PCA的核心步骤，用于发现主导基因表达模式。' },
-      { name: '梯度下降变种 (SGD, Adam, RMSprop)', description: '改进的优化算法，通过自适应学习率或动量加速收敛。Adam优化器因其自适应性和鲁棒性，成为训练生物信息学深度网络（如蛋白质语言模型和基因组Transformer）的首选。' },
-      { name: '概率分布 (正态、伯努利、多项)', description: '描述随机变量取值规律的概率模型。正态分布用于建模基因表达噪声，伯努利分布描述二分类结果（如突变是否致病），多项分布刻画多类分类问题（如蛋白质亚细胞定位）。' },
-      { name: '最大似然估计', description: '找到使观测数据出现概率最大的模型参数的方法。在生物信息学中用于估计进化模型参数、训练隐马尔可夫模型进行基因注释，是统计建模和深度学习训练的共同基础。' },
-      { name: '信息论基础 (熵、交叉熵)', description: '熵量化随机变量的不确定性，交叉熵衡量两个概率分布之间的差异。交叉熵损失是生物序列分类任务（如DeepVariant的变异检测和ESM的蛋白质分类）的标准优化目标。' },
+      { mathId: 'linear-algebra', name: '矩阵分解 (SVD, 特征分解)', description: '将矩阵分解为更简单矩阵的乘积，揭示数据的内在低维结构。在生物信息学中，SVD用于基因表达数据的降噪和缺失值插补，特征分解是PCA的核心步骤，用于发现主导基因表达模式。' },
+      { mathId: 'optimization', name: '梯度下降变种 (SGD, Adam, RMSprop)', description: '改进的优化算法，通过自适应学习率或动量加速收敛。Adam优化器因其自适应性和鲁棒性，成为训练生物信息学深度网络（如蛋白质语言模型和基因组Transformer）的首选。' },
+      { mathId: 'probability', name: '概率分布 (正态、伯努利、多项)', description: '描述随机变量取值规律的概率模型。正态分布用于建模基因表达噪声，伯努利分布描述二分类结果（如突变是否致病），多项分布刻画多类分类问题（如蛋白质亚细胞定位）。' },
+      { mathId: 'probability', name: '最大似然估计', description: '找到使观测数据出现概率最大的模型参数的方法。在生物信息学中用于估计进化模型参数、训练隐马尔可夫模型进行基因注释，是统计建模和深度学习训练的共同基础。' },
+      { mathId: 'information-theory', name: '信息论基础 (熵、交叉熵)', description: '熵量化随机变量的不确定性，交叉熵衡量两个概率分布之间的差异。交叉熵损失是生物序列分类任务（如DeepVariant的变异检测和ESM的蛋白质分类）的标准优化目标。' },
     ],
     tools: ['scikit-learn', 'XGBoost', 'PyTorch', 'TensorFlow', 'SHAP', 'Optuna'],
     projects: [
-      { name: '蛋白质二级结构预测', description: '使用CNN对蛋白质序列进行二级结构分类' },
-      { name: '基因表达降维可视化', description: '使用PCA和t-SNE对单细胞数据进行降维和可视化' },
-      { name: '突变致病性预测', description: '使用随机森林预测SNP的致病性' },
+      { name: '蛋白质二级结构预测', description: '使用CNN对蛋白质序列进行二级结构分类',
+ },
+      { name: '基因表达降维可视化', description: '使用PCA和t-SNE对单细胞数据进行降维和可视化',
+ },
+      { name: '突变致病性预测', description: '使用随机森林预测SNP的致病性',
+ },
     ],
     resources: [
       { name: 'Hands-On Machine Learning', type: '书籍' },
@@ -128,17 +133,20 @@ export const stages: Stage[] = [
       { name: '模型蒸馏', description: '将大模型的知识迁移到小模型的技术，通过让小模型模仿大模型的输出来保持性能。在生物信息学中用于将大型蛋白质语言模型（如ESM-2 15B）压缩为可在本地部署的轻量级模型。' },
     ],
     mathTopics: [
-      { name: '注意力机制数学推导', description: '注意力计算涉及查询-键-值(Q, K, V)矩阵的乘法、缩放和softmax归一化。理解这些数学操作有助于设计针对生物序列特性的改进注意力机制，如处理长基因组序列的线性注意力变体。' },
-      { name: '变分推断基础', description: '通过优化变分下界(ELBO)来近似难以直接计算的后验分布的方法。在变分自编码器(VAE)中用于单细胞数据建模，能够同时学习低维表示和估计数据的不确定性。' },
-      { name: '图论与谱聚类', description: '图论研究节点和边的数学结构，谱聚类利用图的拉普拉斯矩阵特征向量进行聚类。在生物信息学中用于蛋白质相互作用网络模块发现和基因共表达网络的社区检测。' },
-      { name: '优化理论进阶', description: '包括凸优化、约束优化和非凸优化的数学理论。生物信息学中的许多问题（如蛋白质结构优化和基因网络推断）本质上是非凸优化问题，理解优化理论有助于设计更有效的求解策略。' },
-      { name: '拉格朗日乘子法', description: '将有约束优化问题转化为无约束问题的数学方法。在支持向量机的对偶问题推导和带约束的蛋白质设计优化中发挥核心作用，是处理生物信息学中各种约束条件的强大工具。' },
+      { mathId: 'calculus', name: '注意力机制数学推导', description: '注意力计算涉及查询-键-值(Q, K, V)矩阵的乘法、缩放和softmax归一化。理解这些数学操作有助于设计针对生物序列特性的改进注意力机制，如处理长基因组序列的线性注意力变体。' },
+      { mathId: 'probability', name: '变分推断基础', description: '通过优化变分下界(ELBO)来近似难以直接计算的后验分布的方法。在变分自编码器(VAE)中用于单细胞数据建模，能够同时学习低维表示和估计数据的不确定性。' },
+      { mathId: 'linear-algebra', name: '图论与谱聚类', description: '图论研究节点和边的数学结构，谱聚类利用图的拉普拉斯矩阵特征向量进行聚类。在生物信息学中用于蛋白质相互作用网络模块发现和基因共表达网络的社区检测。' },
+      { mathId: 'optimization', name: '优化理论进阶', description: '包括凸优化、约束优化和非凸优化的数学理论。生物信息学中的许多问题（如蛋白质结构优化和基因网络推断）本质上是非凸优化问题，理解优化理论有助于设计更有效的求解策略。' },
+      { mathId: 'optimization', name: '拉格朗日乘子法', description: '将有约束优化问题转化为无约束问题的数学方法。在支持向量机的对偶问题推导和带约束的蛋白质设计优化中发挥核心作用，是处理生物信息学中各种约束条件的强大工具。' },
     ],
     tools: ['PyTorch', 'Hugging Face Transformers', 'PyTorch Geometric', 'WandB', 'TensorBoard'],
     projects: [
-      { name: 'DNA序列BERT预训练', description: '使用Transformer对DNA序列进行预训练和调控区域预测' },
-      { name: '蛋白质接触图预测', description: '使用注意力机制预测蛋白质残基间接触' },
-      { name: '单细胞数据插补', description: '使用VAE对单细胞RNA-seq数据进行缺失值插补' },
+      { name: 'DNA序列BERT预训练', description: '使用Transformer对DNA序列进行预训练和调控区域预测',
+ },
+      { name: '蛋白质接触图预测', description: '使用注意力机制预测蛋白质残基间接触',
+ },
+      { name: '单细胞数据插补', description: '使用VAE对单细胞RNA-seq数据进行缺失值插补',
+ },
     ],
     resources: [
       { name: 'Attention Is All You Need (论文)', type: '论文' },
@@ -171,11 +179,11 @@ export const stages: Stage[] = [
       { name: '单细胞基础模型 (scGPT, scFoundation)', description: '在大规模单细胞数据集上预训练的Transformer模型，学习细胞的通用表示。scGPT通过基因表达建模实现细胞类型注释、批次校正和扰动预测，为单细胞分析提供统一的基础框架。' },
     ],
     mathTopics: [
-      { name: '微分方程与动力系统', description: '描述变量随时间或空间变化的方程，动力系统研究系统的长期行为。在生物信息学中用于建模基因调控网络的动态行为、蛋白质相互作用动力学和细胞分化轨迹的推断。' },
-      { name: '随机过程与马尔可夫链', description: '描述随机变量随时间演变的数学模型，马尔可夫链假设未来状态仅依赖于当前状态。在生物信息学中用于序列比对（隐马尔可夫模型）、进化过程建模和单细胞轨迹推断。' },
-      { name: '变分法', description: '研究泛函极值问题的数学分支，处理函数的函数。在生物信息学中用于推导最优控制问题（如最优实验设计）和连续极限下的优化问题，是统计力学方法的基础。' },
-      { name: '信息论进阶 (互信息、KL散度)', description: '互信息衡量两个变量之间的统计依赖性，KL散度衡量两个概率分布的差异。在生物信息学中，互信息用于推断基因调控网络中的直接相互作用，KL散度用于变分推断和生成模型训练。' },
-      { name: '流形学习', description: '假设高维数据实际分布在一个低维流形上，通过非线性降维揭示数据的内在几何结构。在单细胞数据分析中，流形学习（如UMAP）用于可视化细胞状态连续体和发现分化轨迹。' },
+      { mathId: 'calculus', name: '微分方程与动力系统', description: '描述变量随时间或空间变化的方程，动力系统研究系统的长期行为。在生物信息学中用于建模基因调控网络的动态行为、蛋白质相互作用动力学和细胞分化轨迹的推断。' },
+      { mathId: 'probability', name: '随机过程与马尔可夫链', description: '描述随机变量随时间演变的数学模型，马尔可夫链假设未来状态仅依赖于当前状态。在生物信息学中用于序列比对（隐马尔可夫模型）、进化过程建模和单细胞轨迹推断。' },
+      { mathId: 'optimization', name: '变分法', description: '研究泛函极值问题的数学分支，处理函数的函数。在生物信息学中用于推导最优控制问题（如最优实验设计）和连续极限下的优化问题，是统计力学方法的基础。' },
+      { mathId: 'information-theory', name: '信息论进阶 (互信息、KL散度)', description: '互信息衡量两个变量之间的统计依赖性，KL散度衡量两个概率分布的差异。在生物信息学中，互信息用于推断基因调控网络中的直接相互作用，KL散度用于变分推断和生成模型训练。' },
+      { mathId: 'linear-algebra', name: '流形学习', description: '假设高维数据实际分布在一个低维流形上，通过非线性降维揭示数据的内在几何结构。在单细胞数据分析中，流形学习（如UMAP）用于可视化细胞状态连续体和发现分化轨迹。' },
     ],
     tools: [
       'AlphaFold2 / ColabFold',
@@ -186,10 +194,14 @@ export const stages: Stage[] = [
       'RDKit',
     ],
     projects: [
-      { name: '蛋白质功能预测', description: '使用ESM-2嵌入进行蛋白质GO注释预测' },
-      { name: '基因调控序列设计', description: '使用扩散模型生成具有特定调控功能的DNA序列' },
-      { name: '药物分子性质预测', description: '使用图神经网络预测分子ADMET性质' },
-      { name: '单细胞注释与批次校正', description: '使用scVI进行单细胞数据整合与细胞类型注释' },
+      { name: '蛋白质功能预测', description: '使用ESM-2嵌入进行蛋白质GO注释预测',
+ },
+      { name: '基因调控序列设计', description: '使用扩散模型生成具有特定调控功能的DNA序列',
+ },
+      { name: '药物分子性质预测', description: '使用图神经网络预测分子ADMET性质',
+ },
+      { name: '单细胞注释与批次校正', description: '使用scVI进行单细胞数据整合与细胞类型注释',
+ },
     ],
     resources: [
       { name: 'AlphaFold论文 (Nature 2021)', type: '论文' },

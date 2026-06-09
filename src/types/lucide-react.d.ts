@@ -29,4 +29,10 @@ declare module 'lucide-react' {
   export const Library: LucideIcon;
   export const Wrench: LucideIcon;
   export const Sigma: LucideIcon;
+  export const Leaf: LucideIcon;
+  export const Database: LucideIcon;
+  export const Zap: LucideIcon;
+  export const ChevronLeft: LucideIcon;
+  export const ChevronRight: LucideIcon;
+  export const RefreshCw: LucideIcon;
 }

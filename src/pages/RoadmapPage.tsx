@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
-import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp } from 'lucide-react';
+import { useProgress } from '../hooks/useProgress';
+import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp, Check, RefreshCw } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
 
 interface Stage {
   id: number;
@@ -10,9 +13,9 @@ interface Stage {
   description: string;
   mlTopics: { name: string; description: string }[];
   dlTopics: { name: string; description: string }[];
-  mathTopics: { name: string; description: string }[];
+  mathTopics: { name: string; description: string; mathId?: string }[];
   tools: string[];
-  projects: { name: string; description: string }[];
+  projects: { name: string; description: string; starterCode?: string }[];
   resources: { name: string; type: string }[];
 }
 
@@ -20,6 +23,21 @@ export default function RoadmapPage() {
   const stages = useData<Stage[]>('roadmap');
   const [openStage, setOpenStage] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const { isTopicDone, toggleTopic, getOverallProgress, resetAll } = useProgress();
+
+  // Calculate all topic keys
+  const allTopicKeys = useMemo(() => {
+    if (!stages) return [];
+    const keys: string[] = [];
+    for (const stage of stages) {
+      for (const t of stage.mlTopics) keys.push(`stage-${stage.id}-ml-${t.name}`);
+      for (const t of stage.dlTopics) keys.push(`stage-${stage.id}-dl-${t.name}`);
+      for (const t of stage.mathTopics) keys.push(`stage-${stage.id}-math-${t.name}`);
+    }
+    return keys;
+  }, [stages]);
+
+  const overall = getOverallProgress(allTopicKeys);
 
   const faqs = [
     {
@@ -53,6 +71,40 @@ export default function RoadmapPage() {
         <p className="text-base" style={{ color: '#8A8A8A', maxWidth: 600 }}>
           从基础到专业，四个阶段系统掌握生物信息学中的机器学习与深度学习
         </p>
+
+        {overall.total > 0 && (
+          <div className="mt-5 border rounded-lg p-4" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold" style={{ color: '#1A1A1A' }}>
+                总体进度: {overall.pct}%
+              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs" style={{ color: '#8A8A8A' }}>
+                  {overall.done}/{overall.total} 项已完成
+                </span>
+                {overall.done > 0 && (
+                  <button
+                    onClick={() => { if (confirm('确定要重置所有进度？')) resetAll(); }}
+                    className="flex items-center gap-1 text-xs hover:underline"
+                    style={{ color: '#8A8A8A' }}
+                  >
+                    <RefreshCw size={11} />
+                    重置
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="w-full h-2 rounded-full" style={{ backgroundColor: '#EEEEEE' }}>
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  backgroundColor: overall.pct === 100 ? '#2D5A3D' : '#1E3A5F',
+                  width: `${overall.pct}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -92,12 +144,37 @@ export default function RoadmapPage() {
                         <h4 className="text-sm font-semibold" style={{ color: '#1E3A5F' }}>机器学习</h4>
                       </div>
                       <ul className="space-y-3">
-                        {stage.mlTopics.map((topic) => (
+                        {stage.mlTopics.map((topic) => {
+                          const key = `stage-${stage.id}-ml-${topic.name}`;
+                          const done = isTopicDone(key);
+                          return (
                           <li key={topic.name}>
-                            <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{topic.name}</div>
-                            <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                            <div
+                              className="flex items-start gap-2 cursor-pointer"
+                              onClick={() => toggleTopic(key)}
+                            >
+                              <span
+                                className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                style={{
+                                  borderColor: done ? '#2D5A3D' : '#CCCCCC',
+                                  backgroundColor: done ? '#2D5A3D' : 'transparent',
+                                }}
+                              >
+                                {done && <Check size={10} style={{ color: 'white' }} />}
+                              </span>
+                              <div>
+                                <div
+                                  className="font-medium text-sm"
+                                  style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                >
+                                  {topic.name}
+                                </div>
+                                <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                              </div>
+                            </div>
                           </li>
-                        ))}
+                          );
+                        })}
                       </ul>
                     </div>
 
@@ -107,12 +184,37 @@ export default function RoadmapPage() {
                         <h4 className="text-sm font-semibold" style={{ color: '#2D5A3D' }}>深度学习</h4>
                       </div>
                       <ul className="space-y-3">
-                        {stage.dlTopics.map((topic) => (
+                        {stage.dlTopics.map((topic) => {
+                          const key = `stage-${stage.id}-dl-${topic.name}`;
+                          const done = isTopicDone(key);
+                          return (
                           <li key={topic.name}>
-                            <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{topic.name}</div>
-                            <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                            <div
+                              className="flex items-start gap-2 cursor-pointer"
+                              onClick={() => toggleTopic(key)}
+                            >
+                              <span
+                                className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                style={{
+                                  borderColor: done ? '#2D5A3D' : '#CCCCCC',
+                                  backgroundColor: done ? '#2D5A3D' : 'transparent',
+                                }}
+                              >
+                                {done && <Check size={10} style={{ color: 'white' }} />}
+                              </span>
+                              <div>
+                                <div
+                                  className="font-medium text-sm"
+                                  style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                >
+                                  {topic.name}
+                                </div>
+                                <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                              </div>
+                            </div>
                           </li>
-                        ))}
+                          );
+                        })}
                       </ul>
                     </div>
                   </div>
@@ -123,12 +225,43 @@ export default function RoadmapPage() {
                       <h4 className="text-sm font-semibold" style={{ color: '#4A4A4A' }}>数学基础</h4>
                     </div>
                     <div className="space-y-2">
-                      {stage.mathTopics.map((topic) => (
+                      {stage.mathTopics.map((topic) => {
+                        const key = `stage-${stage.id}-math-${topic.name}`;
+                        const done = isTopicDone(key);
+                        return (
                         <div key={topic.name}>
-                          <div className="font-medium text-xs" style={{ color: '#4A4A4A' }}>{topic.name}</div>
-                          <div className="text-xs mt-0.5" style={{ color: '#8A8A8A', lineHeight: 1.5 }}>{topic.description}</div>
+                          <div
+                            className="flex items-start gap-2 cursor-pointer"
+                            onClick={() => toggleTopic(key)}
+                          >
+                            <span
+                              className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                              style={{
+                                borderColor: done ? '#2D5A3D' : '#CCCCCC',
+                                backgroundColor: done ? '#2D5A3D' : 'transparent',
+                              }}
+                            >
+                              {done && <Check size={10} style={{ color: 'white' }} />}
+                            </span>
+                            <div>
+                              <div
+                                className="font-medium text-xs"
+                                style={{ color: done ? '#8A8A8A' : '#4A4A4A', textDecoration: done ? 'line-through' : 'none' }}
+                              >
+                                {topic.mathId ? (
+                                  <Link to={`/math`} className="no-underline hover:underline" style={{ color: '#1E3A5F' }}>
+                                    {topic.name} →
+                                  </Link>
+                                ) : (
+                                  topic.name
+                                )}
+                              </div>
+                              <div className="text-xs mt-0.5" style={{ color: '#8A8A8A', lineHeight: 1.5 }}>{topic.description}</div>
+                            </div>
+                          </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -153,6 +286,11 @@ export default function RoadmapPage() {
                         <div key={project.name} className="border rounded-lg p-3" style={{ borderColor: '#EEEEEE' }}>
                           <h5 className="text-sm font-medium mb-1" style={{ color: '#1A1A1A' }}>{project.name}</h5>
                           <p className="text-xs" style={{ color: '#8A8A8A' }}>{project.description}</p>
+                          {project.starterCode && (
+                            <div className="mt-2">
+                              <CodeBlock code={project.starterCode} label="Starter Code" collapsible />
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
 import { Calculator, Leaf, Box, Cpu, BookOpen } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
 
 interface MathTopic {
   id: string;
@@ -8,7 +10,7 @@ interface MathTopic {
   description: string;
   bioAnalogy: string;
   bioAnalogyDetail: string;
-  keyConcepts: { name: string; formula: string; description: string }[];
+  keyConcepts: { name: string; formula: string; description: string; relatedLinks?: { label: string; path: string }[]; codeImpl?: string }[];
   resources: { name: string; type: string; url: string }[];
   mlUsage: string[];
   dlUsage: string[];
@@ -68,6 +70,28 @@ export default function MathPage() {
                       {concept.formula}
                     </code>
                     <p className="text-xs" style={{ color: '#8A8A8A' }}>{concept.description}</p>
+                    {concept.codeImpl && (
+                      <div className="mt-2">
+                        <CodeBlock code={concept.codeImpl} label="Python 实现" collapsible />
+                      </div>
+                    )}
+                    {concept.relatedLinks && concept.relatedLinks.length > 0 && (
+                      <div className="mt-2 pt-2 border-t" style={{ borderColor: '#EEEEEE' }}>
+                        <span className="text-xs" style={{ color: '#A0A0A0' }}>See how this is used in: </span>
+                        {concept.relatedLinks.map((link, i) => (
+                          <span key={link.path + link.label}>
+                            {i > 0 && <span className="text-xs" style={{ color: '#A0A0A0' }}> · </span>}
+                            <Link
+                              to={link.path}
+                              className="text-xs font-medium no-underline hover:underline"
+                              style={{ color: '#1E3A5F' }}
+                            >
+                              {link.label}
+                            </Link>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

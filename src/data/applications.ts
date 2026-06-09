@@ -3,8 +3,8 @@ export interface Application {
   name: string;
   description: string;
   color: string;
-  mlMethods: { name: string; description: string; tools: string[] }[];
-  dlMethods: { name: string; description: string; tools: string[] }[];
+  mlMethods: { name: string; description: string; tools: string[]; codeSnippet?: string }[];
+  dlMethods: { name: string; description: string; tools: string[]; codeSnippet?: string }[];
   datasets: { name: string; description: string; size: string }[];
   keyPapers: { title: string; authors: string; year: number; venue: string; url: string }[];
   gettingStarted: string[];

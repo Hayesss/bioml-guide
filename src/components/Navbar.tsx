@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Microscope, Library, Wrench, Sigma, Menu, X } from 'lucide-react';
+import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search } from 'lucide-react';
 
 const navItems = [
   { path: '/roadmap', label: '学习路径', icon: BookOpen },
@@ -8,9 +8,14 @@ const navItems = [
   { path: '/resources', label: '资源库', icon: Library },
   { path: '/tools', label: '工具', icon: Wrench },
   { path: '/math', label: '数学直觉', icon: Sigma },
+  { path: '/cheatsheet', label: '速查', icon: Zap },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  onSearch?: () => void;
+}
+
+export default function Navbar({ onSearch }: NavbarProps) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -49,6 +54,17 @@ export default function Navbar() {
               </Link>
             );
           })}
+          <button
+            onClick={onSearch}
+            className="flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+            style={{ color: '#8A8A8A', borderColor: '#E5E5E5' }}
+          >
+            <Search size={14} />
+            <span className="hidden lg:inline">搜索</span>
+            <kbd className="hidden lg:inline text-xs px-1 py-0.5 rounded border font-mono ml-1" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}>
+              Ctrl+K
+            </kbd>
+          </button>
         </div>
 
         <button

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../hooks/useData';
 import { Copy, Check, FlaskConical, BookOpen, Terminal } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
 
 interface Tool {
   id: string;
@@ -13,6 +14,7 @@ interface Tool {
   dlRelevant: boolean;
   url: string;
   tags: string[];
+  quickExample?: string;
 }
 
 interface ToolsData {
@@ -167,6 +169,12 @@ export default function ToolsPage() {
                 </button>
               </div>
 
+              {tool.quickExample && (
+                <div className="mt-3">
+                  <CodeBlock code={tool.quickExample} label="Quick Example" collapsible />
+                </div>
+              )}
+
               <div className="mt-2.5 flex items-center gap-1.5">
                 <span className="text-xs" style={{ color: '#8A8A8A' }}>难度:</span>
                 <span
@@ -216,6 +224,107 @@ export default function ToolsPage() {
               <p>pip install biopython scanpy</p>
               <p>pip install scvi-tools</p>
               <p>pip install deepchem rdkit</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-14">
+        <h2 className="text-xl font-bold mb-5" style={{ color: '#1A1A1A' }}>工具选型指南</h2>
+
+        <div className="space-y-5">
+          {/* ML Framework selection */}
+          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: '#1E3A5F' }}>ML框架怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ backgroundColor: '#FAFAFA' }}>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>场景</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1E3A5F' }}>推荐工具</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#4A4A4A' }}>理由</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { scene: '快速搭建基线模型', tool: 'scikit-learn', reason: 'API简洁统一，文档最完善，适合入门和快速迭代' },
+                    { scene: '表格数据最佳性能', tool: 'XGBoost / LightGBM', reason: '梯度提升在结构化特征上通常优于其他算法' },
+                    { scene: '高维基因数据特征选择', tool: 'scikit-learn (LASSO)', reason: 'L1正则化自动筛选少量关键基因标志物' },
+                    { scene: '模型可解释性要求高', tool: 'scikit-learn + SHAP', reason: '线性模型和树模型天然可解释，SHAP提供一致性归因' },
+                    { scene: '数据量极大（百万+样本）', tool: 'LightGBM', reason: '基于直方图的算法，训练速度比XGBoost快数倍' },
+                    { scene: '需要概率校准输出', tool: 'scikit-learn (Logistic)', reason: '逻辑回归天然输出校准概率，适合临床决策' },
+                  ].map((row) => (
+                    <tr key={row.scene} className="border-t" style={{ borderColor: '#EEEEEE' }}>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.scene}</td>
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#1E3A5F' }}>{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Protein structure tool comparison */}
+          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: '#2D5A3D' }}>蛋白质结构预测工具怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ backgroundColor: '#FAFAFA' }}>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>工具</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>精度</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>速度</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>适用场景</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { tool: 'AlphaFold2', accuracy: '⭐⭐⭐⭐⭐', speed: '慢（小时）', use: '少量蛋白质最高精度结构预测，需GPU+大内存' },
+                    { tool: 'ColabFold', accuracy: '⭐⭐⭐⭐', speed: '中（分钟）', use: '日常蛋白质结构预测首选，Colab免费GPU可运行' },
+                    { tool: 'ESMFold', accuracy: '⭐⭐⭐', speed: '快（秒级）', use: '大规模扫描（数千蛋白质），不需MSA，速度远超AlphaFold' },
+                    { tool: 'RosettaFold', accuracy: '⭐⭐⭐⭐', speed: '慢（小时）', use: '与AlphaFold互补，某些靶标表现更好，支持蛋白质设计' },
+                  ].map((row) => (
+                    <tr key={row.tool} className="border-t" style={{ borderColor: '#EEEEEE' }}>
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#1A1A1A' }}>{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.accuracy}</td>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.speed}</td>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.use}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* DL Framework selection */}
+          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: '#5B3A7B' }}>DL框架怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ backgroundColor: '#FAFAFA' }}>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>场景</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#2D5A3D' }}>推荐</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#4A4A4A' }}>为什么</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { scene: '学术研究 / 新模型开发', tool: 'PyTorch', why: '动态计算图，调试友好；几乎所有生物模型（ESM、AlphaFold、scVI）都用它' },
+                    { scene: '生产部署 / 工业应用', tool: 'TensorFlow/Keras', why: 'SavedModel格式成熟，TensorFlow Serving方便部署' },
+                    { scene: '使用预训练生物大模型', tool: 'PyTorch + HuggingFace', why: 'HuggingFace生态以PyTorch为主，ESM、NT等模型开箱即用' },
+                    { scene: '图神经网络（分子/蛋白）', tool: 'PyTorch Geometric', why: '最活跃的GNN生态，已实现GCN/GAT/MPNN等主流架构' },
+                    { scene: 'TPU训练 / Google Cloud', tool: 'TensorFlow/JAX', why: 'TPU对TensorFlow/JAX优化最好' },
+                  ].map((row) => (
+                    <tr key={row.scene} className="border-t" style={{ borderColor: '#EEEEEE' }}>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.scene}</td>
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#2D5A3D' }}>{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.why}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

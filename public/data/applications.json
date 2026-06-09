@@ -13,7 +13,8 @@
             "scikit-learn",
             "XGBoost",
             "CADD"
-          ]
+          ],
+          "codeSnippet": "from sklearn.ensemble import RandomForestClassifier\nimport pandas as pd\n\n# 从物种丰度表预测宿主疾病状态\notu_table = pd.read_csv(\"otu_abundance.csv\", index_col=0)\nX = otu_table.T.values  # 样本 x 物种\ny = pd.read_csv(\"metadata.csv\")[\"disease_status\"]\nmodel = RandomForestClassifier(n_estimators=200)\nmodel.fit(X, y)\nprint(f\"AUC: {model.score(X, y):.3f}\")"
         },
         {
           "name": "SVM",
@@ -22,7 +23,8 @@
             "scikit-learn",
             "libsvm",
             "libsvm"
-          ]
+          ],
+          "codeSnippet": "from sklearn.svm import SVC\nfrom sklearn.preprocessing import StandardScaler\n\n# SVM区分增强子 vs 启动子调控元件\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_kmer_features)\nmodel = SVC(kernel=\"rbf\", C=1.0, probability=True)\nmodel.fit(X_scaled, y_element_labels)"
         },
         {
           "name": "k-mer特征 + 逻辑回归",
@@ -31,7 +33,8 @@
             "scikit-learn",
             "Biopython",
             "jellyfish"
-          ]
+          ],
+          "codeSnippet": "from sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.linear_model import LogisticRegression\n\n# k-mer频率 + 逻辑回归进行基因家族分类\nkmer_vec = CountVectorizer(analyzer=\"char\", ngram_range=(4, 4))\nX_kmer = kmer_vec.fit_transform(dna_sequences)\nmodel = LogisticRegression(max_iter=1000)\nmodel.fit(X_kmer, y_gene_families)"
         },
         {
           "name": "隐马尔可夫模型",
@@ -61,7 +64,8 @@
             "DeepVariant",
             "TensorFlow",
             "Docker"
-          ]
+          ],
+          "codeSnippet": "# DeepVariant 变异检测（Docker 一键运行）\ndocker run \\\n  -v \"${PWD}/input:/input\" \\\n  -v \"${PWD}/output:/output\" \\\n  google/deepvariant:1.6.1 \\\n  /opt/deepvariant/bin/run_deepvariant \\\n  --ref=/input/ref.fasta \\\n  --reads=/input/sample.bam \\\n  --output_vcf=/output/output.vcf.gz"
         },
         {
           "name": "Enformer",
@@ -71,7 +75,8 @@
             "PyTorch",
             "TensorFlow",
             "Basenji"
-          ]
+          ],
+          "codeSnippet": "from enformer_pytorch import Enformer\nimport torch\n\n# 从基因组序列预测基因表达\nmodel = Enformer.from_pretrained(\"EleutherAI/enformer-official-rough\")\nseq = torch.randint(0, 2, (1, 196608, 4)).float()  # one-hot DNA\noutput = model(seq)  # 预测人类表达 + 小鼠表达\n# output[\"human\"]: (1, 5313) — 5313个基因组轨迹\n# output[\"mouse\"]: (1, 1643)"
         },
         {
           "name": "Basenji",
@@ -89,7 +94,8 @@
             "Hugging Face Transformers",
             "PyTorch",
             "flash-attn"
-          ]
+          ],
+          "codeSnippet": "from transformers import AutoTokenizer, AutoModel\n\n# 加载基因组语言模型，提取DNA序列嵌入\nmodel_name = \"InstaDeepAI/nucleotide-transformer-500m-human-ref\"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModel.from_pretrained(model_name)\n\nsequence = \"ATCGATCGATCGATCG\"\ninputs = tokenizer(sequence, return_tensors=\"pt\")\noutputs = model(**inputs)  # last_hidden_state 用于下游任务"
         },
         {
           "name": "HyenaDNA",
@@ -147,11 +153,32 @@
         }
       ],
       "gettingStarted": [
-        "学习DNA序列基础表示方法 (one-hot, k-mer)",
-        "实践DeepVariant或使用预训练模型进行变异检测",
-        "使用Enformer预测基因表达并解释注意力权重",
-        "尝试Nucleotide Transformer进行迁移学习"
-      ]
+        "用 Biopython 读取 FASTA 并实现 one-hot 编码：from Bio import SeqIO; import numpy as np",
+        "使用 scikit-learn 训练随机森林变异致病性分类器：RandomForestClassifier(n_estimators=100).fit(X, y)",
+        "Docker 运行 DeepVariant 检测变异：docker run -v $PWD/input:/input google/deepvariant",
+        "加载预训练 Enformer 预测基因表达：from enformer_pytorch import Enformer",
+        "使用 Nucleotide Transformer 提取 DNA 序列嵌入：AutoModel.from_pretrained(\"InstaDeepAI/nucleotide-transformer-500m-human-ref\")"
+      ],
+      "decisionGuidance": {
+        "summary": "大部分基因组学分类/注释任务可用经典ML高效解决，需要从原始序列学习复杂模式时才用DL。",
+        "rules": [
+          {
+            "when": "变异致病性预测（有结构化的多维特征）",
+            "use": "ML（随机森林、XGBoost）",
+            "why": "特征工程成熟，可解释性强"
+          },
+          {
+            "when": "从原始DNA序列直接预测功能",
+            "use": "DL（CNN、Transformer）",
+            "why": "需要自动学习序列模式和长程依赖"
+          },
+          {
+            "when": "需要精确的变异检测",
+            "use": "DL（DeepVariant专用CNN）",
+            "why": "将比对信息编码为图像, CNN捕捉复杂模式"
+          }
+        ]
+      }
     },
     {
       "id": "protein",
@@ -166,7 +193,8 @@
             "scikit-learn",
             "libsvm",
             "SVM-Prot"
-          ]
+          ],
+          "codeSnippet": "from sklearn.svm import SVC\nfrom sklearn.preprocessing import StandardScaler\n\n# SVM区分增强子 vs 启动子调控元件\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_kmer_features)\nmodel = SVC(kernel=\"rbf\", C=1.0, probability=True)\nmodel.fit(X_scaled, y_element_labels)"
         },
         {
           "name": "随机森林",
@@ -175,7 +203,8 @@
             "scikit-learn",
             "XGBoost",
             "LightGBM"
-          ]
+          ],
+          "codeSnippet": "from sklearn.ensemble import RandomForestClassifier\nimport pandas as pd\n\n# 从物种丰度表预测宿主疾病状态\notu_table = pd.read_csv(\"otu_abundance.csv\", index_col=0)\nX = otu_table.T.values  # 样本 x 物种\ny = pd.read_csv(\"metadata.csv\")[\"disease_status\"]\nmodel = RandomForestClassifier(n_estimators=200)\nmodel.fit(X, y)\nprint(f\"AUC: {model.score(X, y):.3f}\")"
         },
         {
           "name": "HMM",
@@ -184,7 +213,8 @@
             "HMMER",
             "Pfam",
             "InterPro"
-          ]
+          ],
+          "codeSnippet": "# Pfam 蛋白质家族注释（命令行）\nhmmscan --cpu 4 \\\n  --tblout protein_pfam.tsv \\\n  Pfam-A.hmm \\\n  protein_sequences.fasta\n\n# 解析结果\n# 每行: target_name, query_name, E-value, score, bias"
         },
         {
           "name": "接触图预测 (传统ML)",
@@ -204,7 +234,8 @@
             "AlphaFold2",
             "ColabFold",
             "OpenFold"
-          ]
+          ],
+          "codeSnippet": "# ColabFold 快速蛋白质结构预测\ncolabfold_batch protein.fasta ./output\n\n# 输出文件:\n# output/*_relaxed_rank_001.pdb  — 预测的3D结构\n# output/*_plddt.png           — 置信度可视化\n# output/*_PAE.png             — 预测对齐误差"
         },
         {
           "name": "ESM-2",
@@ -213,7 +244,8 @@
             "fair-esm",
             "Hugging Face Transformers",
             "PyTorch"
-          ]
+          ],
+          "codeSnippet": "import torch\nfrom transformers import AutoTokenizer, AutoModel\n\n# ESM-2提取蛋白质嵌入 + 零样本突变效应预测\ntokenizer = AutoTokenizer.from_pretrained(\"facebook/esm2_t33_650M_UR50D\")\nmodel = AutoModel.from_pretrained(\"facebook/esm2_t33_650M_UR50D\")\n\nseq_wt = tokenizer(\"MKTVRQERL\", return_tensors=\"pt\")\nseq_mt = tokenizer(\"MKTVRQPRL\", return_tensors=\"pt\")\n# 比较两个嵌入的差异评估突变影响"
         },
         {
           "name": "ColabFold",
@@ -231,7 +263,8 @@
             "ProteinMPNN",
             "PyTorch",
             "PyRosetta"
-          ]
+          ],
+          "codeSnippet": "import torch\nfrom proteinmpnn import ProteinMPNN\n\n# 基于骨架结构设计蛋白质序列\nmodel = ProteinMPNN(num_letters=21)\n# 输入: 骨架坐标 (L, 4, 3) — 每个残基的N,CA,C,Cβ\n# coords = torch.randn(1, 50, 4, 3)\n# seq, log_probs = model.sample(coords)\n# 返回: 设计的氨基酸序列 + 每位置概率"
         },
         {
           "name": "RFdiffusion",
@@ -298,11 +331,32 @@
         }
       ],
       "gettingStarted": [
-        "使用ColabFold预测蛋白质结构",
-        "使用ESM-2提取蛋白质嵌入进行下游任务",
-        "学习蛋白质结构表示 (接触图、距离图)",
-        "实践RosettaFold或OmegaFold"
-      ]
+        "使用 ColabFold 预测蛋白质结构：colabfold_batch protein.fasta ./output",
+        "加载 ESM-2 提取蛋白质嵌入：model = AutoModel.from_pretrained(\"facebook/esm2_t33_650M_UR50D\")",
+        "使用 RDKit 计算 Morgan 指纹作为 ML 特征：AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048)",
+        "尝试 ProteinMPNN 进行蛋白质序列设计（基于骨架坐标）",
+        "探索 UniProt 数据库获取蛋白质功能注释：from Bio import SeqIO"
+      ],
+      "decisionGuidance": {
+        "summary": "蛋白质结构预测是DL的主场（AlphaFold2/ESM），但蛋白质分类和注释仍大量使用经典ML。",
+        "rules": [
+          {
+            "when": "蛋白质家族分类 / 亚细胞定位预测",
+            "use": "ML（SVM、HMM）",
+            "why": "Pfam等基于HMM的方法成熟可靠"
+          },
+          {
+            "when": "蛋白质结构预测",
+            "use": "DL（AlphaFold2、ESMFold）",
+            "why": "端到端深度学习已达实验精度"
+          },
+          {
+            "when": "蛋白质序列设计 / 突变效应预测",
+            "use": "DL（ProteinMPNN、ESM-2）",
+            "why": "需要从序列空间采样和零样本泛化"
+          }
+        ]
+      }
     },
     {
       "id": "single-cell",
@@ -317,7 +371,8 @@
             "Scanpy",
             "Seurat",
             "scikit-learn"
-          ]
+          ],
+          "codeSnippet": "import scanpy as sc\n\n# PCA降维保留单细胞数据主要变异方向\nadata = sc.datasets.pbmc3k()\nsc.pp.normalize_total(adata)\nsc.pp.log1p(adata)\nsc.pp.highly_variable_genes(adata, n_top_genes=2000)\nsc.tl.pca(adata, n_comps=50)\nsc.pl.pca_variance_ratio(adata, n_pcs=50)  # 肘部图"
         },
         {
           "name": "t-SNE / UMAP",
@@ -326,7 +381,8 @@
             "Scanpy",
             "Seurat",
             "umap-learn"
-          ]
+          ],
+          "codeSnippet": "import scanpy as sc\n\n# t-SNE + UMAP可视化单细胞群体\nsc.pp.neighbors(adata, n_pcs=30)\nsc.tl.tsne(adata)\nsc.tl.umap(adata)\nsc.pl.umap(adata, color=[\"louvain\", \"CST3\"])\nsc.pl.tsne(adata, color=[\"louvain\"])"
         },
         {
           "name": "Louvain/Leiden聚类",
@@ -364,7 +420,8 @@
             "scvi-tools",
             "PyTorch",
             "Scanpy"
-          ]
+          ],
+          "codeSnippet": "import scvi\nimport scanpy as sc\n\n# scVI批次校正 + 降维\nadata = sc.read(\"multi_batch.h5ad\")\nscvi.model.SCVI.setup_anndata(adata, batch_key=\"batch\")\nmodel = scvi.model.SCVI(adata, n_latent=30)\nmodel.train()\nadata.obsm[\"X_scVI\"] = model.get_latent_representation()\nsc.pp.neighbors(adata, use_rep=\"X_scVI\")\nsc.tl.umap(adata)"
         },
         {
           "name": "scANVI",
@@ -382,7 +439,8 @@
             "scgpt",
             "PyTorch",
             "Hugging Face"
-          ]
+          ],
+          "codeSnippet": "from scgpt.model import TransformerModel\nfrom scgpt.tokenizer import GeneVocab\n\n# 加载预训练scGPT进行细胞类型注释\nvocab = GeneVocab.from_file(\"gene_vocab.json\")\nmodel = TransformerModel.load_from_checkpoint(\"scgpt_human.ckpt\")\n# 输入: tokenized基因表达谱\n# 输出: 细胞嵌入 + 细胞类型预测"
         },
         {
           "name": "TotalVI",
@@ -449,11 +507,32 @@
         }
       ],
       "gettingStarted": [
-        "学习Scanpy数据结构和基本操作",
-        "使用scVI进行批次校正和降维",
-        "尝试scGPT进行迁移学习和注释",
-        "学习构建和分析单细胞图谱"
-      ]
+        "使用 Scanpy 加载并预处理 10x 单细胞数据：sc.read_10x_h5(\"pbmc3k.h5\")",
+        "执行标准 QC 和降维流程：sc.pp.filter_cells, sc.pp.normalize_total, sc.tl.pca",
+        "训练 scVI 模型进行批次校正：scvi.model.SCVI(adata).train()",
+        "使用 UMAP 和 Leiden 聚类可视化细胞群体：sc.tl.umap(adata); sc.tl.leiden(adata)",
+        "尝试 scGPT 进行细胞类型迁移学习注释"
+      ],
+      "decisionGuidance": {
+        "summary": "单细胞分析的探索性工作（聚类、可视化）用ML工具，建模和批次校正用DL方法。",
+        "rules": [
+          {
+            "when": "细胞聚类 / 可视化 / 标记基因",
+            "use": "ML（Scanpy + UMAP/Leiden）",
+            "why": "标准流程成熟，结果可解释"
+          },
+          {
+            "when": "批次校正 / 缺失值插补",
+            "use": "DL（scVI、scANVI）",
+            "why": "深度生成模型分离技术和生物变异"
+          },
+          {
+            "when": "大规模图谱整合 / 跨物种迁移",
+            "use": "DL（scGPT、Geneformer）",
+            "why": "基础模型捕获通用细胞表示"
+          }
+        ]
+      }
     },
     {
       "id": "drug-discovery",
@@ -469,7 +548,8 @@
             "scikit-learn",
             "XGBoost",
             "DeepChem"
-          ]
+          ],
+          "codeSnippet": "from rdkit import Chem\nfrom rdkit.Chem import AllChem\nfrom sklearn.ensemble import RandomForestRegressor\n\n# Morgan指纹 + 随机森林预测分子活性\nmol = Chem.MolFromSmiles(\"CC(=O)OC1=CC=CC=C1C(=O)O\")\nfp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048)\nX = [list(fp) for mol in molecules]\nmodel = RandomForestRegressor(n_estimators=100).fit(X, y_activity)"
         },
         {
           "name": "支持向量机",
@@ -518,7 +598,8 @@
             "RDKit",
             "TensorFlow",
             "PyTorch"
-          ]
+          ],
+          "codeSnippet": "import deepchem as dc\n\n# 图卷积网络预测分子毒性 (Tox21数据集)\ntasks, datasets, _ = dc.molnet.load_tox21()\ntrain, valid, test = datasets\nmodel = dc.models.GraphConvModel(len(tasks), mode=\"classification\")\nmodel.fit(train, nb_epoch=30)\nauc = model.evaluate(test, [dc.metrics.roc_auc_score])\nprint(f\"Test AUC: {auc[\"roc_auc_score\"]:.3f}\")"
         },
         {
           "name": "ChemBERTa",
@@ -527,7 +608,8 @@
             "Hugging Face Transformers",
             "DeepChem",
             "RDKit"
-          ]
+          ],
+          "codeSnippet": "from transformers import AutoTokenizer, AutoModel\n\n# ChemBERTa提取分子SMILES嵌入\ntokenizer = AutoTokenizer.from_pretrained(\"DeepChem/ChemBERTa-77M-MLM\")\nmodel = AutoModel.from_pretrained(\"DeepChem/ChemBERTa-77M-MLM\")\n\nsmiles = \"CC(=O)OC1=CC=CC=C1C(=O)O\"  # 阿司匹林\ninputs = tokenizer(smiles, return_tensors=\"pt\")\noutputs = model(**inputs)  # 分子嵌入用于性质预测"
         },
         {
           "name": "SchNet/DimeNet",
@@ -603,11 +685,32 @@
         }
       ],
       "gettingStarted": [
-        "学习RDKit进行分子操作和特征提取",
-        "使用DeepChem进行分子性质预测",
-        "实践REINVENT进行分子生成",
-        "学习图神经网络处理分子图"
-      ]
+        "安装 RDKit 并解析分子 SMILES：Chem.MolFromSmiles(\"CC(=O)OC1=CC=CC=C1C(=O)O\")",
+        "使用 DeepChem 加载 Tox21 数据集并训练 GCN：dc.molnet.load_tox21()",
+        "用 Morgan 指纹 + 随机森林建立 QSAR 模型：RandomForestRegressor().fit(X_fp, y_activity)",
+        "加载 ChemBERTa 提取分子嵌入：AutoModel.from_pretrained(\"DeepChem/ChemBERTa-77M-MLM\")",
+        "尝试 REINVENT 分子生成：基于 RL 优化目标性质"
+      ],
+      "decisionGuidance": {
+        "summary": "传统QSAR用ML即可，分子生成和3D构象预测用DL。RDKit提供两者所需的特征工程基础。",
+        "rules": [
+          {
+            "when": "快速虚拟筛选 / QSAR建模",
+            "use": "ML（随机森林、SVM）",
+            "why": "Morgan指纹+树模型在小数据集上表现稳定"
+          },
+          {
+            "when": "分子生成 / 全新药物设计",
+            "use": "DL（REINVENT、扩散模型）",
+            "why": "需要从化学空间采样新颖结构"
+          },
+          {
+            "when": "蛋白质-配体结合预测 / 3D性质",
+            "use": "DL（SchNet、GNN）",
+            "why": "3D等变网络捕捉空间相互作用"
+          }
+        ]
+      }
     },
     {
       "id": "transcriptomics",
@@ -631,7 +734,8 @@
             "WGCNA",
             "R",
             "flashClust"
-          ]
+          ],
+          "codeSnippet": "# WGCNA基因共表达网络分析 (R语言)\nlibrary(WGCNA)\n\n# 构建加权共表达网络\npowers <- c(1:20)\nsft <- pickSoftThreshold(datExpr, powerVector=powers)\nnet <- blockwiseModules(datExpr, power=6,\n                        minModuleSize=30,\n                        mergeCutHeight=0.25)\nmoduleColors <- labels2colors(net)"
         },
         {
           "name": "LASSO/Ridge",
@@ -658,7 +762,8 @@
             "GSEApy",
             "clusterProfiler",
             "Enrichr"
-          ]
+          ],
+          "codeSnippet": "import gseapy as gp\n\n# 基因集富集分析\ngene_list = [\"TP53\", \"BRCA1\", \"EGFR\", \"MYC\", \"PTEN\"]\n\n# GO生物过程富集\nenr = gp.enrichr(gene_list=gene_list,\n                 gene_sets=\"GO_Biological_Process_2021\",\n                 organism=\"human\")\nprint(enr.results[[\"Term\", \"Adjusted P-value\"]].head(10))"
         }
       ],
       "dlMethods": [
@@ -669,7 +774,8 @@
             "PyTorch",
             "TensorFlow",
             "Scanpy"
-          ]
+          ],
+          "codeSnippet": "import torch, torch.nn as nn\n\n# 自编码器对基因表达数据降噪\nclass GeneAE(nn.Module):\n    def __init__(self, n_genes=5000, latent=128):\n        super().__init__()\n        self.encoder = nn.Sequential(\n            nn.Linear(n_genes, 1024), nn.ReLU(),\n            nn.Linear(1024, latent))\n        self.decoder = nn.Sequential(\n            nn.Linear(latent, 1024), nn.ReLU(),\n            nn.Linear(1024, n_genes))\n    def forward(self, x):\n        z = self.encoder(x)\n        return self.decoder(z), z"
         },
         {
           "name": "DeepSurv",
@@ -678,7 +784,8 @@
             "PyTorch",
             "scikit-survival",
             "nnet-survival"
-          ]
+          ],
+          "codeSnippet": "from pycox.models import DeepHitSingle\nimport torchtuples as tt\n\n# 深度学习生存分析预测癌症预后\nnet = tt.practical.MLPVanilla(in_features=n_genes,\n                               num_nodes=[256, 128, 64],\n                               out_features=1,\n                               batch_norm=True,\n                               dropout=0.3)\nmodel = DeepHitSingle(net, tt.optim.Adam)\nmodel.fit(X_train, (duration_train, event_train),\n          batch_size=256, epochs=100)"
         },
         {
           "name": "ATTENTION-TRANS (Enformer)",
@@ -696,7 +803,8 @@
             "scvi-tools",
             "PyTorch",
             "Scanpy"
-          ]
+          ],
+          "codeSnippet": "import scvi\nimport scanpy as sc\n\n# scVI批次校正 + 降维\nadata = sc.read(\"multi_batch.h5ad\")\nscvi.model.SCVI.setup_anndata(adata, batch_key=\"batch\")\nmodel = scvi.model.SCVI(adata, n_latent=30)\nmodel.train()\nadata.obsm[\"X_scVI\"] = model.get_latent_representation()\nsc.pp.neighbors(adata, use_rep=\"X_scVI\")\nsc.tl.umap(adata)"
         }
       ],
       "datasets": [
@@ -738,11 +846,32 @@
         }
       ],
       "gettingStarted": [
-        "学习bulk RNA-seq分析流程",
-        "使用TCGA数据进行差异表达分析",
-        "实践DeepSurv进行生存预测",
-        "整合scRNA-seq和bulk RNA-seq数据"
-      ]
+        "加载 TCGA 基因表达数据：pd.read_csv(\"TCGA_BRCA_expr.csv\", index_col=0)",
+        "使用 PyDESeq2 进行差异表达分析：from pydeseq2.dds import DeseqDataSet",
+        "运行 GSEA 富集分析：gseapy.enrichr(gene_list, gene_sets=\"KEGG_2021_Human\")",
+        "用自编码器对表达数据降噪：nn.Linear(5000, 128) -> nn.Linear(128, 5000)",
+        "实践 DeepSurv 生存分析：从基因表达预测患者预后"
+      ],
+      "decisionGuidance": {
+        "summary": "转录组学数据分析以统计方法+ML为主，DL适合大规模整合和生存预测。",
+        "rules": [
+          {
+            "when": "差异表达分析 / 通路富集",
+            "use": "统计+ML（DESeq2、GSEA）",
+            "why": "统计框架成熟，结果可直接发表"
+          },
+          {
+            "when": "预后模型 / 生存分析",
+            "use": "ML或DL（Cox、DeepSurv）",
+            "why": "根据样本量选择：小样本用Cox，大样本用DeepSurv"
+          },
+          {
+            "when": "基因调控网络推断",
+            "use": "ML（ARACNE、GENIE3）",
+            "why": "基于互信息和树模型的方法可解释性强"
+          }
+        ]
+      }
     },
     {
       "id": "metagenomics",
@@ -757,7 +886,8 @@
             "scikit-learn",
             "Biopython",
             "jellyfish"
-          ]
+          ],
+          "codeSnippet": "from sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.ensemble import RandomForestClassifier\n\n# k-mer频率 + RF进行宏基因组物种分类\nvectorizer = CountVectorizer(analyzer=\"char\", ngram_range=(5, 5))\nX_kmer = vectorizer.fit_transform(metagenomic_reads)\n\nmodel = RandomForestClassifier(n_estimators=100)\nmodel.fit(X_kmer, y_species_labels)\nprint(f\"Top 5-mers: {model.feature_importances_.argsort()[-10:]}\")"
         },
         {
           "name": "聚类算法",
@@ -784,7 +914,8 @@
             "scikit-learn",
             "XGBoost",
             "QIIME2"
-          ]
+          ],
+          "codeSnippet": "from sklearn.ensemble import RandomForestClassifier\nimport pandas as pd\n\n# 从物种丰度表预测宿主疾病状态\notu_table = pd.read_csv(\"otu_abundance.csv\", index_col=0)\nX = otu_table.T.values  # 样本 x 物种\ny = pd.read_csv(\"metadata.csv\")[\"disease_status\"]\nmodel = RandomForestClassifier(n_estimators=200)\nmodel.fit(X, y)\nprint(f\"AUC: {model.score(X, y):.3f}\")"
         }
       ],
       "dlMethods": [
@@ -864,11 +995,32 @@
         }
       ],
       "gettingStarted": [
-        "学习16S rRNA分析流程 (QIIME2)",
-        "使用Kraken2/Bracken进行物种分类",
-        "实践深度学习方法进行读段分类",
-        "分析微生物组与宿主表型关联"
-      ]
+        "学习 QIIME2 分析 16S rRNA 数据并生成 OTU 表",
+        "使用 Kraken2/Bracken 进行宏基因组物种分类注释",
+        "用 CountVectorizer 提取 k-mer 特征：CountVectorizer(analyzer=\"char\", ngram_range=(5,5))",
+        "训练随机森林预测样本表型：RandomForestClassifier().fit(X_otu, y_phenotype)",
+        "尝试 VAE 学习微生物群落的低维概率表示"
+      ],
+      "decisionGuidance": {
+        "summary": "宏基因组学目前以经典ML为主，DL在序列分类和群落表示学习中逐渐兴起。",
+        "rules": [
+          {
+            "when": "物种分类 / OTU聚类",
+            "use": "ML（k-mer+随机森林、Kraken2）",
+            "why": "k-mer方法计算高效，数据库成熟"
+          },
+          {
+            "when": "宿主表型预测",
+            "use": "ML（随机森林、XGBoost）",
+            "why": "中等样本量下优于DL，可解释特征重要性"
+          },
+          {
+            "when": "深度序列分类 / 群落表示学习",
+            "use": "DL（CNN、VAE、GraphSAGE）",
+            "why": "从原始序列学习，发现未知物种模式"
+          }
+        ]
+      }
     }
   ]
 }
