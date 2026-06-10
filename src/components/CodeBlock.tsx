@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Highlight, themes } from 'prism-react-renderer';
 
 interface CodeBlockProps {
   code: string;
   label?: string;
+  language?: string;
   collapsible?: boolean;
 }
 
-export default function CodeBlock({ code, label, collapsible = false }: CodeBlockProps) {
+/** 干掉没有高亮的原始代码块，现在用Prism做语法高亮 */
+export default function CodeBlock({ code, label, language = 'python', collapsible = false }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(!collapsible);
 
@@ -69,14 +72,28 @@ export default function CodeBlock({ code, label, collapsible = false }: CodeBloc
         </button>
       </div>
 
-      {/* Code body */}
+      {/* Code body with syntax highlighting */}
       {open && (
-        <pre
-          className="m-0 px-3 py-2.5 font-mono text-xs overflow-x-auto bg-brand-off-white text-brand-ink-light"
-          style={{ whiteSpace: 'pre' }}
+        <Highlight
+          theme={themes.github}
+          code={code.trimEnd()}
+          language={language}
         >
-          {code}
-        </pre>
+          {({ style, tokens, getLineProps, getTokenProps }) => (
+            <pre
+              className="m-0 px-3 py-2.5 text-xs overflow-x-auto bg-brand-off-white"
+              style={{ ...style, whiteSpace: 'pre', backgroundColor: '#FAFAFA' }}
+            >
+              {tokens.map((line, i) => (
+                <div key={i} {...getLineProps({ line, key: i })}>
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token, key })} />
+                  ))}
+                </div>
+              ))}
+            </pre>
+          )}
+        </Highlight>
       )}
     </div>
   );
