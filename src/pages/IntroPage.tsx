@@ -69,8 +69,8 @@ export default function IntroPage() {
   return (
     <div>
       {/* ====== Full-viewport Cover ====== */}
-      <section className="relative min-h-screen overflow-hidden">
-        {/* 16:9 容器：背景图+文字共用，顶部对齐 */}
+      <section className="relative overflow-hidden">
+        {/* 16:9 容器：背景图+文字共用 */}
         <div className="relative w-full" style={{ aspectRatio: '16 / 9' }}>
           {/* 背景图片层，30%透明度 */}
           <div
@@ -114,12 +114,12 @@ export default function IntroPage() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Scroll-down indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator">
-          <span className="text-xs text-brand-ink-muted">向下滚动了解更多</span>
-          <ChevronDown size={20} className="text-brand-ink-muted" />
+          {/* Scroll-down indicator，贴在16:9容器底部 */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 scroll-indicator">
+            <span className="text-xs text-brand-ink-muted">向下滚动了解更多</span>
+            <ChevronDown size={20} className="text-brand-ink-muted" />
+          </div>
         </div>
       </section>
 
