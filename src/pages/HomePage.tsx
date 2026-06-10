@@ -56,12 +56,18 @@ export default function HomePage() {
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
-            to="/roadmap"
+            to="/intro"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white no-underline bg-brand-accent"
           >
             <BookOpen size={15} />
-            开始学习
+            了解背景知识
             <ArrowRight size={14} />
+          </Link>
+          <Link
+            to="/roadmap"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline border border-brand-border text-brand-ink-light"
+          >
+            开始学习
           </Link>
           <Link
             to="/applications"

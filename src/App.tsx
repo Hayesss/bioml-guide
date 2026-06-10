@@ -14,6 +14,7 @@ import ToolsPage from './pages/ToolsPage';
 import MathPage from './pages/MathPage';
 import CheatSheetPage from './pages/CheatSheetPage';
 import TopicLearnPage from './pages/TopicLearnPage';
+import IntroPage from './pages/IntroPage';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -30,6 +31,7 @@ export default function App() {
           <ErrorBoundary>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/intro" element={<IntroPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
