@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowRight, FlaskConical, Check, X } from 'lucide-react';
+import { ChevronLeft, ArrowRight, FlaskConical, Check, X } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
 interface QuizQuestion {
@@ -111,14 +111,14 @@ export default function TopicLearnPage() {
 
   return (
     <div className="max-w-[800px] mx-auto py-8 px-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-brand-ink-muted mb-6">
-        <Link to="/roadmap" className="hover:underline text-brand-ink-muted no-underline">学习路径</Link>
-        <ChevronRight size={12} />
-        <span>阶段{topic.stage}: {stageNames[topic.stage]}</span>
-        <ChevronRight size={12} />
-        <span className="text-brand-ink font-medium">{topic.name}</span>
-      </div>
+      {/* Back to roadmap */}
+      <Link
+        to="/roadmap"
+        className="inline-flex items-center gap-1.5 text-sm text-brand-ink-muted hover:text-brand-accent no-underline mb-6 transition-colors"
+      >
+        <ChevronLeft size={16} />
+        返回学习路径
+      </Link>
 
       {/* Header */}
       <div className="mb-8">
