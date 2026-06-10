@@ -57,7 +57,7 @@ export default function IntroPage() {
         <div
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: 'url(/cover-bg.png)',
+            backgroundImage: `url(${import.meta.env.BASE_URL}cover-bg.png)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
