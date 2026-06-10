@@ -52,8 +52,19 @@ export default function IntroPage() {
   return (
     <div>
       {/* ====== Full-viewport Cover ====== */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
-        <div className="max-w-2xl mx-auto">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        {/* 背景图片层，30%透明度，铺满全屏 */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: 'url(/cover-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.3,
+          }}
+        />
+        <div className="max-w-2xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8 bg-brand-accent-light text-brand-accent">
             <Dna size={14} />生物信息学 X 机器学习
           </div>
