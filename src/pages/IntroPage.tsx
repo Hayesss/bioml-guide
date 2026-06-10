@@ -58,7 +58,7 @@ export default function IntroPage() {
             <Dna size={14} />生物信息学 X 机器学习
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-brand-ink leading-tight">
-            当生物学遇见<br />人工智能
+            当生物学遇见人工智能
           </h1>
           <p className="text-base md:text-lg max-w-xl mx-auto mb-10 text-brand-ink-muted leading-relaxed">
             一个人类基因组有30亿个碱基对，一个单细胞实验能测10000个基因的表达，
