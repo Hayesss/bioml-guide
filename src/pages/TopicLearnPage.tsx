@@ -176,9 +176,6 @@ export default function TopicLearnPage() {
             <div className="px-5 py-3 border-b border-brand-border-light flex items-center gap-2">
               <span className="text-lg">{section.icon}</span>
               <h2 className="text-sm font-semibold text-brand-ink">{section.title}</h2>
-              {section.type === 'analogy' && (
-                <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">费曼技巧</span>
-              )}
             </div>
             <div className="px-5 py-4">
               {section.content && (
@@ -304,7 +301,7 @@ function SelfCheck({ questions }: { questions: QuizQuestion[] }) {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <div className="text-center py-3">
-        <div className="text-3xl mb-2">{pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚'}</div>
+        <div className="text-3xl mb-2">{pct >= 80 ? '★' : pct >= 60 ? '●' : '○'}</div>
         <p className="text-sm font-medium text-brand-ink mb-1">
           {pct >= 80 ? '掌握得很好！' : pct >= 60 ? '还不错，继续加油' : '建议再看一遍上面的内容'}
         </p>

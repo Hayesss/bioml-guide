@@ -80,7 +80,7 @@ export default function Quiz() {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <div className="border rounded-lg p-6 text-center border-brand-border">
-        <div className="text-4xl mb-3">{pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚'}</div>
+        <div className="text-4xl mb-3">{pct >= 80 ? '★' : pct >= 60 ? '●' : '○'}</div>
         <h3 className="text-lg font-bold mb-2 text-brand-ink">
           {pct >= 80 ? '厉害！基础知识扎实' : pct >= 60 ? '不错，继续加油' : '需要多看看学习路径噢'}
         </h3>
