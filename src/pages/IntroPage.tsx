@@ -53,14 +53,15 @@ export default function IntroPage() {
     <div>
       {/* ====== Full-viewport Cover ====== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        {/* 背景图片层，30%透明度，铺满全屏 */}
+        {/* 背景图片层，30%透明度，16:9宽高比居中 */}
         <div
-          className="absolute inset-0 z-0"
+          className="absolute w-full top-1/2 -translate-y-1/2 z-0"
           style={{
             backgroundImage: `url(${import.meta.env.BASE_URL}cover-bg.png)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            aspectRatio: '16 / 9',
             opacity: 0.3,
           }}
         />
