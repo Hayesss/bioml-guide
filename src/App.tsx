@@ -31,6 +31,7 @@ export default function App() {
           <ErrorBoundary>
           <Routes>
             <Route path="/" element={<IntroPage />} />
+            <Route path="/intro" element={<IntroPage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
