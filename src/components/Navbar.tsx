@@ -23,7 +23,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-brand-border" style={{ height: 56 }}>
       <div className="max-w-[1100px] mx-auto px-6 flex items-center justify-between h-full">
         <Link
-          to="/"
+          to="/home"
           className="font-semibold text-base no-underline text-brand-ink"
         >
           BioML Guide

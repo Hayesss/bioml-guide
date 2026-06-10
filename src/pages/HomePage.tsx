@@ -56,7 +56,7 @@ export default function HomePage() {
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
-            to="/intro"
+            to="/"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white no-underline bg-brand-accent"
           >
             <BookOpen size={15} />
