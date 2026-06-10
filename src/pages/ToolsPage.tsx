@@ -23,11 +23,12 @@ interface ToolsData {
 }
 
 export default function ToolsPage() {
-  const data = useData<ToolsData>('tools');
+  const { data, loading, error } = useData<ToolsData>('tools');
   const [activeCat, setActiveCat] = useState('全部');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  if (!data) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+  if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
+  if (error || !data) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;
 
   const { toolCategories, tools } = data;
 
@@ -56,21 +57,21 @@ export default function ToolsPage() {
   return (
     <div className="space-y-14">
       <div>
-        <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>工具</h1>
-        <p className="text-base" style={{ color: '#8A8A8A', maxWidth: 600 }}>
+        <h1 className="text-3xl font-bold mb-3 text-brand-ink">工具</h1>
+        <p className="text-base text-brand-ink-muted max-w-[600px]">
           生物信息学ML/DL工作流中常用的框架、库和平台
         </p>
       </div>
 
       <section>
-        <h2 className="text-lg font-bold mb-5" style={{ color: '#1A1A1A' }}>ML 与 DL 框架对比</h2>
-        <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+        <h2 className="text-lg font-bold mb-5 text-brand-ink">ML 与 DL 框架对比</h2>
+        <div className="border rounded-lg overflow-hidden border-brand-border">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: '#FAFAFA' }}>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1A1A1A' }}>维度</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1E3A5F' }}>ML框架</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#2D5A3D' }}>DL框架</th>
+              <tr className="bg-brand-off-white">
+                <th className="text-left px-4 py-3 font-semibold text-brand-ink">维度</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-accent">ML框架</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-dl">DL框架</th>
               </tr>
             </thead>
             <tbody>
@@ -82,10 +83,10 @@ export default function ToolsPage() {
                 { dim: '训练时间', ml: '分钟到小时', dl: '小时到天' },
                 { dim: '调试难度', ml: '较低', dl: '较高 (需监控训练过程)' },
               ].map((row) => (
-                <tr key={row.dim} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: '#4A4A4A' }}>{row.dim}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.ml}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.dl}</td>
+                <tr key={row.dim} className="border-t border-brand-border-light">
+                  <td className="px-4 py-3 font-medium text-brand-ink-light">{row.dim}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.ml}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.dl}</td>
                 </tr>
               ))}
             </tbody>
@@ -115,56 +116,51 @@ export default function ToolsPage() {
           {filtered.map((tool) => (
             <div
               key={tool.id}
-              className="border rounded-lg p-5 hover:shadow-sm transition-shadow"
-              style={{ borderColor: '#E5E5E5' }}
+              className="border rounded-lg p-5 hover:shadow-sm transition-shadow border-brand-border"
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="text-sm font-semibold font-mono" style={{ color: '#1A1A1A' }}>
-                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="no-underline hover:underline" style={{ color: '#1E3A5F' }}>
+                  <h3 className="text-sm font-semibold font-mono text-brand-ink">
+                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="no-underline hover:underline text-brand-accent">
                       {tool.name}
                     </a>
                   </h3>
-                  <p className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>{tool.category}</p>
+                  <p className="text-xs mt-0.5 text-brand-ink-muted">{tool.category}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {tool.mlRelevant && (
-                    <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}>ML</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-brand-accent-light text-brand-accent">ML</span>
                   )}
                   {tool.dlRelevant && (
-                    <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: '#E8F0E9', color: '#2D5A3D' }}>DL</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-brand-dl-light text-brand-dl">DL</span>
                   )}
                 </div>
               </div>
-              <p className="text-sm mb-3" style={{ color: '#4A4A4A', lineHeight: 1.7 }}>
+              <p className="text-sm mb-3 text-brand-ink-light" style={{ lineHeight: 1.7 }}>
                 {tool.description}
               </p>
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {tool.tags.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-0.5 rounded border" style={{ borderColor: '#EEEEEE', color: '#8A8A8A' }}>
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded border border-brand-border-light text-brand-ink-muted">
                     {tag}
                   </span>
                 ))}
               </div>
 
               <div className="flex items-center gap-2">
-                <div
-                  className="flex-1 font-mono text-xs px-3 py-2 rounded border overflow-x-auto"
-                  style={{ backgroundColor: '#FAFAFA', borderColor: '#EEEEEE', color: '#4A4A4A' }}
-                >
+                <div className="flex-1 font-mono text-xs px-3 py-2 rounded border overflow-x-auto bg-brand-off-white border-brand-border-light text-brand-ink-light">
                   {tool.installCommand}
                 </div>
                 <button
                   onClick={() => handleCopy(tool.id, tool.installCommand)}
-                  className="p-1.5 rounded border hover:bg-gray-50 transition-colors shrink-0"
-                  style={{ borderColor: '#EEEEEE' }}
+                  className="p-1.5 rounded border hover:bg-gray-50 transition-colors shrink-0 border-brand-border-light"
                   title="复制安装命令"
                 >
                   {copiedId === tool.id ? (
-                    <Check size={14} style={{ color: '#2D5A3D' }} />
+                    <Check size={14} className="text-brand-dl" />
                   ) : (
-                    <Copy size={14} style={{ color: '#8A8A8A' }} />
+                    <Copy size={14} className="text-brand-ink-muted" />
                   )}
                 </button>
               </div>
@@ -176,7 +172,7 @@ export default function ToolsPage() {
               )}
 
               <div className="mt-2.5 flex items-center gap-1.5">
-                <span className="text-xs" style={{ color: '#8A8A8A' }}>难度:</span>
+                <span className="text-xs text-brand-ink-muted">难度:</span>
                 <span
                   className="text-xs px-2 py-0.5 rounded font-medium"
                   style={{
@@ -197,30 +193,30 @@ export default function ToolsPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-5" style={{ color: '#1A1A1A' }}>快速入门</h2>
+        <h2 className="text-lg font-bold mb-5 text-brand-ink">快速入门</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <FlaskConical size={16} className="mb-2" style={{ color: '#1E3A5F' }} />
-            <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1A1A' }}>ML 快速启动</h3>
-            <div className="font-mono text-xs space-y-1.5" style={{ color: '#4A4A4A' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <FlaskConical size={16} className="mb-2 text-brand-accent" />
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">ML 快速启动</h3>
+            <div className="font-mono text-xs space-y-1.5 text-brand-ink-light">
               <p>pip install scikit-learn xgboost</p>
               <p>pip install pandas numpy matplotlib</p>
               <p>pip install shap optuna</p>
             </div>
           </div>
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <BookOpen size={16} className="mb-2" style={{ color: '#2D5A3D' }} />
-            <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1A1A' }}>DL 快速启动</h3>
-            <div className="font-mono text-xs space-y-1.5" style={{ color: '#4A4A4A' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <BookOpen size={16} className="mb-2 text-brand-dl" />
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">DL 快速启动</h3>
+            <div className="font-mono text-xs space-y-1.5 text-brand-ink-light">
               <p>pip install torch torchvision</p>
               <p>pip install transformers</p>
               <p>pip install wandb</p>
             </div>
           </div>
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <Terminal size={16} className="mb-2" style={{ color: '#8A8A8A' }} />
-            <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1A1A' }}>生信专用</h3>
-            <div className="font-mono text-xs space-y-1.5" style={{ color: '#4A4A4A' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <Terminal size={16} className="mb-2 text-brand-ink-muted" />
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">生信专用</h3>
+            <div className="font-mono text-xs space-y-1.5 text-brand-ink-light">
               <p>pip install biopython scanpy</p>
               <p>pip install scvi-tools</p>
               <p>pip install deepchem rdkit</p>
@@ -230,19 +226,19 @@ export default function ToolsPage() {
       </section>
 
       <section className="mb-14">
-        <h2 className="text-xl font-bold mb-5" style={{ color: '#1A1A1A' }}>工具选型指南</h2>
+        <h2 className="text-xl font-bold mb-5 text-brand-ink">工具选型指南</h2>
 
         <div className="space-y-5">
           {/* ML Framework selection */}
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#1E3A5F' }}>ML框架怎么选？</h3>
-            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <h3 className="text-sm font-semibold mb-3 text-brand-accent">ML框架怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden border-brand-border-light">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: '#FAFAFA' }}>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>场景</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1E3A5F' }}>推荐工具</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#4A4A4A' }}>理由</th>
+                  <tr className="bg-brand-off-white">
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">场景</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-accent">推荐工具</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink-light">理由</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -254,10 +250,10 @@ export default function ToolsPage() {
                     { scene: '数据量极大（百万+样本）', tool: 'LightGBM', reason: '基于直方图的算法，训练速度比XGBoost快数倍' },
                     { scene: '需要概率校准输出', tool: 'scikit-learn (Logistic)', reason: '逻辑回归天然输出校准概率，适合临床决策' },
                   ].map((row) => (
-                    <tr key={row.scene} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.scene}</td>
-                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#1E3A5F' }}>{row.tool}</td>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.reason}</td>
+                    <tr key={row.scene} className="border-t border-brand-border-light">
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-light">{row.scene}</td>
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium text-brand-accent">{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-muted">{row.reason}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -266,16 +262,16 @@ export default function ToolsPage() {
           </div>
 
           {/* Protein structure tool comparison */}
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#2D5A3D' }}>蛋白质结构预测工具怎么选？</h3>
-            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <h3 className="text-sm font-semibold mb-3 text-brand-dl">蛋白质结构预测工具怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden border-brand-border-light">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: '#FAFAFA' }}>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>工具</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>精度</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>速度</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>适用场景</th>
+                  <tr className="bg-brand-off-white">
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">工具</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">精度</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">速度</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">适用场景</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -285,11 +281,11 @@ export default function ToolsPage() {
                     { tool: 'ESMFold', accuracy: '⭐⭐⭐', speed: '快（秒级）', use: '大规模扫描（数千蛋白质），不需MSA，速度远超AlphaFold' },
                     { tool: 'RosettaFold', accuracy: '⭐⭐⭐⭐', speed: '慢（小时）', use: '与AlphaFold互补，某些靶标表现更好，支持蛋白质设计' },
                   ].map((row) => (
-                    <tr key={row.tool} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#1A1A1A' }}>{row.tool}</td>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.accuracy}</td>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.speed}</td>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.use}</td>
+                    <tr key={row.tool} className="border-t border-brand-border-light">
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium text-brand-ink">{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-light">{row.accuracy}</td>
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-light">{row.speed}</td>
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-muted">{row.use}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -298,15 +294,15 @@ export default function ToolsPage() {
           </div>
 
           {/* DL Framework selection */}
-          <div className="border rounded-lg p-5" style={{ borderColor: '#E5E5E5' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#5B3A7B' }}>DL框架怎么选？</h3>
-            <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+          <div className="border rounded-lg p-5 border-brand-border">
+            <h3 className="text-sm font-semibold mb-3 text-brand-purple">DL框架怎么选？</h3>
+            <div className="border rounded-lg overflow-hidden border-brand-border-light">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: '#FAFAFA' }}>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#1A1A1A' }}>场景</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#2D5A3D' }}>推荐</th>
-                    <th className="text-left px-4 py-2.5 font-semibold text-xs" style={{ color: '#4A4A4A' }}>为什么</th>
+                  <tr className="bg-brand-off-white">
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink">场景</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-dl">推荐</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-xs text-brand-ink-light">为什么</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -317,10 +313,10 @@ export default function ToolsPage() {
                     { scene: '图神经网络（分子/蛋白）', tool: 'PyTorch Geometric', why: '最活跃的GNN生态，已实现GCN/GAT/MPNN等主流架构' },
                     { scene: 'TPU训练 / Google Cloud', tool: 'TensorFlow/JAX', why: 'TPU对TensorFlow/JAX优化最好' },
                   ].map((row) => (
-                    <tr key={row.scene} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#4A4A4A' }}>{row.scene}</td>
-                      <td className="px-4 py-2.5 text-xs font-mono font-medium" style={{ color: '#2D5A3D' }}>{row.tool}</td>
-                      <td className="px-4 py-2.5 text-xs" style={{ color: '#8A8A8A' }}>{row.why}</td>
+                    <tr key={row.scene} className="border-t border-brand-border-light">
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-light">{row.scene}</td>
+                      <td className="px-4 py-2.5 text-xs font-mono font-medium text-brand-dl">{row.tool}</td>
+                      <td className="px-4 py-2.5 text-xs text-brand-ink-muted">{row.why}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -330,24 +326,24 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="border rounded-lg p-6" style={{ borderColor: '#E5E5E5' }}>
-        <h2 className="text-lg font-bold mb-4" style={{ color: '#1A1A1A' }}>环境配置建议</h2>
-        <div className="space-y-4 text-sm" style={{ color: '#4A4A4A' }}>
+      <section className="border rounded-lg p-6 border-brand-border">
+        <h2 className="text-lg font-bold mb-4 text-brand-ink">环境配置建议</h2>
+        <div className="space-y-4 text-sm text-brand-ink-light">
           <div>
-            <h3 className="font-medium mb-1" style={{ color: '#1A1A1A' }}>Python版本</h3>
+            <h3 className="font-medium mb-1 text-brand-ink">Python版本</h3>
             <p>推荐使用 Python 3.9-3.11，通过 conda 或 pyenv 管理虚拟环境</p>
           </div>
           <div>
-            <h3 className="font-medium mb-1" style={{ color: '#1A1A1A' }}>GPU环境</h3>
+            <h3 className="font-medium mb-1 text-brand-ink">GPU环境</h3>
             <p>NVIDIA GPU需安装CUDA Toolkit + cuDNN。或使用Google Colab的免费T4 GPU</p>
           </div>
           <div>
-            <h3 className="font-medium mb-1" style={{ color: '#1A1A1A' }}>推荐IDE</h3>
+            <h3 className="font-medium mb-1 text-brand-ink">推荐IDE</h3>
             <p>VS Code + Python扩展 + Jupyter插件，或 PyCharm Professional</p>
           </div>
           <div>
-            <h3 className="font-medium mb-1" style={{ color: '#1A1A1A' }}>Conda环境模板</h3>
-            <pre className="mt-2 p-3 rounded-lg border font-mono text-xs overflow-x-auto" style={{ backgroundColor: '#FAFAFA', borderColor: '#EEEEEE' }}>
+            <h3 className="font-medium mb-1 text-brand-ink">Conda环境模板</h3>
+            <pre className="mt-2 p-3 rounded-lg border font-mono text-xs overflow-x-auto bg-brand-off-white border-brand-border-light">
 {`conda create -n bioml python=3.10
 conda activate bioml
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118

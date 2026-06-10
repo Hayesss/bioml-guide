@@ -1,8 +1,10 @@
 {
-  "name": "app2",
+  "name": "bioml-guide",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "面向生物信息学研究者的机器学习与深度学习系统学习指南",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

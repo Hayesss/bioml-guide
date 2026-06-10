@@ -11,33 +11,29 @@ const footerLinks = [
 
 export default function Footer() {
   return (
-    <footer
-      className="border-t py-8"
-      style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E5E5' }}
-    >
+    <footer className="border-t py-8 bg-brand-off-white border-brand-border">
       <div className="max-w-[1100px] mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Brand */}
           <div>
-            <div className="text-sm font-semibold mb-2" style={{ color: '#1A1A1A' }}>BioML Guide</div>
-            <p className="text-xs mb-1" style={{ color: '#8A8A8A' }}>
+            <div className="text-sm font-semibold mb-2 text-brand-ink">BioML Guide</div>
+            <p className="text-xs mb-1 text-brand-ink-muted">
               面向生物信息学研究者的机器学习与深度学习系统学习指南
             </p>
-            <p className="text-xs" style={{ color: '#8A8A8A' }}>
+            <p className="text-xs text-brand-ink-muted">
               涵盖基因组学、蛋白质科学、单细胞、药物发现等核心领域
             </p>
           </div>
 
           {/* Quick nav */}
           <div>
-            <div className="text-xs font-semibold mb-2" style={{ color: '#4A4A4A' }}>页面导航</div>
+            <div className="text-xs font-semibold mb-2 text-brand-ink-light">页面导航</div>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {footerLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="text-sm no-underline hover:underline"
-                  style={{ color: '#8A8A8A' }}
+                  className="text-sm no-underline hover:underline text-brand-ink-muted"
                 >
                   {link.label}
                 </Link>
@@ -47,7 +43,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <div className="text-xs font-semibold mb-2" style={{ color: '#4A4A4A' }}>外部资源</div>
+            <div className="text-xs font-semibold mb-2 text-brand-ink-light">外部资源</div>
             <div className="space-y-1">
               {[
                 { label: 'scikit-learn', url: 'https://scikit-learn.org/' },
@@ -61,8 +57,7 @@ export default function Footer() {
                   href={ext.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-sm no-underline hover:underline"
-                  style={{ color: '#8A8A8A' }}
+                  className="block text-sm no-underline hover:underline text-brand-ink-muted"
                 >
                   {ext.label}
                 </a>
@@ -71,10 +66,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div
-          className="mt-6 pt-4 border-t text-center text-xs"
-          style={{ color: '#8A8A8A', borderColor: '#EEEEEE' }}
-        >
+        <div className="mt-6 pt-4 border-t text-center text-xs text-brand-ink-muted border-brand-border-light">
           &copy; {new Date().getFullYear()} BioML Guide. Built with React + Vite + Tailwind CSS.
         </div>
       </div>

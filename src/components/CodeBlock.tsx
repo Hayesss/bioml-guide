@@ -30,11 +30,11 @@ export default function CodeBlock({ code, label, collapsible = false }: CodeBloc
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#EEEEEE' }}>
+    <div className="border rounded-lg overflow-hidden border-brand-border-light">
       {/* Header row */}
       <div
-        className="flex items-center justify-between px-3 py-1.5"
-        style={{ backgroundColor: '#FAFAFA', borderBottom: open ? '1px solid #EEEEEE' : 'none' }}
+        className="flex items-center justify-between px-3 py-1.5 bg-brand-off-white"
+        style={{ borderBottom: open ? '1px solid #EEEEEE' : 'none' }}
       >
         <div className="flex items-center gap-2">
           {collapsible && (
@@ -44,14 +44,14 @@ export default function CodeBlock({ code, label, collapsible = false }: CodeBloc
               title={open ? 'Hide code' : 'Show code'}
             >
               {open ? (
-                <ChevronUp size={12} style={{ color: '#8A8A8A' }} />
+                <ChevronUp size={12} className="text-brand-ink-muted" />
               ) : (
-                <ChevronDown size={12} style={{ color: '#8A8A8A' }} />
+                <ChevronDown size={12} className="text-brand-ink-muted" />
               )}
             </button>
           )}
           {label && (
-            <span className="text-xs font-medium" style={{ color: '#8A8A8A' }}>
+            <span className="text-xs font-medium text-brand-ink-muted">
               {label}
             </span>
           )}
@@ -62,9 +62,9 @@ export default function CodeBlock({ code, label, collapsible = false }: CodeBloc
           title="Copy code"
         >
           {copied ? (
-            <Check size={13} style={{ color: '#2D5A3D' }} />
+            <Check size={13} className="text-brand-dl" />
           ) : (
-            <Copy size={13} style={{ color: '#8A8A8A' }} />
+            <Copy size={13} className="text-brand-ink-muted" />
           )}
         </button>
       </div>
@@ -72,8 +72,8 @@ export default function CodeBlock({ code, label, collapsible = false }: CodeBloc
       {/* Code body */}
       {open && (
         <pre
-          className="m-0 px-3 py-2.5 font-mono text-xs overflow-x-auto"
-          style={{ backgroundColor: '#FAFAFA', color: '#4A4A4A', whiteSpace: 'pre' }}
+          className="m-0 px-3 py-2.5 font-mono text-xs overflow-x-auto bg-brand-off-white text-brand-ink-light"
+          style={{ whiteSpace: 'pre' }}
         >
           {code}
         </pre>

@@ -244,8 +244,8 @@ export default function CheatSheetPage() {
   return (
     <div className="space-y-12">
       <div>
-        <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>速查表</h1>
-        <p className="text-base" style={{ color: '#8A8A8A', maxWidth: 600 }}>
+        <h1 className="text-3xl font-bold mb-3 text-brand-ink">速查表</h1>
+        <p className="text-base text-brand-ink-muted max-w-[600px]">
           生物信息学 ML/DL 常用命令、代码模式和公式的快速参考
         </p>
       </div>
@@ -255,31 +255,28 @@ export default function CheatSheetPage() {
           <section key={section.title}>
             <div className="flex items-center gap-2.5 mb-4">
               <section.icon size={18} style={{ color: section.color }} />
-              <h2 className="text-lg font-bold" style={{ color: '#1A1A1A' }}>{section.title}</h2>
+              <h2 className="text-lg font-bold text-brand-ink">{section.title}</h2>
             </div>
             <div className="space-y-3">
               {section.items.map((item) => (
-                <div key={item.label} className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
-                  <div
-                    className="flex items-center justify-between px-3 py-1.5"
-                    style={{ backgroundColor: '#FAFAFA', borderBottom: '1px solid #EEEEEE' }}
-                  >
-                    <span className="text-xs font-medium" style={{ color: '#4A4A4A' }}>{item.label}</span>
+                <div key={item.label} className="border rounded-lg overflow-hidden border-brand-border">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-brand-off-white" style={{ borderBottom: '1px solid #EEEEEE' }}>
+                    <span className="text-xs font-medium text-brand-ink-light">{item.label}</span>
                     <button
                       onClick={() => copyCode(item.label, item.code)}
                       className="p-1 rounded hover:bg-gray-100 transition-colors"
                       title="Copy"
                     >
                       {copiedLabel === item.label ? (
-                        <Check size={13} style={{ color: '#2D5A3D' }} />
+                        <Check size={13} className="text-brand-dl" />
                       ) : (
-                        <Copy size={13} style={{ color: '#8A8A8A' }} />
+                        <Copy size={13} className="text-brand-ink-muted" />
                       )}
                     </button>
                   </div>
                   <pre
-                    className="m-0 px-3 py-2 font-mono text-xs overflow-x-auto"
-                    style={{ backgroundColor: '#FCFCFC', color: '#4A4A4A', whiteSpace: 'pre', maxHeight: 200 }}
+                    className="m-0 px-3 py-2 font-mono text-xs overflow-x-auto bg-[#FCFCFC] text-brand-ink-light"
+                    style={{ whiteSpace: 'pre', maxHeight: 200 }}
                   >
                     {item.code}
                   </pre>
@@ -291,9 +288,9 @@ export default function CheatSheetPage() {
       </div>
 
       {/* Quick reference footer */}
-      <section className="border rounded-lg p-6" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}>
-        <h2 className="text-sm font-semibold mb-3" style={{ color: '#1A1A1A' }}>常用命令速记</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono" style={{ color: '#4A4A4A' }}>
+      <section className="border rounded-lg p-6 border-brand-border bg-brand-off-white">
+        <h2 className="text-sm font-semibold mb-3 text-brand-ink">常用命令速记</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-brand-ink-light">
           {[
             { cmd: 'pip list | grep torch', desc: '检查 PyTorch 版本' },
             { cmd: 'nvidia-smi', desc: '查看 GPU 状态' },
@@ -305,8 +302,8 @@ export default function CheatSheetPage() {
             { cmd: 'du -sh data/', desc: '查看数据目录大小' },
           ].map((item) => (
             <div key={item.cmd} className="flex items-start gap-2">
-              <code className="shrink-0 px-1.5 py-0.5 rounded" style={{ backgroundColor: '#EEEEEE' }}>{item.cmd}</code>
-              <span className="text-xs" style={{ color: '#8A8A8A' }}>{item.desc}</span>
+              <code className="shrink-0 px-1.5 py-0.5 rounded bg-brand-border-light">{item.cmd}</code>
+              <span className="text-xs text-brand-ink-muted">{item.desc}</span>
             </div>
           ))}
         </div>

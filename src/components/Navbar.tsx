@@ -20,15 +20,11 @@ export default function Navbar({ onSearch }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-white border-b"
-      style={{ borderColor: '#E5E5E5', height: 56 }}
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-brand-border" style={{ height: 56 }}>
       <div className="max-w-[1100px] mx-auto px-6 flex items-center justify-between h-full">
         <Link
           to="/"
-          className="font-semibold text-base no-underline"
-          style={{ color: '#1A1A1A' }}
+          className="font-semibold text-base no-underline text-brand-ink"
         >
           BioML Guide
         </Link>
@@ -46,41 +42,33 @@ export default function Navbar({ onSearch }: NavbarProps) {
                 <item.icon size={15} />
                 {item.label}
                 {active && (
-                  <span
-                    className="absolute -bottom-4 left-0 right-0 h-0.5"
-                    style={{ backgroundColor: '#1E3A5F' }}
-                  />
+                  <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
                 )}
               </Link>
             );
           })}
           <button
             onClick={onSearch}
-            className="flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-            style={{ color: '#8A8A8A', borderColor: '#E5E5E5' }}
+            className="flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border"
           >
             <Search size={14} />
             <span className="hidden lg:inline">搜索</span>
-            <kbd className="hidden lg:inline text-xs px-1 py-0.5 rounded border font-mono ml-1" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}>
+            <kbd className="hidden lg:inline text-xs px-1 py-0.5 rounded border font-mono ml-1 border-brand-border bg-brand-off-white">
               Ctrl+K
             </kbd>
           </button>
         </div>
 
         <button
-          className="md:hidden p-1"
+          className="md:hidden p-1 text-brand-ink-light"
           onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ color: '#4A4A4A' }}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {mobileOpen && (
-        <div
-          className="md:hidden bg-white border-b px-6 py-4 space-y-3"
-          style={{ borderColor: '#E5E5E5' }}
-        >
+        <div className="md:hidden bg-white border-b px-6 py-4 space-y-3 border-brand-border">
           {navItems.map((item) => {
             const active = location.pathname === item.path;
             return (

@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Layout from './components/Layout';
 import SearchModal from './components/SearchModal';
 import BackToTop from './components/BackToTop';
+import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import RoadmapPage from './pages/RoadmapPage';
 import ApplicationsPage from './pages/ApplicationsPage';
@@ -25,6 +26,7 @@ export default function App() {
       <SearchModal isOpen={searchOpen} onClose={closeSearch} onToggle={toggleSearch} />
       <div className="flex-1">
         <Layout>
+          <ErrorBoundary>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
@@ -34,6 +36,7 @@ export default function App() {
             <Route path="/math" element={<MathPage />} />
             <Route path="/cheatsheet" element={<CheatSheetPage />} />
           </Routes>
+          </ErrorBoundary>
         </Layout>
       </div>
       <Footer />

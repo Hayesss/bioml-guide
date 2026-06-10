@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'bioml-guide-progress';
 
@@ -11,22 +11,22 @@ function loadProgress(): ProgressState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch {
+    // localStorage unavailable or corrupted data — start fresh
+  }
   return { roadmapTopics: {}, lastUpdated: Date.now() };
 }
 
 function saveProgress(state: ProgressState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, lastUpdated: Date.now() }));
-  } catch {}
+  } catch {
+    // localStorage unavailable — silently ignore
+  }
 }
 
 export function useProgress() {
   const [progress, setProgress] = useState<ProgressState>(loadProgress);
-
-  useEffect(() => {
-    setProgress(loadProgress());
-  }, []);
 
   const isTopicDone = useCallback(
     (key: string) => !!progress.roadmapTopics[key],

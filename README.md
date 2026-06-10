@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# BioML Guide
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+面向**生物信息学研究者**的机器学习与深度学习系统学习指南。
 
-Currently, two official plugins are available:
+从零基础到前沿应用，系统掌握 ML/DL 在基因组学、蛋白质科学、单细胞组学和药物发现中的核心方法与实践技能。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 功能特性
 
-## React Compiler
+- **四阶段学习路径** — 基础入门 → 核心方法 → 进阶架构 → 专业应用，每阶段覆盖 ML/DL/数学/工具/项目/资源六大维度
+- **六大应用方向** — 基因组学、蛋白质科学、单细胞组学、药物发现、转录组学、影像组学，含决策指南（何时用 ML 何时用 DL）
+- **进度追踪** — 勾选式学习检查，进度百分比，数据持久化到 localStorage
+- **全局搜索** — `Ctrl+K` 呼出，模糊匹配全站工具、方法、概念和资源
+- **速查表** — 环境搭建、数据加载、ML/DL 常用模式、生物信息特有操作的一键复制代码片段
+- **自测 Quiz** — 5 道生物信息学 ML/DL 实战题目，即时反馈与解析
+- **数学直觉** — 用生物学类比理解线性代数、微积分、概率、优化和信息论
+- **响应式设计** — 桌面端和移动端均可正常浏览
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 快速开始
 
-## Expanding the ESLint configuration
+```bash
+# 安装依赖
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 启动开发服务器
+npm run dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 构建生产版本
+npm run build
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 本地预览生产构建
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+要求 Node.js 18+。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 项目结构
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+bioml-guide/
+├── public/
+│   └── data/                  # 内容数据 (JSON)
+│       ├── roadmap.json       # 四阶段学习路径
+│       ├── applications.json  # 六大应用方向
+│       ├── tools.json         # 工具库 (25+)
+│       ├── resources.json     # 学习资源 (20+)
+│       └── math.json          # 数学直觉
+├── src/
+│   ├── components/            # 通用组件
+│   │   ├── Navbar.tsx         # 顶部导航 + 搜索入口
+│   │   ├── Footer.tsx         # 页脚
+│   │   ├── Layout.tsx         # 页面布局
+│   │   ├── SearchModal.tsx    # 全局搜索模态框
+│   │   ├── Quiz.tsx           # 自测问答
+│   │   ├── CodeBlock.tsx      # 代码块 (语法高亮 + 复制)
+│   │   └── BackToTop.tsx      # 回到顶部
+│   ├── pages/                 # 页面组件
+│   │   ├── HomePage.tsx       # 首页
+│   │   ├── RoadmapPage.tsx    # 学习路径
+│   │   ├── ApplicationsPage.tsx # 应用方向
+│   │   ├── ResourcesPage.tsx  # 资源库
+│   │   ├── ToolsPage.tsx      # 工具
+│   │   ├── MathPage.tsx       # 数学直觉
+│   │   └── CheatSheetPage.tsx # 速查表
+│   ├── hooks/
+│   │   ├── useData.ts         # JSON 数据加载
+│   │   └── useProgress.ts     # 学习进度管理
+│   ├── data/                  # TypeScript 类型定义及静态数据
+│   ├── App.tsx                # 路由配置
+│   ├── main.tsx               # 入口
+│   └── index.css              # 全局样式 + CSS 变量
+├── tailwind.config.js
+├── vite.config.ts
+└── .github/workflows/deploy.yml  # GitHub Pages 自动部署
+```
+
+## 技术栈
+
+| 类别 | 技术 |
+|------|------|
+| 框架 | React 19 + TypeScript |
+| 构建 | Vite 8 |
+| 样式 | Tailwind CSS 3 |
+| 路由 | React Router 7 |
+| 图标 | Lucide React |
+| 部署 | GitHub Pages (GitHub Actions) |
+
+## 内容维护
+
+所有学习内容以 JSON 格式存储在 `public/data/` 目录下，修改内容无需改动组件代码：
+
+- 添加学习主题 → 编辑 `roadmap.json`
+- 添加应用方向 → 编辑 `applications.json`
+- 添加工具/资源 → 编辑 `tools.json` / `resources.json`
+- 修改数学概念 → 编辑 `math.json`
+
+速查表和 Quiz 的内容直接写在对应组件中。
+
+## License
+
+MIT

@@ -21,13 +21,21 @@ interface Application {
 }
 
 export default function HomePage() {
-  const stages = useData<Stage[]>('roadmap');
-  const applications = useData<Application[]>('applications');
+  const { data: stages, loading, error } = useData<Stage[]>('roadmap');
+  const { data: applications } = useData<Application[]>('applications');
 
-  if (!stages || !applications) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>
+        <div className="text-sm text-brand-ink-muted">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !stages || !applications) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-sm text-brand-error">{error || '加载数据失败'}</div>
       </div>
     );
   }
@@ -36,24 +44,20 @@ export default function HomePage() {
     <div className="space-y-20">
       {/* Hero */}
       <section className="text-center py-16">
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6"
-          style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}
-        >
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 bg-brand-accent-light text-brand-accent">
           <Dna size={13} />
           面向生物信息学研究者的系统学习指南
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-5" style={{ color: '#1A1A1A' }}>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-5 text-brand-ink">
           生物信息学中的机器学习与深度学习
         </h1>
-        <p className="text-lg max-w-2xl mx-auto mb-8" style={{ color: '#8A8A8A', lineHeight: 1.8 }}>
+        <p className="text-lg max-w-2xl mx-auto mb-8 text-brand-ink-muted" style={{ lineHeight: 1.8 }}>
           从零基础到前沿应用，系统掌握ML/DL在基因组学、蛋白质科学和药物发现中的核心方法与实践技能
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
             to="/roadmap"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white no-underline"
-            style={{ backgroundColor: '#1E3A5F' }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white no-underline bg-brand-accent"
           >
             <BookOpen size={15} />
             开始学习
@@ -61,8 +65,7 @@ export default function HomePage() {
           </Link>
           <Link
             to="/applications"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline border"
-            style={{ color: '#4A4A4A', borderColor: '#E5E5E5' }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline border border-brand-border text-brand-ink-light"
           >
             <Microscope size={15} />
             应用方向
@@ -71,10 +74,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats bar */}
-      <section
-        className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8 border-y px-6 rounded-lg"
-        style={{ borderColor: '#EEEEEE', backgroundColor: '#FAFAFA' }}
-      >
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8 border-y px-6 rounded-lg border-brand-border-light bg-brand-off-white">
         {[
           { value: '4', label: '学习阶段', icon: Layers },
           { value: '6', label: '应用方向', icon: Microscope },
@@ -82,9 +82,9 @@ export default function HomePage() {
           { value: '20+', label: '学习资源', icon: BookOpen },
         ].map((stat) => (
           <div key={stat.label} className="text-center">
-            <stat.icon size={18} className="mx-auto mb-1.5" style={{ color: '#1E3A5F' }} />
-            <div className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>{stat.value}</div>
-            <div className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>{stat.label}</div>
+            <stat.icon size={18} className="mx-auto mb-1.5 text-brand-accent" />
+            <div className="text-2xl font-bold text-brand-ink">{stat.value}</div>
+            <div className="text-xs mt-0.5 text-brand-ink-muted">{stat.label}</div>
           </div>
         ))}
       </section>
@@ -92,38 +92,33 @@ export default function HomePage() {
       {/* Stage overview cards */}
       <section>
         <div className="flex items-center gap-3 mb-8">
-          <Layers size={20} style={{ color: '#1E3A5F' }} />
-          <h2 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>学习路径概览</h2>
+          <Layers size={20} className="text-brand-accent" />
+          <h2 className="text-2xl font-bold text-brand-ink">学习路径概览</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {stages.map((stage) => (
             <div
               key={stage.id}
-              className="border rounded-lg p-6 hover:shadow-sm transition-shadow"
-              style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF' }}
+              className="border rounded-lg p-6 hover:shadow-sm transition-shadow border-brand-border bg-white"
             >
               <div className="flex items-center justify-between mb-3">
-                <span
-                  className="text-xs font-mono font-medium px-2 py-0.5 rounded"
-                  style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}
-                >
+                <span className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-brand-accent-light text-brand-accent">
                   阶段 {stage.id}
                 </span>
-                <span className="text-xs" style={{ color: '#8A8A8A' }}>{stage.duration}</span>
+                <span className="text-xs text-brand-ink-muted">{stage.duration}</span>
               </div>
-              <h3 className="text-lg font-semibold mb-1" style={{ color: '#1A1A1A' }}>
+              <h3 className="text-lg font-semibold mb-1 text-brand-ink">
                 {stage.name}
               </h3>
-              <p className="text-xs mb-3" style={{ color: '#8A8A8A' }}>{stage.nameEn}</p>
-              <p className="text-sm mb-4" style={{ color: '#4A4A4A', lineHeight: 1.7 }}>
+              <p className="text-xs mb-3 text-brand-ink-muted">{stage.nameEn}</p>
+              <p className="text-sm mb-4 text-brand-ink-light" style={{ lineHeight: 1.7 }}>
                 {stage.description}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {stage.mlTopics.slice(0, 3).map((topic) => (
                   <span
                     key={topic.name}
-                    className="text-xs px-2 py-0.5 rounded border"
-                    style={{ borderColor: '#EEEEEE', color: '#8A8A8A' }}
+                    className="text-xs px-2 py-0.5 rounded border border-brand-border-light text-brand-ink-muted"
                   >
                     {topic.name}
                   </span>
@@ -135,8 +130,7 @@ export default function HomePage() {
         <div className="mt-6 text-center">
           <Link
             to="/roadmap"
-            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline"
-            style={{ color: '#1E3A5F' }}
+            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline text-brand-accent"
           >
             查看完整学习路径
             <ArrowRight size={14} />
@@ -147,28 +141,27 @@ export default function HomePage() {
       {/* Application preview cards */}
       <section>
         <div className="flex items-center gap-3 mb-8">
-          <Microscope size={20} style={{ color: '#1E3A5F' }} />
-          <h2 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>应用方向</h2>
+          <Microscope size={20} className="text-brand-accent" />
+          <h2 className="text-2xl font-bold text-brand-ink">应用方向</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {applications.map((app) => (
             <div
               key={app.id}
-              className="border rounded-lg p-5 hover:shadow-sm transition-shadow"
-              style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF', borderTopWidth: 3, borderTopColor: app.color }}
+              className="border rounded-lg p-5 hover:shadow-sm transition-shadow border-brand-border bg-white"
+              style={{ borderTopWidth: 3, borderTopColor: app.color }}
             >
-              <h3 className="text-base font-semibold mb-2" style={{ color: '#1A1A1A' }}>
+              <h3 className="text-base font-semibold mb-2 text-brand-ink">
                 {app.name}
               </h3>
-              <p className="text-sm mb-4" style={{ color: '#8A8A8A', lineHeight: 1.7 }}>
+              <p className="text-sm mb-4 text-brand-ink-muted" style={{ lineHeight: 1.7 }}>
                 {app.description}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {app.dlMethods.slice(0, 2).map((m) => (
                   <span
                     key={m.name}
-                    className="text-xs px-2 py-0.5 rounded"
-                    style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}
+                    className="text-xs px-2 py-0.5 rounded bg-brand-accent-light text-brand-accent"
                   >
                     {m.name}
                   </span>
@@ -180,8 +173,7 @@ export default function HomePage() {
         <div className="mt-6 text-center">
           <Link
             to="/applications"
-            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline"
-            style={{ color: '#1E3A5F' }}
+            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline text-brand-accent"
           >
             查看全部应用方向
             <ArrowRight size={14} />
@@ -192,16 +184,16 @@ export default function HomePage() {
       {/* ML vs DL comparison */}
       <section>
         <div className="flex items-center gap-3 mb-8">
-          <Brain size={20} style={{ color: '#1E3A5F' }} />
-          <h2 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>机器学习 vs 深度学习</h2>
+          <Brain size={20} className="text-brand-accent" />
+          <h2 className="text-2xl font-bold text-brand-ink">机器学习 vs 深度学习</h2>
         </div>
-        <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+        <div className="border rounded-lg overflow-hidden border-brand-border">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: '#FAFAFA' }}>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1A1A1A' }}>维度</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1E3A5F' }}>机器学习 (ML)</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#2D5A3D' }}>深度学习 (DL)</th>
+              <tr className="bg-brand-off-white">
+                <th className="text-left px-4 py-3 font-semibold text-brand-ink">维度</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-accent">机器学习 (ML)</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-dl">深度学习 (DL)</th>
               </tr>
             </thead>
             <tbody>
@@ -214,10 +206,10 @@ export default function HomePage() {
                 { dim: '代表算法', ml: '随机森林、SVM、XGBoost、逻辑回归', dl: 'CNN、RNN、Transformer、VAE、GAN' },
                 { dim: '典型工具', ml: 'scikit-learn, XGBoost, SHAP', dl: 'PyTorch, TensorFlow, HuggingFace' },
               ].map((row) => (
-                <tr key={row.dim} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: '#4A4A4A' }}>{row.dim}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.ml}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.dl}</td>
+                <tr key={row.dim} className="border-t border-brand-border-light">
+                  <td className="px-4 py-3 font-medium text-brand-ink-light">{row.dim}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.ml}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.dl}</td>
                 </tr>
               ))}
             </tbody>
@@ -228,9 +220,9 @@ export default function HomePage() {
       {/* Self-assessment quiz */}
       <section>
         <div className="flex items-center gap-3 mb-6">
-          <Brain size={20} style={{ color: '#1E3A5F' }} />
-          <h2 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>来测一下？</h2>
-          <span className="text-xs" style={{ color: '#8A8A8A' }}>5道生物信息学ML/DL基础题</span>
+          <Brain size={20} className="text-brand-accent" />
+          <h2 className="text-2xl font-bold text-brand-ink">来测一下？</h2>
+          <span className="text-xs text-brand-ink-muted">5道生物信息学ML/DL基础题</span>
         </div>
         <Quiz />
       </section>
@@ -239,34 +231,31 @@ export default function HomePage() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Link
           to="/resources"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow"
-          style={{ borderColor: '#E5E5E5' }}
+          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
         >
-          <BookOpen size={18} className="mb-2" style={{ color: '#1E3A5F' }} />
-          <h3 className="text-sm font-semibold mb-1" style={{ color: '#1A1A1A' }}>精选资源库</h3>
-          <p className="text-xs" style={{ color: '#8A8A8A' }}>
+          <BookOpen size={18} className="mb-2 text-brand-accent" />
+          <h3 className="text-sm font-semibold mb-1 text-brand-ink">精选资源库</h3>
+          <p className="text-xs text-brand-ink-muted">
             Andrew Ng课程、Fast.ai、D2L、经典书籍和视频教程
           </p>
         </Link>
         <Link
           to="/tools"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow"
-          style={{ borderColor: '#E5E5E5' }}
+          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
         >
-          <FlaskConical size={18} className="mb-2" style={{ color: '#1E3A5F' }} />
-          <h3 className="text-sm font-semibold mb-1" style={{ color: '#1A1A1A' }}>工具与环境</h3>
-          <p className="text-xs" style={{ color: '#8A8A8A' }}>
+          <FlaskConical size={18} className="mb-2 text-brand-accent" />
+          <h3 className="text-sm font-semibold mb-1 text-brand-ink">工具与环境</h3>
+          <p className="text-xs text-brand-ink-muted">
             PyTorch、scikit-learn、ESM-2、AlphaFold2等核心工具安装与配置
           </p>
         </Link>
         <Link
           to="/math"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow"
-          style={{ borderColor: '#E5E5E5' }}
+          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
         >
-          <Brain size={18} className="mb-2" style={{ color: '#1E3A5F' }} />
-          <h3 className="text-sm font-semibold mb-1" style={{ color: '#1A1A1A' }}>数学直觉</h3>
-          <p className="text-xs" style={{ color: '#8A8A8A' }}>
+          <Brain size={18} className="mb-2 text-brand-accent" />
+          <h3 className="text-sm font-semibold mb-1 text-brand-ink">数学直觉</h3>
+          <p className="text-xs text-brand-ink-muted">
             用生物学直觉理解线性代数、微积分、概率和优化
           </p>
         </Link>

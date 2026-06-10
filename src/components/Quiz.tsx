@@ -49,6 +49,7 @@ export default function Quiz() {
   const [finished, setFinished] = useState(false);
 
   const q = questions[current];
+  if (!q) return null;
   const isCorrect = selected === q.answer;
 
   const handleSubmit = () => {
@@ -78,18 +79,17 @@ export default function Quiz() {
   if (finished) {
     const pct = Math.round((score / questions.length) * 100);
     return (
-      <div className="border rounded-lg p-6 text-center" style={{ borderColor: '#E5E5E5' }}>
+      <div className="border rounded-lg p-6 text-center border-brand-border">
         <div className="text-4xl mb-3">{pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚'}</div>
-        <h3 className="text-lg font-bold mb-2" style={{ color: '#1A1A1A' }}>
+        <h3 className="text-lg font-bold mb-2 text-brand-ink">
           {pct >= 80 ? '厉害！基础知识扎实' : pct >= 60 ? '不错，继续加油' : '需要多看看学习路径噢'}
         </h3>
-        <p className="text-sm mb-4" style={{ color: '#8A8A8A' }}>
+        <p className="text-sm mb-4 text-brand-ink-muted">
           正确 {score}/{questions.length} ({pct}%)
         </p>
         <button
           onClick={handleRestart}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-          style={{ backgroundColor: '#1E3A5F', color: 'white' }}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand-accent text-white"
         >
           <RefreshCw size={14} />
           再来一次
@@ -99,52 +99,49 @@ export default function Quiz() {
   }
 
   return (
-    <div className="border rounded-lg p-6" style={{ borderColor: '#E5E5E5' }}>
+    <div className="border rounded-lg p-6 border-brand-border">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Brain size={16} style={{ color: '#1E3A5F' }} />
-          <h3 className="text-sm font-semibold" style={{ color: '#1A1A1A' }}>知识自测</h3>
+          <Brain size={16} className="text-brand-accent" />
+          <h3 className="text-sm font-semibold text-brand-ink">知识自测</h3>
         </div>
-        <span className="text-xs" style={{ color: '#8A8A8A' }}>
+        <span className="text-xs text-brand-ink-muted">
           {current + 1} / {questions.length}
         </span>
       </div>
 
       {/* Progress */}
-      <div className="w-full h-1 rounded-full mb-4" style={{ backgroundColor: '#EEEEEE' }}>
+      <div className="w-full h-1 rounded-full mb-4 bg-brand-border-light">
         <div
-          className="h-full rounded-full transition-all duration-300"
-          style={{
-            backgroundColor: '#1E3A5F',
-            width: `${((current + (submitted ? 1 : 0)) / questions.length) * 100}%`,
-          }}
+          className="h-full rounded-full transition-all duration-300 bg-brand-accent"
+          style={{ width: `${((current + (submitted ? 1 : 0)) / questions.length) * 100}%` }}
         />
       </div>
 
-      <p className="text-sm font-medium mb-4" style={{ color: '#1A1A1A', lineHeight: 1.6 }}>
+      <p className="text-sm font-medium mb-4 text-brand-ink" style={{ lineHeight: 1.6 }}>
         {q.q}
       </p>
 
       <div className="space-y-2 mb-4">
         {q.options.map((opt, i) => {
-          let bg = '#FFFFFF';
-          let borderColor = '#E5E5E5';
-          let textColor = '#4A4A4A';
+          let bg = 'bg-white';
+          let borderColor = 'border-brand-border';
+          let textColor = 'text-brand-ink-light';
 
           if (submitted) {
             if (i === q.answer) {
-              bg = '#E8F0E9';
-              borderColor = '#2D5A3D';
-              textColor = '#2D5A3D';
+              bg = 'bg-brand-dl-light';
+              borderColor = 'border-brand-dl';
+              textColor = 'text-brand-dl';
             } else if (i === selected && !isCorrect) {
-              bg = '#FDE8E8';
-              borderColor = '#C53030';
-              textColor = '#C53030';
+              bg = 'bg-brand-error-light';
+              borderColor = 'border-brand-error';
+              textColor = 'text-brand-error';
             }
           } else if (i === selected) {
-            bg = '#E8EDF2';
-            borderColor = '#1E3A5F';
-            textColor = '#1E3A5F';
+            bg = 'bg-brand-accent-light';
+            borderColor = 'border-brand-accent';
+            textColor = 'text-brand-accent';
           }
 
           return (
@@ -152,17 +149,16 @@ export default function Quiz() {
               key={i}
               disabled={submitted}
               onClick={() => setSelected(i)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border text-left text-sm transition-colors"
-              style={{ backgroundColor: bg, borderColor, color: textColor }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border text-left text-sm transition-colors ${bg} ${borderColor} ${textColor}`}
             >
               <span
                 className="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-mono shrink-0"
                 style={{ borderColor: submitted && i === q.answer ? '#2D5A3D' : '#E5E5E5' }}
               >
                 {submitted && i === q.answer ? (
-                  <Check size={12} style={{ color: '#2D5A3D' }} />
+                  <Check size={12} className="text-brand-dl" />
                 ) : submitted && i === selected && !isCorrect ? (
-                  <X size={12} style={{ color: '#C53030' }} />
+                  <X size={12} className="text-brand-error" />
                 ) : (
                   String.fromCharCode(65 + i)
                 )}
@@ -175,11 +171,8 @@ export default function Quiz() {
 
       {submitted && (
         <div
-          className="rounded-lg p-3 mb-4 text-xs"
-          style={{
-            backgroundColor: isCorrect ? '#E8F0E9' : '#FDE8E8',
-            color: isCorrect ? '#2D5A3D' : '#8B4513',
-          }}
+          className={`rounded-lg p-3 mb-4 text-xs ${isCorrect ? 'bg-brand-dl-light text-brand-dl' : 'bg-brand-error-light'}`}
+          style={{ color: isCorrect ? '#2D5A3D' : '#8B4513' }}
         >
           <span className="font-medium">{isCorrect ? '✓ 正确！' : '✗ 错误'}</span>{' '}
           {q.explanation}
@@ -189,12 +182,7 @@ export default function Quiz() {
       <button
         onClick={submitted ? handleNext : handleSubmit}
         disabled={selected === null}
-        className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors"
-        style={{
-          backgroundColor: selected === null ? '#EEEEEE' : '#1E3A5F',
-          color: selected === null ? '#8A8A8A' : 'white',
-          cursor: selected === null ? 'not-allowed' : 'pointer',
-        }}
+        className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${selected === null ? 'bg-brand-border-light text-brand-ink-muted cursor-not-allowed' : 'bg-brand-accent text-white cursor-pointer'}`}
       >
         {submitted ? (current < questions.length - 1 ? '下一题' : '查看结果') : '提交答案'}
       </button>

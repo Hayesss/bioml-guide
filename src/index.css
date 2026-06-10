@@ -8,11 +8,16 @@
   --warm-white: #F5F5F0;
   --ink: #1A1A1A;
   --ink-light: #4A4A4A;
+  --ink-medium: #6A6A6A;
   --ink-muted: #8A8A8A;
+  --ink-extra-muted: #A0A0A0;
   --accent: #1E3A5F;
   --accent-light: #E8EDF2;
   --accent-dl: #2D5A3D;
   --accent-dl-light: #E8F0E9;
+  --purple: #5B3A7B;
+  --error: #C53030;
+  --error-light: #FDE8E8;
   --border: #E5E5E5;
   --border-light: #EEEEEE;
 }

@@ -20,7 +20,7 @@ interface Stage {
 }
 
 export default function RoadmapPage() {
-  const stages = useData<Stage[]>('roadmap');
+  const { data: stages, loading, error } = useData<Stage[]>('roadmap');
   const [openStage, setOpenStage] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { isTopicDone, toggleTopic, getOverallProgress, resetAll } = useProgress();
@@ -62,31 +62,31 @@ export default function RoadmapPage() {
     },
   ];
 
-  if (!stages) return <div className="p-8 text-sm" style={{ color: '#8A8A8A' }}>Loading...</div>;
+  if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
+  if (error || !stages) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;
 
   return (
     <div className="space-y-14">
       <div>
-        <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>学习路径</h1>
-        <p className="text-base" style={{ color: '#8A8A8A', maxWidth: 600 }}>
+        <h1 className="text-3xl font-bold mb-3 text-brand-ink">学习路径</h1>
+        <p className="text-base text-brand-ink-muted max-w-[600px]">
           从基础到专业，四个阶段系统掌握生物信息学中的机器学习与深度学习
         </p>
 
         {overall.total > 0 && (
-          <div className="mt-5 border rounded-lg p-4" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}>
+          <div className="mt-5 border rounded-lg p-4 border-brand-border bg-brand-off-white">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold" style={{ color: '#1A1A1A' }}>
+              <span className="text-sm font-semibold text-brand-ink">
                 总体进度: {overall.pct}%
               </span>
               <div className="flex items-center gap-3">
-                <span className="text-xs" style={{ color: '#8A8A8A' }}>
+                <span className="text-xs text-brand-ink-muted">
                   {overall.done}/{overall.total} 项已完成
                 </span>
                 {overall.done > 0 && (
                   <button
                     onClick={() => { if (confirm('确定要重置所有进度？')) resetAll(); }}
-                    className="flex items-center gap-1 text-xs hover:underline"
-                    style={{ color: '#8A8A8A' }}
+                    className="flex items-center gap-1 text-xs hover:underline text-brand-ink-muted"
                   >
                     <RefreshCw size={11} />
                     重置
@@ -94,7 +94,7 @@ export default function RoadmapPage() {
                 )}
               </div>
             </div>
-            <div className="w-full h-2 rounded-full" style={{ backgroundColor: '#EEEEEE' }}>
+            <div className="w-full h-2 rounded-full bg-brand-border-light">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
@@ -111,37 +111,34 @@ export default function RoadmapPage() {
         {stages.map((stage) => {
           const open = openStage === stage.id;
           return (
-            <div key={stage.id} className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+            <div key={stage.id} className="border rounded-lg overflow-hidden border-brand-border">
               <button
                 className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
                 onClick={() => setOpenStage(open ? null : stage.id)}
               >
                 <div className="flex items-center gap-4">
-                  <span
-                    className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold text-white"
-                    style={{ backgroundColor: '#1E3A5F' }}
-                  >
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold text-white bg-brand-accent">
                     {stage.id}
                   </span>
                   <div>
-                    <h3 className="text-base font-semibold" style={{ color: '#1A1A1A' }}>
+                    <h3 className="text-base font-semibold text-brand-ink">
                       {stage.name}
                     </h3>
-                    <p className="text-xs" style={{ color: '#8A8A8A' }}>{stage.nameEn} · {stage.duration}</p>
+                    <p className="text-xs text-brand-ink-muted">{stage.nameEn} · {stage.duration}</p>
                   </div>
                 </div>
-                {open ? <ChevronUp size={18} style={{ color: '#8A8A8A' }} /> : <ChevronDown size={18} style={{ color: '#8A8A8A' }} />}
+                {open ? <ChevronUp size={18} className="text-brand-ink-muted" /> : <ChevronDown size={18} className="text-brand-ink-muted" />}
               </button>
 
               {open && (
-                <div className="px-6 pb-6 border-t" style={{ borderColor: '#EEEEEE' }}>
-                  <p className="text-sm mt-4 mb-5" style={{ color: '#4A4A4A' }}>{stage.description}</p>
+                <div className="px-6 pb-6 border-t border-brand-border-light">
+                  <p className="text-sm mt-4 mb-5 text-brand-ink-light">{stage.description}</p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="rounded-lg p-4" style={{ backgroundColor: '#E8EDF2' }}>
+                    <div className="rounded-lg p-4 bg-brand-accent-light">
                       <div className="flex items-center gap-2 mb-3">
-                        <Box size={14} style={{ color: '#1E3A5F' }} />
-                        <h4 className="text-sm font-semibold" style={{ color: '#1E3A5F' }}>机器学习</h4>
+                        <Box size={14} className="text-brand-accent" />
+                        <h4 className="text-sm font-semibold text-brand-accent">机器学习</h4>
                       </div>
                       <ul className="space-y-3">
                         {stage.mlTopics.map((topic) => {
@@ -169,7 +166,7 @@ export default function RoadmapPage() {
                                 >
                                   {topic.name}
                                 </div>
-                                <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                                <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
                               </div>
                             </div>
                           </li>
@@ -178,10 +175,10 @@ export default function RoadmapPage() {
                       </ul>
                     </div>
 
-                    <div className="rounded-lg p-4" style={{ backgroundColor: '#E8F0E9' }}>
+                    <div className="rounded-lg p-4 bg-brand-dl-light">
                       <div className="flex items-center gap-2 mb-3">
-                        <Cpu size={14} style={{ color: '#2D5A3D' }} />
-                        <h4 className="text-sm font-semibold" style={{ color: '#2D5A3D' }}>深度学习</h4>
+                        <Cpu size={14} className="text-brand-dl" />
+                        <h4 className="text-sm font-semibold text-brand-dl">深度学习</h4>
                       </div>
                       <ul className="space-y-3">
                         {stage.dlTopics.map((topic) => {
@@ -209,7 +206,7 @@ export default function RoadmapPage() {
                                 >
                                   {topic.name}
                                 </div>
-                                <div className="text-xs mt-0.5" style={{ color: '#6A6A6A', lineHeight: 1.6 }}>{topic.description}</div>
+                                <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
                               </div>
                             </div>
                           </li>
@@ -219,10 +216,10 @@ export default function RoadmapPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-lg p-4 border" style={{ borderColor: '#EEEEEE', backgroundColor: '#FAFAFA' }}>
+                  <div className="mt-5 rounded-lg p-4 border border-brand-border-light bg-brand-off-white">
                     <div className="flex items-center gap-2 mb-3">
-                      <Calculator size={14} style={{ color: '#8A8A8A' }} />
-                      <h4 className="text-sm font-semibold" style={{ color: '#4A4A4A' }}>数学基础</h4>
+                      <Calculator size={14} className="text-brand-ink-muted" />
+                      <h4 className="text-sm font-semibold text-brand-ink-light">数学基础</h4>
                     </div>
                     <div className="space-y-2">
                       {stage.mathTopics.map((topic) => {
@@ -249,14 +246,14 @@ export default function RoadmapPage() {
                                 style={{ color: done ? '#8A8A8A' : '#4A4A4A', textDecoration: done ? 'line-through' : 'none' }}
                               >
                                 {topic.mathId ? (
-                                  <Link to={`/math`} className="no-underline hover:underline" style={{ color: '#1E3A5F' }}>
+                                  <Link to={`/math`} className="no-underline hover:underline text-brand-accent">
                                     {topic.name} →
                                   </Link>
                                 ) : (
                                   topic.name
                                 )}
                               </div>
-                              <div className="text-xs mt-0.5" style={{ color: '#8A8A8A', lineHeight: 1.5 }}>{topic.description}</div>
+                              <div className="text-xs mt-0.5 text-brand-ink-muted" style={{ lineHeight: 1.5 }}>{topic.description}</div>
                             </div>
                           </div>
                         </div>
@@ -267,12 +264,12 @@ export default function RoadmapPage() {
 
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Code size={14} style={{ color: '#8A8A8A' }} />
-                      <h4 className="text-sm font-semibold" style={{ color: '#4A4A4A' }}>工具</h4>
+                      <Code size={14} className="text-brand-ink-muted" />
+                      <h4 className="text-sm font-semibold text-brand-ink-light">工具</h4>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {stage.tools.map((tool) => (
-                        <span key={tool} className="text-xs px-2.5 py-1 rounded font-mono" style={{ backgroundColor: '#EEEEEE', color: '#4A4A4A' }}>
+                        <span key={tool} className="text-xs px-2.5 py-1 rounded font-mono bg-brand-border-light text-brand-ink-light">
                           {tool}
                         </span>
                       ))}
@@ -280,12 +277,12 @@ export default function RoadmapPage() {
                   </div>
 
                   <div className="mt-5">
-                    <h4 className="text-sm font-semibold mb-3" style={{ color: '#4A4A4A' }}>实践项目</h4>
+                    <h4 className="text-sm font-semibold mb-3 text-brand-ink-light">实践项目</h4>
                     <div className="space-y-3">
                       {stage.projects.map((project) => (
-                        <div key={project.name} className="border rounded-lg p-3" style={{ borderColor: '#EEEEEE' }}>
-                          <h5 className="text-sm font-medium mb-1" style={{ color: '#1A1A1A' }}>{project.name}</h5>
-                          <p className="text-xs" style={{ color: '#8A8A8A' }}>{project.description}</p>
+                        <div key={project.name} className="border rounded-lg p-3 border-brand-border-light">
+                          <h5 className="text-sm font-medium mb-1 text-brand-ink">{project.name}</h5>
+                          <p className="text-xs text-brand-ink-muted">{project.description}</p>
                           {project.starterCode && (
                             <div className="mt-2">
                               <CodeBlock code={project.starterCode} label="Starter Code" collapsible />
@@ -297,10 +294,10 @@ export default function RoadmapPage() {
                   </div>
 
                   <div className="mt-5">
-                    <h4 className="text-sm font-semibold mb-2" style={{ color: '#4A4A4A' }}>推荐资源</h4>
+                    <h4 className="text-sm font-semibold mb-2 text-brand-ink-light">推荐资源</h4>
                     <div className="flex flex-wrap gap-2">
                       {stage.resources.map((res) => (
-                        <span key={res.name} className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: '#E8EDF2', color: '#1E3A5F' }}>
+                        <span key={res.name} className="text-xs px-2.5 py-1 rounded bg-brand-accent-light text-brand-accent">
                           {res.name} ({res.type})
                         </span>
                       ))}
@@ -315,15 +312,15 @@ export default function RoadmapPage() {
 
       {/* Weekly breakdown */}
       <section>
-        <h2 className="text-xl font-bold mb-5" style={{ color: '#1A1A1A' }}>阶段2-3周计划示例</h2>
-        <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+        <h2 className="text-xl font-bold mb-5 text-brand-ink">阶段2-3周计划示例</h2>
+        <div className="border rounded-lg overflow-hidden border-brand-border">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: '#FAFAFA' }}>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1A1A1A' }}>周次</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#1E3A5F' }}>ML内容</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#2D5A3D' }}>DL内容</th>
-                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#4A4A4A' }}>数学/其他</th>
+              <tr className="bg-brand-off-white">
+                <th className="text-left px-4 py-3 font-semibold text-brand-ink">周次</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-accent">ML内容</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-dl">DL内容</th>
+                <th className="text-left px-4 py-3 font-semibold text-brand-ink-light">数学/其他</th>
               </tr>
             </thead>
             <tbody>
@@ -337,11 +334,11 @@ export default function RoadmapPage() {
                 { week: '7', ml: '不平衡数据处理', dl: 'BERT预训练理解', math: 'KL散度' },
                 { week: '8', ml: '项目整合与调优', dl: '迁移学习实践', math: '优化理论进阶' },
               ].map((row) => (
-                <tr key={row.week} className="border-t" style={{ borderColor: '#EEEEEE' }}>
-                  <td className="px-4 py-3 font-mono font-medium" style={{ color: '#1A1A1A' }}>{row.week}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.ml}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.dl}</td>
-                  <td className="px-4 py-3" style={{ color: '#4A4A4A' }}>{row.math}</td>
+                <tr key={row.week} className="border-t border-brand-border-light">
+                  <td className="px-4 py-3 font-mono font-medium text-brand-ink">{row.week}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.ml}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.dl}</td>
+                  <td className="px-4 py-3 text-brand-ink-light">{row.math}</td>
                 </tr>
               ))}
             </tbody>
@@ -351,22 +348,22 @@ export default function RoadmapPage() {
 
       {/* FAQ */}
       <section>
-        <h2 className="text-xl font-bold mb-5" style={{ color: '#1A1A1A' }}>常见问题</h2>
+        <h2 className="text-xl font-bold mb-5 text-brand-ink">常见问题</h2>
         <div className="space-y-3">
           {faqs.map((faq, i) => {
             const open = openFaq === i;
             return (
-              <div key={i} className="border rounded-lg" style={{ borderColor: '#E5E5E5' }}>
+              <div key={i} className="border rounded-lg border-brand-border">
                 <button
                   className="w-full flex items-center justify-between px-5 py-3.5 text-left"
                   onClick={() => setOpenFaq(open ? null : i)}
                 >
-                  <span className="text-sm font-medium" style={{ color: '#1A1A1A' }}>{faq.q}</span>
-                  {open ? <ChevronUp size={16} style={{ color: '#8A8A8A' }} /> : <ChevronDown size={16} style={{ color: '#8A8A8A' }} />}
+                  <span className="text-sm font-medium text-brand-ink">{faq.q}</span>
+                  {open ? <ChevronUp size={16} className="text-brand-ink-muted" /> : <ChevronDown size={16} className="text-brand-ink-muted" />}
                 </button>
                 {open && (
-                  <div className="px-5 pb-4 border-t" style={{ borderColor: '#EEEEEE' }}>
-                    <p className="text-sm pt-3" style={{ color: '#4A4A4A', lineHeight: 1.7 }}>{faq.a}</p>
+                  <div className="px-5 pb-4 border-t border-brand-border-light">
+                    <p className="text-sm pt-3 text-brand-ink-light" style={{ lineHeight: 1.7 }}>{faq.a}</p>
                   </div>
                 )}
               </div>
