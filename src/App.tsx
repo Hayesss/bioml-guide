@@ -13,6 +13,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import ToolsPage from './pages/ToolsPage';
 import MathPage from './pages/MathPage';
 import CheatSheetPage from './pages/CheatSheetPage';
+import TopicLearnPage from './pages/TopicLearnPage';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/tools" element={<ToolsPage />} />
             <Route path="/math" element={<MathPage />} />
             <Route path="/cheatsheet" element={<CheatSheetPage />} />
+            <Route path="/learn/:topicKey" element={<TopicLearnPage />} />
           </Routes>
           </ErrorBoundary>
         </Layout>

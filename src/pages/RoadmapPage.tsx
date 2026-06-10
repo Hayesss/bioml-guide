@@ -21,9 +21,21 @@ interface Stage {
 
 export default function RoadmapPage() {
   const { data: stages, loading, error } = useData<Stage[]>('roadmap');
+  const { data: topicsData } = useData<{topics: {key:string;name:string}[]}>('topics');
   const [openStage, setOpenStage] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { isTopicDone, toggleTopic, getOverallProgress, resetAll } = useProgress();
+
+  // Build topic name → key lookup map for linking to learn pages
+  const topicKeyMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (topicsData?.topics) {
+      for (const t of topicsData.topics) {
+        map[t.name] = t.key;
+      }
+    }
+    return map;
+  }, [topicsData]);
 
   // Calculate all topic keys
   const allTopicKeys = useMemo(() => {
@@ -160,11 +172,19 @@ export default function RoadmapPage() {
                                 {done && <Check size={10} style={{ color: 'white' }} />}
                               </span>
                               <div>
-                                <div
-                                  className="font-medium text-sm"
-                                  style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
-                                >
-                                  {topic.name}
+                                <div className="flex items-center gap-1.5">
+                                  <div
+                                    className="font-medium text-sm"
+                                    style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                  >
+                                    {topicKeyMap[topic.name] ? (
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#1A1A5F' }}>
+                                        {topic.name} <span className="text-[10px] opacity-40">↗</span>
+                                      </Link>
+                                    ) : (
+                                      topic.name
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
                               </div>
@@ -204,7 +224,13 @@ export default function RoadmapPage() {
                                   className="font-medium text-sm"
                                   style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
                                 >
-                                  {topic.name}
+                                    {topicKeyMap[topic.name] ? (
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#2D5A3D' }}>
+                                        {topic.name} <span className="text-[10px] opacity-40">↗</span>
+                                      </Link>
+                                    ) : (
+                                      topic.name
+                                    )}
                                 </div>
                                 <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
                               </div>
@@ -245,7 +271,11 @@ export default function RoadmapPage() {
                                 className="font-medium text-xs"
                                 style={{ color: done ? '#8A8A8A' : '#4A4A4A', textDecoration: done ? 'line-through' : 'none' }}
                               >
-                                {topic.mathId ? (
+                                {topicKeyMap[topic.name] ? (
+                                  <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline text-brand-accent">
+                                    {topic.name} <span className="text-[10px] opacity-40">↗</span>
+                                  </Link>
+                                ) : topic.mathId ? (
                                   <Link to={`/math`} className="no-underline hover:underline text-brand-accent">
                                     {topic.name} →
                                   </Link>
