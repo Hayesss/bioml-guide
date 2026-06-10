@@ -102,6 +102,7 @@ export default function TopicLearnPage() {
   const sectionBgColors: Record<string, string> = {
     analogy: '#FFF8E7',
     concept: '#FFFFFF',
+    expert: '#FFFDF5',
     how: '#FAFAFA',
     bio: '#E8F0E9',
     code: '#E8EDF2',
