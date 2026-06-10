@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Microscope, ArrowRight, Dna, Layers, FlaskConical, Brain, Zap, ChevronDown } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
@@ -49,23 +50,45 @@ const concepts = [
 ];
 
 export default function IntroPage() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const progress = Math.min(window.scrollY / window.innerHeight, 1);
+      setScrollProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 滚动压缩：封面内容随滚动缩小+上移+淡出
+  const coverScale = 1 - scrollProgress * 0.12;
+  const coverTranslateY = scrollProgress * window.innerHeight * 0.15;
+  const coverOpacity = 1 - scrollProgress * 0.6;
+
   return (
     <div>
       {/* ====== Full-viewport Cover ====== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        {/* 背景图片层，30%透明度，16:9宽高比居中 */}
+        {/* 背景图片层，30%透明度，16:9宽高比，顶部对齐 */}
         <div
-          className="absolute w-full top-1/2 -translate-y-1/2 z-0"
+          className="absolute w-full top-0 z-0"
           style={{
             backgroundImage: `url(${import.meta.env.BASE_URL}cover-bg.png)`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center top',
             backgroundRepeat: 'no-repeat',
             aspectRatio: '16 / 9',
             opacity: 0.3,
           }}
         />
-        <div className="max-w-2xl mx-auto relative z-10">
+        <div
+          className="max-w-2xl mx-auto relative z-10 transition-none"
+          style={{
+            transform: `scale(${coverScale}) translateY(${coverTranslateY}px)`,
+            opacity: coverOpacity,
+          }}
+        >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8 bg-brand-accent-light text-brand-accent">
             <Dna size={14} />生物信息学 X 机器学习
           </div>
