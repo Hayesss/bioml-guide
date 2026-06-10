@@ -69,49 +69,55 @@ export default function IntroPage() {
   return (
     <div>
       {/* ====== Full-viewport Cover ====== */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        {/* 背景图片层，30%透明度，16:9宽高比，顶部对齐 */}
-        <div
-          className="absolute w-full top-0 z-0"
-          style={{
-            backgroundImage: `url(${import.meta.env.BASE_URL}cover-bg.png)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            backgroundRepeat: 'no-repeat',
-            aspectRatio: '16 / 9',
-            opacity: 0.3,
-          }}
-        />
-        <div
-          className="max-w-2xl mx-auto relative z-10 transition-none"
-          style={{
-            transform: `scale(${coverScale}) translateY(${coverTranslateY}px)`,
-            opacity: coverOpacity,
-          }}
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8 bg-brand-accent-light text-brand-accent">
-            <Dna size={14} />生物信息学 X 机器学习
-          </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-brand-ink leading-tight">
-            当生物学遇见人工智能
-          </h1>
-          <p className="text-base md:text-lg max-w-xl mx-auto mb-10 text-brand-ink-muted leading-relaxed">
-            一个人类基因组有30亿个碱基对，一个单细胞实验能测10000个基因的表达，
-            一个蛋白质数据库收录了2亿个结构。生物学已进入数据洪流时代，
-            机器学习和深度学习正在成为解读这些数据的核心工具。
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link to="/roadmap" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium text-white no-underline bg-brand-accent hover:opacity-90 transition-opacity">
-              <BookOpen size={16} />开始系统学习
-            </Link>
-            <Link to="/applications" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium no-underline border border-brand-border text-brand-ink-light hover:bg-brand-off-white transition-colors">
-              <Microscope size={16} />查看应用方向
-            </Link>
+      <section className="relative min-h-screen overflow-hidden">
+        {/* 16:9 容器：背景图+文字共用，顶部对齐 */}
+        <div className="relative w-full" style={{ aspectRatio: '16 / 9' }}>
+          {/* 背景图片层，30%透明度 */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${import.meta.env.BASE_URL}cover-bg.png)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.3,
+            }}
+          />
+          {/* 文字层：置于16:9图片中央 */}
+          <div
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-6"
+            style={{
+              transform: `scale(${coverScale}) translateY(${coverTranslateY}px)`,
+              opacity: coverOpacity,
+              willChange: 'transform, opacity',
+            }}
+          >
+            <div className="max-w-2xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8 bg-brand-accent-light text-brand-accent">
+                <Dna size={14} />生物信息学 X 机器学习
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-brand-ink leading-tight">
+                当生物学遇见人工智能
+              </h1>
+              <p className="text-base md:text-lg max-w-xl mx-auto mb-10 text-brand-ink-muted leading-relaxed">
+                一个人类基因组有30亿个碱基对，一个单细胞实验能测10000个基因的表达，
+                一个蛋白质数据库收录了2亿个结构。生物学已进入数据洪流时代，
+                机器学习和深度学习正在成为解读这些数据的核心工具。
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <Link to="/roadmap" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium text-white no-underline bg-brand-accent hover:opacity-90 transition-opacity">
+                  <BookOpen size={16} />开始系统学习
+                </Link>
+                <Link to="/applications" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium no-underline border border-brand-border text-brand-ink-light hover:bg-brand-off-white transition-colors">
+                  <Microscope size={16} />查看应用方向
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Scroll-down indicator */}
-        <div className="absolute bottom-10 flex flex-col items-center gap-2 scroll-indicator">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator">
           <span className="text-xs text-brand-ink-muted">向下滚动了解更多</span>
           <ChevronDown size={20} className="text-brand-ink-muted" />
         </div>
