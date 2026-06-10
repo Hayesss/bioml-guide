@@ -388,6 +388,114 @@
         "ML",
         "官方文档"
       ]
+    },
+    {
+      "id": "deep-learning-goodfellow",
+      "name": "Deep Learning (花书)",
+      "author": "Ian Goodfellow, Yoshua Bengio, Aaron Courville",
+      "category": "书籍",
+      "level": "高级",
+      "cost": "免费",
+      "type": "书籍",
+      "description": "深度学习领域的经典教科书，由三位领域先驱合著，系统讲解深度学习从数学基础到前沿算法的完整体系。涵盖前馈网络、正则化、CNN、RNN、自编码器、生成模型等核心主题。适合有一定ML基础后深入理解深度学习的数学原理和设计思想，对于理解AlphaFold、ESM等生物大模型的架构设计非常有帮助。MIT出版社出版，在线版本免费阅读。",
+      "url": "https://www.deeplearningbook.org/",
+      "tags": ["深度学习", "经典", "MIT", "数学"]
+    },
+    {
+      "id": "esl",
+      "name": "The Elements of Statistical Learning (ESL)",
+      "author": "Trevor Hastie, Robert Tibshirani, Jerome Friedman",
+      "category": "书籍",
+      "level": "高级",
+      "cost": "免费",
+      "type": "书籍",
+      "description": "统计学习理论的权威教材（斯坦福统计系），深入覆盖线性回归、模型评估、Lasso、树方法、SVM、神经网络、随机森林和集成学习等主题的数学基础。与ISLR互补——ISLR侧重应用入门，ESL深入数学理论。对生物信息学研究者而言，掌握ESL中的统计推断和模型选择理论有助于设计更科学的基因表达实验和变异检测方法。",
+      "url": "https://hastie.su.domains/ElemStatLearn/",
+      "tags": ["统计学习", "斯坦福", "经典", "数学"]
+    },
+    {
+      "id": "murphy-prob-ml",
+      "name": "Probabilistic Machine Learning (Murphy)",
+      "author": "Kevin P. Murphy (Google)",
+      "category": "书籍",
+      "level": "高级",
+      "cost": "付费",
+      "type": "书籍",
+      "description": "2022-2023年出版的现代ML综合教材（两卷），涵盖从概率论基础到深度生成模型、强化学习和因果推断的最新进展。相比经典教材，增加了对Transformer、扩散模型、图神经网络等前沿主题的深入讲解。特别适合希望系统理解现代ML方法在单细胞分析（scVI的VAE框架）、蛋白质结构预测（扩散模型）等领域应用的生物信息学研究者。",
+      "url": "https://probml.github.io/pml-book/",
+      "tags": ["概率模型", "生成模型", "最新", "综合"]
+    },
+    {
+      "id": "cs229-stanford",
+      "name": "Stanford CS229: Machine Learning",
+      "author": "Andrew Ng (Stanford)",
+      "category": "ML课程",
+      "level": "高级",
+      "cost": "免费",
+      "type": "视频课程",
+      "description": "Stanford校内ML课程（与Coursera入门版不同），深入机器学习算法的数学原理，课程笔记和讲义被全球研究者广泛引用。涵盖监督学习、生成学习算法、SVM、核方法、学习理论和强化学习的数学推导。适合已经完成入门课程、希望深入理解算法数学本质以独立设计生物数据特化模型的研究者。",
+      "url": "https://cs229.stanford.edu/",
+      "tags": ["数学", "斯坦福", "高级", "AndrewNg"]
+    },
+    {
+      "id": "islr-r",
+      "name": "An Introduction to Statistical Learning (ISLR) - R版",
+      "author": "Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani",
+      "category": "ML课程",
+      "level": "入门",
+      "cost": "免费",
+      "type": "书籍",
+      "description": "ISLR的R语言版本，所有示例代码使用R语言实现，配套R包(ISLR2)提供所有数据集和实验代码。对使用R进行生物信息学统计分析的研究者来说，这是从R生态进入ML领域的最佳桥梁。内容覆盖线性回归、分类、重抽样方法、树方法、SVM、深度学习和生存分析等多个主题，每个方法都配有R语言实操示例。",
+      "url": "https://www.statlearning.com/",
+      "tags": ["R语言", "统计学习", "入门", "免费"]
+    },
+    {
+      "id": "r4ds",
+      "name": "R for Data Science (R4DS)",
+      "author": "Hadley Wickham, Garrett Grolemund",
+      "category": "教程",
+      "level": "入门",
+      "cost": "免费",
+      "type": "书籍",
+      "description": "tidyverse创始人Hadley Wickham编写的R语言数据科学入门经典，系统讲解ggplot2可视化、dplyr数据变换、tidyr数据清理和purrr函数式编程。是生物信息学R用户的必读教材——学会tidyverse工作流将大幅提升基因表达矩阵处理和临床数据整理的效率。在线版免费，每年持续更新。",
+      "url": "https://r4ds.hadley.nz/",
+      "tags": ["R语言", "tidyverse", "入门", "数据科学"]
+    },
+    {
+      "id": "bioconductor-workshop",
+      "name": "Bioconductor 官方教程",
+      "author": "Bioconductor Core Team",
+      "category": "教程",
+      "level": "中级",
+      "cost": "免费",
+      "type": "教程",
+      "description": "Bioconductor项目（R语言生物信息学包生态）的官方教程集合，涵盖基因组数据分析、RNA-seq、ChIP-seq、单细胞分析、流式细胞术和蛋白质组学等主流生物信息学方向。每个教程都提供完整的R Markdown文档和示例数据，可直接复现分析流程。是使用R进行生物信息学ML分析的基础资源。",
+      "url": "https://bioconductor.org/help/course-materials/",
+      "tags": ["Bioconductor", "R语言", "生物信息学", "教程"]
+    },
+    {
+      "id": "andrew-ng-dl-specialization",
+      "name": "Andrew Ng 深度学习专项课程",
+      "author": "Andrew Ng (deeplearning.ai / Coursera)",
+      "category": "DL课程",
+      "level": "入门",
+      "cost": "付费（可申请助学金）",
+      "type": "视频课程",
+      "description": "全球最受欢迎的深度学习入门课程，5门课系统覆盖：①神经网络与深度学习基础 ②改善深层网络（正则化、优化、超参调优）③结构化ML项目策略 ④CNN（ResNet、Inception、YOLO）⑤序列模型（RNN/LSTM/GRU、注意力机制、Transformer）。是进入生物信息学DL领域的最佳系统入门课程，每个模块都配有Python编程作业。",
+      "url": "https://www.coursera.org/specializations/deep-learning",
+      "tags": ["AndrewNg", "系统学习", "编程作业", "5门课"]
+    },
+    {
+      "id": "dl2017-chinese-notes",
+      "name": "深度学习笔记（中文翻译版）",
+      "author": "黄海广 译（原作：Andrew Ng）",
+      "category": "DL课程",
+      "level": "入门",
+      "cost": "免费",
+      "type": "教程",
+      "description": "Andrew Ng深度学习五门课完整中文笔记，包含所有课程视频的文字整理、公式推导和关键概念总结。对中文母语学习者非常友好，可作为课程视频的配套参考或独立阅读材料。涵盖从神经网络基础到Transformer的完整DL知识体系，笔记结构清晰，配有图示和附录。",
+      "url": "http://www.ai-start.com/dl2017/",
+      "tags": ["中文", "AndrewNg", "笔记", "免费", "五门课"]
     }
   ]
 }
