@@ -1,0 +1,187 @@
+import { Link } from 'react-router-dom';
+import { ArrowRight, Check, Dna, Database, Layers } from 'lucide-react';
+import { useData } from '../hooks/useData';
+
+interface TopicSection {
+  type: string;
+  title: string;
+  content?: string;
+}
+
+interface WorkflowModule {
+  module_id: string;
+  module_name: string;
+  module_type: string;
+  omics_type: string;
+  biological_question: string;
+  inputs: string[];
+  outputs: string[];
+  tools: string[];
+  qc_metrics: string[];
+  decision_rules: string[];
+  cross_omics_interfaces: string[];
+  ml_dl_connection: string;
+}
+
+interface Topic {
+  key: string;
+  name: string;
+  stage: number;
+  type: string;
+  difficulty: string;
+  prerequisites: string[];
+  sections: TopicSection[];
+  workflowModules?: WorkflowModule[];
+  interfaceSpec?: Record<string, string[]>;
+}
+
+interface TopicsData {
+  topicOrder: string[];
+  topics: Topic[];
+}
+
+const ngsTopicKeys = [
+  'ngs-fastq-qc',
+  'genome-alignment',
+  'count-matrix',
+  'cuttag-analysis',
+  'rnaseq-deseq2',
+  'atacseq-analysis',
+  'multiomics-integration',
+];
+
+export default function BioinfoNgsPage() {
+  const { data, loading, error } = useData<TopicsData>('topics');
+
+  if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
+  if (error || !data) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;
+
+  const topics = ngsTopicKeys
+    .map((key) => data.topics.find((topic) => topic.key === key))
+    .filter((topic): topic is Topic => Boolean(topic));
+  const cuttag = data.topics.find((topic) => topic.key === 'cuttag-analysis');
+  const integration = data.topics.find((topic) => topic.key === 'multiomics-integration');
+
+  return (
+    <div className="space-y-10">
+      <header>
+        <div className="flex items-center gap-2 mb-3">
+          <Dna size={20} className="text-[#2F6B4F]" />
+          <h1 className="text-3xl font-bold text-brand-ink">生信NGS流程</h1>
+        </div>
+        <p className="text-base text-brand-ink-muted max-w-[760px]" style={{ lineHeight: 1.8 }}>
+          从 FASTQ QC、参考基因组比对、count matrix，到 CUT&Tag、RNA-seq、ATAC-seq 和多组学接口。
+          这个页面把分散专题组织成一条可执行的 NGS workflow。
+        </p>
+      </header>
+
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Layers size={17} className="text-brand-accent" />
+          <h2 className="text-lg font-bold text-brand-ink">流程总览</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {topics.map((topic, index) => (
+            <Link
+              key={topic.key}
+              to={`/learn/${topic.key}`}
+              className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-[#2F6B4F]">
+                    {index + 1}
+                  </span>
+                  <h3 className="text-sm font-semibold text-brand-ink">{topic.name}</h3>
+                </div>
+                <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
+                  阶段{topic.stage}
+                </span>
+              </div>
+              <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
+                {topic.sections.find((section) => section.type === 'concept')?.content?.replace(/<[^>]*>/g, '').slice(0, 120) || topic.difficulty}
+              </p>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-[#2F6B4F]">
+                进入专题
+                <ArrowRight size={13} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {cuttag?.workflowModules && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Database size={17} className="text-[#2F6B4F]" />
+              <h2 className="text-lg font-bold text-brand-ink">CUT&Tag 模块化流程卡片</h2>
+            </div>
+            <Link to="/learn/cuttag-analysis" className="text-xs no-underline hover:underline text-brand-accent">
+              查看完整专题
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            {cuttag.workflowModules.map((module) => (
+              <article key={module.module_id} className="border rounded-lg p-4 border-brand-border bg-white">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-brand-ink">{module.module_name}</h3>
+                    <p className="text-xs mt-0.5 text-brand-ink-muted">{module.module_type} · {module.omics_type}</p>
+                  </div>
+                  <Check size={14} className="text-[#2F6B4F] shrink-0" />
+                </div>
+                <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
+                  {module.biological_question}
+                </p>
+                <ChipLine label="输入" items={module.inputs} />
+                <ChipLine label="输出" items={module.outputs} />
+                <ChipLine label="工具" items={module.tools} />
+                <ChipLine label="接口" items={module.cross_omics_interfaces} />
+                <p className="text-xs text-brand-ink-muted mt-2" style={{ lineHeight: 1.5 }}>
+                  <span className="font-medium text-brand-ink-light">ML/DL:</span> {module.ml_dl_connection}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {integration?.interfaceSpec && (
+        <section className="border rounded-lg p-5 border-brand-border bg-brand-off-white">
+          <h2 className="text-lg font-bold mb-4 text-brand-ink">多组学接口规范</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {Object.entries(integration.interfaceSpec).map(([name, fields]) => (
+              <div key={name} className="bg-white border rounded-lg p-3 border-brand-border-light">
+                <div className="text-xs font-semibold font-mono mb-2 text-brand-accent">{name}</div>
+                <div className="flex flex-wrap gap-1">
+                  {fields.map((field) => (
+                    <span key={field} className="text-xs px-2 py-0.5 rounded border border-brand-border-light text-brand-ink-muted">
+                      {field}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function ChipLine({ label, items }: { label: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mb-2">
+      <span className="text-[11px] font-medium text-brand-ink-muted">{label}: </span>
+      <div className="mt-1 flex flex-wrap gap-1">
+        {items.slice(0, 4).map((item) => (
+          <span key={item} className="text-[11px] px-1.5 py-0.5 rounded border border-brand-border-light text-brand-ink-light">
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}

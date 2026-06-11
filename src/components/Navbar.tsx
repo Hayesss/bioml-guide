@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search } from 'lucide-react';
+import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna } from 'lucide-react';
 
 const navItems = [
   { path: '/roadmap', label: '学习路径', icon: BookOpen },
+  { path: '/ngs', label: '生信NGS', icon: Dna },
   { path: '/applications', label: '应用方向', icon: Microscope },
   { path: '/resources', label: '资源库', icon: Library },
   { path: '/tools', label: '工具', icon: Wrench },

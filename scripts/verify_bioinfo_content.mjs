@@ -17,6 +17,10 @@ const resources = readJson('public/data/resources.json');
 const topicPage = readText('src/pages/TopicLearnPage.tsx');
 const roadmapPage = readText('src/pages/RoadmapPage.tsx');
 const searchModal = readText('src/components/SearchModal.tsx');
+const appSource = readText('src/App.tsx');
+const navbar = readText('src/components/Navbar.tsx');
+const footer = readText('src/components/Footer.tsx');
+const bioinfoNgsPage = readText('src/pages/BioinfoNgsPage.tsx');
 const cheatsheetPage = readText('src/pages/CheatSheetPage.tsx');
 const quiz = readText('src/components/Quiz.tsx');
 
@@ -117,6 +121,24 @@ for (const expected of ['bioinfoTopics', '生信流程']) {
 for (const expected of ['bioinfoTopics', '生信流程']) {
   if (!searchModal.includes(expected)) {
     fail(`SearchModal.tsx missing ${expected}`);
+  }
+}
+for (const expected of ['path="/ngs"', 'BioinfoNgsPage']) {
+  if (!appSource.includes(expected)) {
+    fail(`App.tsx missing ${expected}`);
+  }
+}
+for (const expected of ['/ngs', '生信NGS']) {
+  if (!navbar.includes(expected)) {
+    fail(`Navbar.tsx missing ${expected}`);
+  }
+  if (!footer.includes(expected)) {
+    fail(`Footer.tsx missing ${expected}`);
+  }
+}
+for (const expected of ['生信NGS流程', 'cuttag-analysis', 'workflowModules', 'ngs-fastq-qc']) {
+  if (!bioinfoNgsPage.includes(expected)) {
+    fail(`BioinfoNgsPage.tsx missing ${expected}`);
   }
 }
 

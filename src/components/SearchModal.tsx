@@ -88,7 +88,7 @@ function buildIndex(
       items.push({
         label: t.name,
         snippet: t.description?.slice(0, 80) || '',
-        path: '/roadmap',
+        path: '/ngs',
         category: '生信流程',
       });
     }
