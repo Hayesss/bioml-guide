@@ -368,7 +368,7 @@ export default function SingleCellPage() {
           <Microscope size={17} className="text-brand-accent" />
           <h2 className="text-lg font-bold text-brand-ink">分析模块</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {singleCellModules.map((mod) => (
             <article
               key={mod.id}
