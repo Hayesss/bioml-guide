@@ -20,6 +20,32 @@ interface TopicSection {
   questions?: QuizQuestion[];
 }
 
+interface TopicCitation {
+  id: string;
+  label: string;
+  url: string;
+}
+
+interface WorkflowModule {
+  module_id: string;
+  module_name: string;
+  omics_type: string;
+  module_type: string;
+  biological_question: string;
+  inputs: string[];
+  outputs: string[];
+  tools: string[];
+  key_parameters: string[];
+  qc_metrics: string[];
+  decision_rules: string[];
+  failure_modes: string[];
+  upstream_modules: string[];
+  downstream_modules: string[];
+  cross_omics_interfaces: string[];
+  ml_dl_connection: string;
+  citations: string[];
+}
+
 interface Topic {
   key: string;
   name: string;
@@ -28,6 +54,8 @@ interface Topic {
   difficulty: string;
   prerequisites: string[];
   nextTopic?: string;
+  citations?: TopicCitation[];
+  workflowModules?: WorkflowModule[];
   sections: TopicSection[];
 }
 
@@ -97,6 +125,14 @@ export default function TopicLearnPage() {
     ml: '机器学习',
     dl: '深度学习',
     math: '数学基础',
+    bioinfo: '生物信息学',
+  };
+
+  const typeStyles: Record<string, { bg: string; fg: string }> = {
+    ml: { bg: '#E8EDF2', fg: '#1E3A5F' },
+    dl: { bg: '#E8F0E9', fg: '#2D5A3D' },
+    math: { bg: '#F5F5F0', fg: '#8B4513' },
+    bioinfo: { bg: '#E9F5EF', fg: '#2F6B4F' },
   };
 
   const sectionBgColors: Record<string, string> = {
@@ -108,6 +144,8 @@ export default function TopicLearnPage() {
     code: '#E8EDF2',
     check: '#F5F0FF',
   };
+
+  const typeStyle = typeStyles[topic.type] ?? { bg: '#E8EDF2', fg: '#1E3A5F' };
 
   return (
     <div className="max-w-[800px] mx-auto py-8 px-6">
@@ -126,8 +164,8 @@ export default function TopicLearnPage() {
           <span
             className="text-xs font-medium px-2.5 py-0.5 rounded"
             style={{
-              backgroundColor: topic.type === 'dl' ? '#E8F0E9' : topic.type === 'math' ? '#F5F5F0' : '#E8EDF2',
-              color: topic.type === 'dl' ? '#2D5A3D' : topic.type === 'math' ? '#8B4513' : '#1E3A5F',
+              backgroundColor: typeStyle.bg,
+              color: typeStyle.fg,
             }}
           >
             {typeNames[topic.type] || topic.type}
@@ -140,6 +178,21 @@ export default function TopicLearnPage() {
           </span>
         </div>
         <h1 className="text-2xl md:text-3xl font-bold text-brand-ink">{topic.name}</h1>
+        {topic.citations && topic.citations.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {topic.citations.map((citation) => (
+              <a
+                key={citation.id}
+                href={citation.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs px-2 py-0.5 rounded border no-underline hover:underline border-brand-border-light text-brand-ink-muted"
+              >
+                {citation.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Prerequisites */}
@@ -187,7 +240,7 @@ export default function TopicLearnPage() {
               )}
               {section.code && (
                 <div className="mt-2">
-                  <CodeBlock code={section.code} label="Python 代码" />
+                  <CodeBlock code={section.code} label="代码" />
                 </div>
               )}
               {section.output && (
@@ -203,6 +256,42 @@ export default function TopicLearnPage() {
           </div>
         ))}
       </div>
+
+      {topic.workflowModules && topic.workflowModules.length > 0 && (
+        <section className="mt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-brand-ink">流程模块卡片</h2>
+            <span className="text-xs text-brand-ink-muted">{topic.workflowModules.length} 个模块</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {topic.workflowModules.map((module) => (
+              <div key={module.module_id} className="border rounded-lg p-4 border-brand-border-light bg-white">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-brand-ink">{module.module_name}</h3>
+                    <p className="text-xs mt-0.5 text-brand-ink-muted">{module.module_type} · {module.omics_type}</p>
+                  </div>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted shrink-0">
+                    {module.module_id}
+                  </span>
+                </div>
+                <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
+                  {module.biological_question}
+                </p>
+                <ModuleChips label="输入" items={module.inputs} />
+                <ModuleChips label="输出" items={module.outputs} />
+                <ModuleChips label="工具" items={module.tools} />
+                <ModuleChips label="QC" items={module.qc_metrics} />
+                <ModuleChips label="决策" items={module.decision_rules} muted />
+                <ModuleChips label="跨组学接口" items={module.cross_omics_interfaces} />
+                <div className="mt-2 text-xs text-brand-ink-muted" style={{ lineHeight: 1.5 }}>
+                  <span className="font-medium text-brand-ink-light">ML/DL:</span> {module.ml_dl_connection}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Prev / Next navigation */}
       <div className="mt-10 pt-6 border-t border-brand-border-light flex items-center justify-between">
@@ -256,6 +345,25 @@ export default function TopicLearnPage() {
         >
           返回学习路径
         </button>
+      </div>
+    </div>
+  );
+}
+
+function ModuleChips({ label, items, muted = false }: { label: string; items: string[]; muted?: boolean }) {
+  if (!items.length) return null;
+  return (
+    <div className="mb-2">
+      <span className="text-[11px] font-medium text-brand-ink-muted">{label}: </span>
+      <div className="mt-1 flex flex-wrap gap-1">
+        {items.map((item) => (
+          <span
+            key={item}
+            className={`text-[11px] px-1.5 py-0.5 rounded border ${muted ? 'bg-brand-off-white text-brand-ink-muted' : 'bg-white text-brand-ink-light'} border-brand-border-light`}
+          >
+            {item}
+          </span>
+        ))}
       </div>
     </div>
   );

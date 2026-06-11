@@ -9,7 +9,8 @@
     "分子",
     "数据",
     "平台",
-    "R语言"
+    "R语言",
+    "NGS流程"
   ],
   "tools": [
     {
@@ -448,7 +449,12 @@
       "mlRelevant": false,
       "dlRelevant": true,
       "url": "https://jax.readthedocs.io/",
-      "tags": ["JIT编译", "自动微分", "Google", "高性能"],
+      "tags": [
+        "JIT编译",
+        "自动微分",
+        "Google",
+        "高性能"
+      ],
       "quickExample": "import jax\nimport jax.numpy as jnp\n\n# JAX函数式编程 + JIT编译加速\n@jax.jit\ndef gelu(x):\n    return 0.5 * x * (1 + jnp.tanh(jnp.sqrt(2/jnp.pi) * (x + 0.044715 * x**3)))\n\nx = jnp.array([1.0, 2.0, 3.0])\nresult = gelu(x)  # 首次调用编译，后续调用极速"
     },
     {
@@ -461,7 +467,11 @@
       "mlRelevant": false,
       "dlRelevant": true,
       "url": "https://einops.rocks/",
-      "tags": ["张量操作", "PyTorch", "TensorFlow"],
+      "tags": [
+        "张量操作",
+        "PyTorch",
+        "TensorFlow"
+      ],
       "quickExample": "import torch\nfrom einops import rearrange, reduce\n\n# 直观的张量重塑（爱因斯坦标记法风格）\nattn = torch.randn(2, 8, 100, 100)  # (batch, heads, seq, seq)\n# reshape to (batch, seq, seq, heads)\nattn_t = rearrange(attn, 'b h i j -> b i j h')\n# 对头求均值\nattn_mean = reduce(attn, 'b h i j -> b i j', 'mean')"
     },
     {
@@ -474,7 +484,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://catboost.ai/",
-      "tags": ["梯度提升", "类别特征", "Yandex"],
+      "tags": [
+        "梯度提升",
+        "类别特征",
+        "Yandex"
+      ],
       "quickExample": "from catboost import CatBoostClassifier\n\n# 原生支持类别特征，无需one-hot编码\nmodel = CatBoostClassifier(\n    iterations=200,\n    cat_features=['protein_family', 'organism'],  # 直接指定类别列\n    verbose=False\n)\nmodel.fit(X_train, y_train)\npreds = model.predict(X_test)"
     },
     {
@@ -487,7 +501,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://imbalanced-learn.org/",
-      "tags": ["不平衡数据", "SMOTE", "采样"],
+      "tags": [
+        "不平衡数据",
+        "SMOTE",
+        "采样"
+      ],
       "quickExample": "from imblearn.over_sampling import SMOTE\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.pipeline import Pipeline\n\n# SMOTE过采样处理致病SNP数据不平衡\npipeline = Pipeline([\n    ('smote', SMOTE(random_state=42)),\n    ('rf', RandomForestClassifier(n_estimators=100))\n])\npipeline.fit(X_snp_features, y_pathogenicity)"
     },
     {
@@ -500,7 +518,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://lifelines.readthedocs.io/",
-      "tags": ["生存分析", "临床", "预后"],
+      "tags": [
+        "生存分析",
+        "临床",
+        "预后"
+      ],
       "quickExample": "from lifelines import CoxPHFitter\nimport pandas as pd\n\n# TCGA癌症生存分析：基因表达预测患者预后\ndata = pd.DataFrame({\n    'TP53_expr': [2.1, 3.5, 1.8],  # 基因表达\n    'survival_months': [45, 23, 67],\n    'event': [1, 1, 0]  # 1=死亡, 0=删失\n})\ncph = CoxPHFitter()\ncph.fit(data, duration_col='survival_months', event_col='event')\ncph.print_summary()"
     },
     {
@@ -513,7 +535,11 @@
       "mlRelevant": true,
       "dlRelevant": true,
       "url": "https://mlflow.org/",
-      "tags": ["MLOps", "实验管理", "模型注册"],
+      "tags": [
+        "MLOps",
+        "实验管理",
+        "模型注册"
+      ],
       "quickExample": "import mlflow\n\n# MLflow跟踪蛋白质分类模型实验\nmlflow.set_experiment(\"protein-function-prediction\")\nwith mlflow.start_run():\n    # 记录参数\n    mlflow.log_params({\"model\": \"RandomForest\", \"n_estimators\": 100})\n    # 记录指标\n    mlflow.log_metrics({\"accuracy\": 0.85, \"f1\": 0.82})\n    # 保存模型\n    mlflow.sklearn.log_model(model, \"model\")"
     },
     {
@@ -526,7 +552,11 @@
       "mlRelevant": true,
       "dlRelevant": true,
       "url": "https://streamlit.io/",
-      "tags": ["Web应用", "交互式", "演示"],
+      "tags": [
+        "Web应用",
+        "交互式",
+        "演示"
+      ],
       "quickExample": "# 运行: streamlit run app.py\nimport streamlit as st\n\nst.title(\"蛋白质功能预测\")\nsequence = st.text_area(\"输入蛋白质序列:\", \"MKTVRQER\")\nif st.button(\"预测\"):\n    # 调用模型预测\n    st.success(f\"预测功能: 激酶活性 (置信度: 0.92)\")\n    st.line_chart({\"位置1-10\": 0.5, \"位置11-20\": 0.8})"
     },
     {
@@ -539,7 +569,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://scikit-image.org/",
-      "tags": ["图像处理", "显微镜", "病理"],
+      "tags": [
+        "图像处理",
+        "显微镜",
+        "病理"
+      ],
       "quickExample": "from skimage import io, filters, measure\nimport numpy as np\n\n# 处理组织病理切片图像\nimage = io.imread('histology_slide.tif')\ngray = np.mean(image, axis=2)  # 灰度化\nedges = filters.sobel(gray)  # 边缘检测\nlabeled = measure.label(edges > 0.1)  # 连通域标记\nprint(f\"检测到 {labeled.max()} 个细胞区域\")"
     },
     {
@@ -552,7 +586,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://www.dask.org/",
-      "tags": ["并行计算", "大规模数据", "分布式"],
+      "tags": [
+        "并行计算",
+        "大规模数据",
+        "分布式"
+      ],
       "quickExample": "import dask.dataframe as dd\nfrom dask.distributed import Client\n\n# 启动分布式计算集群\nclient = Client(n_workers=4)\n\n# 加载超出内存的大规模基因表达矩阵\nexpr = dd.read_csv('TCGA_all_samples.csv')\ngene_means = expr.groupby('gene_id')['expression'].mean().compute()  # 延迟计算\nprint(f\"处理了 {len(gene_means)} 个基因\")"
     },
     {
@@ -565,7 +603,12 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://topepo.github.io/caret/",
-      "tags": ["统一接口", "分类", "回归", "R"],
+      "tags": [
+        "统一接口",
+        "分类",
+        "回归",
+        "R"
+      ],
       "quickExample": "library(caret)\n# 基因表达分类：自动交叉验证 + 多模型比较\ntrain_control <- trainControl(method=\"cv\", number=10)\nmodel <- train(x=gene_expr, y=cancer_type,\n              method=\"rf\", trControl=train_control)\nconfusionMatrix(model)"
     },
     {
@@ -578,7 +621,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://www.tidymodels.org/",
-      "tags": ["tidyverse", "管道", "R"],
+      "tags": [
+        "tidyverse",
+        "管道",
+        "R"
+      ],
       "quickExample": "library(tidymodels)\n# tidy风格ML管道：基因选择 -> 归一化 -> RF\nrecipe <- recipe(cancer_type ~ ., data=gene_data) %>%\n  step_nzv(all_predictors()) %>%\n  step_normalize(all_predictors())\nmodel <- rand_forest() %>% set_engine(\"ranger\") %>%\n  set_mode(\"classification\")\nwf <- workflow() %>% add_recipe(recipe) %>% add_model(model)"
     },
     {
@@ -591,7 +638,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://bioconductor.org/packages/DESeq2/",
-      "tags": ["差异表达", "负二项分布", "Bioconductor"],
+      "tags": [
+        "差异表达",
+        "负二项分布",
+        "Bioconductor"
+      ],
       "quickExample": "library(DESeq2)\n# RNA-seq差异表达分析\ndds <- DESeqDataSetFromMatrix(countData=counts,\n                              colData=coldata, design=~condition)\ndds <- DESeq(dds)\nres <- results(dds, contrast=c(\"condition\",\"tumor\",\"normal\"))\ndegs <- subset(res, padj < 0.05 & abs(log2FoldChange) > 2)"
     },
     {
@@ -604,7 +655,12 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://satijalab.org/seurat/",
-      "tags": ["单细胞", "聚类", "可视化", "R"],
+      "tags": [
+        "单细胞",
+        "聚类",
+        "可视化",
+        "R"
+      ],
       "quickExample": "library(Seurat)\n# 标准单细胞分析流程\npbmc <- CreateSeuratObject(counts=pbmc_counts)\npbmc <- NormalizeData(pbmc)\npbmc <- FindVariableFeatures(pbmc, nfeatures=2000)\npbmc <- ScaleData(pbmc) %>% RunPCA() %>%\n  FindNeighbors() %>% FindClusters(res=0.5) %>% RunUMAP(dims=1:30)\nDimPlot(pbmc, label=TRUE)"
     },
     {
@@ -617,7 +673,12 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://glmnet.stanford.edu/",
-      "tags": ["正则化", "特征选择", "Lasso", "R"],
+      "tags": [
+        "正则化",
+        "特征选择",
+        "Lasso",
+        "R"
+      ],
       "quickExample": "library(glmnet)\n# Lasso回归从20000个基因中筛选癌症预后标志物\nX <- t(expr_matrix)  # 样本 x 基因\nfit <- cv.glmnet(X, survival_time, alpha=1, nfolds=10)\nselected_genes <- coef(fit, s=\"lambda.1se\")[,1]\ncat(\"选出了\", sum(selected_genes != 0), \"个关键基因\")"
     },
     {
@@ -630,7 +691,12 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://cran.r-project.org/package=survival",
-      "tags": ["生存分析", "Kaplan-Meier", "Cox", "R"],
+      "tags": [
+        "生存分析",
+        "Kaplan-Meier",
+        "Cox",
+        "R"
+      ],
       "quickExample": "library(survival)\n# Kaplan-Meier生存曲线 + log-rank检验\nfit <- survfit(Surv(time, event) ~ gene_group, data=clinical)\nplot(fit, col=c(\"red\",\"blue\"), lwd=2)\nlegend(\"topright\", c(\"高表达\",\"低表达\"), col=c(\"red\",\"blue\"), lwd=2)\n# log-rank检验\nsurvdiff(Surv(time, event) ~ gene_group, data=clinical)"
     },
     {
@@ -643,7 +709,11 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://bioconductor.org/packages/limma/",
-      "tags": ["差异表达", "经验贝叶斯", "小样本"],
+      "tags": [
+        "差异表达",
+        "经验贝叶斯",
+        "小样本"
+      ],
       "quickExample": "library(limma)\n# 小样本RNA-seq差异表达分析 (3 vs 3)\ndesign <- model.matrix(~ 0 + group)\nfit <- lmFit(voom_data, design)\ncontrast <- makeContrasts(group_treat - group_ctrl, levels=design)\nfit2 <- contrasts.fit(fit, contrast)\nfit2 <- eBayes(fit2)  # 经验贝叶斯方差收缩\ntopTable(fit2, n=10)"
     },
     {
@@ -656,8 +726,217 @@
       "mlRelevant": true,
       "dlRelevant": false,
       "url": "https://cran.r-project.org/package=randomForest",
-      "tags": ["随机森林", "特征重要性", "分类", "R"],
+      "tags": [
+        "随机森林",
+        "特征重要性",
+        "分类",
+        "R"
+      ],
       "quickExample": "library(randomForest)\n# 微生物组随机森林：鉴定关键疾病相关菌属\nrf <- randomForest(otu_table, as.factor(disease_status),\n                   ntree=500, importance=TRUE)\nvarImpPlot(rf, n.var=15)  # 可视化Top15最重要的菌属\nprint(rf$confusion)  # OOB混淆矩阵"
+    },
+    {
+      "id": "fastqc",
+      "name": "FastQC",
+      "description": "高通量测序原始数据质量控制工具，输出 per-base quality、adapter、GC、duplication 等模块化 HTML 报告。CUT&Tag 中要结合 assay 特性解释 read 开头 sequence content warning。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda fastqc",
+      "difficulty": "入门",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/",
+      "tags": [
+        "FASTQ",
+        "QC",
+        "NGS"
+      ],
+      "quickExample": "fastqc -t 8 -o qc/fastqc fastq/*.fastq.gz"
+    },
+    {
+      "id": "multiqc",
+      "name": "MultiQC",
+      "description": "汇总多个样本和多个生信工具输出的报告，适合 pipeline 末端生成项目级 QC，并把 alignment、duplication、FRiP 等指标统一检查。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda multiqc",
+      "difficulty": "入门",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://docs.seqera.io/multiqc/",
+      "tags": [
+        "QC",
+        "report",
+        "pipeline"
+      ],
+      "quickExample": "multiqc . -o qc/multiqc"
+    },
+    {
+      "id": "bowtie2",
+      "name": "Bowtie2",
+      "description": "快速、敏感的 short-read aligner，CUT&Tag/CUT&RUN 常用于 host genome 和 E. coli spike-in genome 比对。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda bowtie2",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml",
+      "tags": [
+        "alignment",
+        "FASTQ",
+        "BAM"
+      ],
+      "quickExample": "bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -I 10 -X 700 -x hg38 -1 R1.fq.gz -2 R2.fq.gz -S sample.sam"
+    },
+    {
+      "id": "samtools",
+      "name": "samtools",
+      "description": "处理 SAM/BAM/CRAM 的核心工具，用于 view、sort、index、flagstat、idxstats、coverage 等步骤，是 NGS pipeline 的基础工具。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda samtools",
+      "difficulty": "入门",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://www.htslib.org/doc/samtools.html",
+      "tags": [
+        "SAM",
+        "BAM",
+        "CRAM"
+      ],
+      "quickExample": "samtools view -bS sample.sam | samtools sort -o sample.sorted.bam\nsamtools index sample.sorted.bam\nsamtools flagstat sample.sorted.bam"
+    },
+    {
+      "id": "bedtools",
+      "name": "bedtools",
+      "description": "genome interval arithmetic 工具集，可对 BED/BAM/GFF/VCF 做 intersect、merge、coverage、genomecov、closest 等操作，是 peak、fragment 和 annotation 连接的核心工具。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda bedtools",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://bedtools.readthedocs.io/en/latest/",
+      "tags": [
+        "BED",
+        "interval",
+        "coverage"
+      ],
+      "quickExample": "bedtools genomecov -bg -i sample.fragments.bed -g hg38.chrom.sizes > sample.bedgraph\nbedtools closest -a peaks.bed -b genes.bed > peak_gene.tsv"
+    },
+    {
+      "id": "cutadapt",
+      "name": "Cutadapt",
+      "description": "去除 adapter 和低质量读段的 FASTQ trimming 工具；CUT&Tag 长读长出现 read-through adapter 时使用，短读长项目需先看 QC 决策。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda cutadapt",
+      "difficulty": "入门",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://cutadapt.readthedocs.io/",
+      "tags": [
+        "adapter",
+        "trimming",
+        "FASTQ"
+      ],
+      "quickExample": "cutadapt -a ADAPTER_FWD -A ADAPTER_REV -m 20 -o R1.trim.fq.gz -p R2.trim.fq.gz R1.fq.gz R2.fq.gz"
+    },
+    {
+      "id": "seacr",
+      "name": "SEACR",
+      "description": "面向低背景 CUT&RUN/CUT&Tag chromatin profiling 的 peak/enriched region caller，输入 paired-end fragment bedGraph，可选择 norm/non 和 stringent/relaxed。",
+      "category": "NGS流程",
+      "installCommand": "git clone https://github.com/FredHutch/SEACR",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://github.com/FredHutch/SEACR",
+      "tags": [
+        "CUT&Tag",
+        "CUT&RUN",
+        "peak calling"
+      ],
+      "quickExample": "bash SEACR_1.3.sh target.bedgraph IgG.bedgraph norm stringent peaks/sample"
+    },
+    {
+      "id": "deeptools",
+      "name": "deepTools",
+      "description": "用于高通量测序数据 coverage、BigWig、matrix、heatmap 和 profile plot 的 Python 工具套件，常用于 peak-centered heatmap 和 metaplot。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda deeptools",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://deeptools.readthedocs.io/",
+      "tags": [
+        "BigWig",
+        "heatmap",
+        "visualization"
+      ],
+      "quickExample": "bamCoverage -b sample.sorted.bam -o sample.bw --binSize 10\ncomputeMatrix reference-point -S sample.bw -R peaks.bed -o matrix.gz -a 3000 -b 3000\nplotHeatmap -m matrix.gz -out heatmap.png"
+    },
+    {
+      "id": "deseq2",
+      "name": "DESeq2",
+      "description": "Bioconductor 差异分析工具，基于负二项分布建模 count data，并估计 size factor、dispersion 和 fold-change shrinkage。RNA-seq 和 differential peak count matrix 都可用。",
+      "category": "R语言",
+      "installCommand": "R -e \"BiocManager::install('DESeq2')\"",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://bioconductor.org/packages/release/bioc/html/DESeq2.html",
+      "tags": [
+        "RNA-seq",
+        "differential analysis",
+        "count matrix"
+      ],
+      "quickExample": "dds <- DESeqDataSetFromMatrix(countData=cts, colData=meta, design=~condition)\ndds <- DESeq(dds)\nres <- results(dds, contrast=c(\"condition\",\"treated\",\"control\"))"
+    },
+    {
+      "id": "chipseeker",
+      "name": "ChIPseeker",
+      "description": "R/Bioconductor peak annotation、peak comparison 和 visualization 工具，可连接 peak 与最近基因、TSS 距离和 genomic annotation。",
+      "category": "R语言",
+      "installCommand": "R -e \"BiocManager::install('ChIPseeker')\"",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://bioconductor.org/packages/release/bioc/html/ChIPseeker.html",
+      "tags": [
+        "peak annotation",
+        "ChIP-seq",
+        "CUT&Tag"
+      ],
+      "quickExample": "library(ChIPseeker)\npeak <- readPeakFile(\"peaks.bed\")\nanno <- annotatePeak(peak, TxDb=txdb, tssRegion=c(-3000, 3000))"
+    },
+    {
+      "id": "macs2",
+      "name": "MACS2",
+      "description": "经典 ChIP-seq/ATAC-seq peak caller；ATAC-seq pipeline 常用 BAMPE 模式调用 narrow peaks，ChIP-seq 根据 assay 选择 narrow/broad。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda macs2",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "https://github.com/macs3-project/MACS",
+      "tags": [
+        "peak calling",
+        "ChIP-seq",
+        "ATAC-seq"
+      ],
+      "quickExample": "macs2 callpeak -t sample.bam -c control.bam -f BAMPE -g hs -n sample -q 0.01"
+    },
+    {
+      "id": "homer",
+      "name": "HOMER",
+      "description": "motif discovery、motif enrichment、peak annotation 和 regulatory element 分析工具，适合从 differential peaks 推断 TF motif 富集。",
+      "category": "NGS流程",
+      "installCommand": "conda install -c bioconda homer",
+      "difficulty": "中级",
+      "mlRelevant": true,
+      "dlRelevant": false,
+      "url": "http://homer.ucsd.edu/homer/",
+      "tags": [
+        "motif",
+        "enrichment",
+        "annotation"
+      ],
+      "quickExample": "findMotifsGenome.pl peaks.bed hg38 homer_out -size 200"
     }
   ]
 }

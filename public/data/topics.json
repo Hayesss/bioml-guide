@@ -89,7 +89,14 @@
     "stage-4-math-stochastic-processes",
     "stage-4-math-variational-calculus",
     "stage-4-math-information-advanced",
-    "stage-4-math-manifold-learning"
+    "stage-4-math-manifold-learning",
+    "ngs-fastq-qc",
+    "genome-alignment",
+    "count-matrix",
+    "cuttag-analysis",
+    "rnaseq-deseq2",
+    "atacseq-analysis",
+    "multiomics-integration"
   ],
   "topics": [
     {
@@ -5399,6 +5406,1180 @@
               ],
               "answer": 1,
               "explanation": "损失先降后升→优化越过了最低点。通常意味着学习率太大，减小学习率即可。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "ngs-fastq-qc",
+      "name": "NGS FASTQ 与质量控制",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [],
+      "nextTopic": "genome-alignment",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>FASTQ QC 像收货验货：</strong>先确认每箱货有没有破损、标签是否正确、是否混入其他东西，再决定能不能进入仓库。测序数据也是一样，不能一上来就比对。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "FASTQ 与 QC",
+          "content": "<p>FASTQ 同时存储 read sequence 和 base quality；FastQC 用模块化报告快速发现质量、adapter、GC、duplication 等问题；MultiQC 汇总多个样本和多个分析步骤的日志。QC 的目标不是追求每个模块全绿，而是判断 warning 是否会改变生物结论。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "生物学与实验背景",
+          "content": "<p>不同 assay 的 warning 解释不同。CUT&Tag、ATAC-seq 这类 tagmentation 数据可能出现 read 起始碱基偏好；RNA-seq 更关注 rRNA、adapter、gene body coverage 和 strandedness。判断失败需要结合样本、实验批次、比对率和下游指标。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "FastQC + MultiQC",
+          "code": "mkdir -p qc/fastqc qc/multiqc\nfastqc -t 8 -o qc/fastqc fastq/*.fastq.gz\nmultiqc qc/fastqc -o qc/multiqc"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CUT&Tag 的 per-base sequence content 失败一定代表样本失败吗？",
+              "options": [
+                "一定失败",
+                "不一定，Tn5 偏好可造成开头碱基组成异常",
+                "只要失败就必须丢弃",
+                "只能重测"
+              ],
+              "answer": 1,
+              "explanation": "CUT&Tag 教程指出开头碱基组成异常常见，可能来自 Tn5 preference，不能单独作为失败判据。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "genome-alignment",
+      "name": "参考基因组比对与 SAM/BAM/BED",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "ngs-fastq-qc"
+      ],
+      "nextTopic": "count-matrix",
+      "sections": [
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "比对的输入输出",
+          "content": "<p>输入是 FASTQ 和参考 genome index；输出通常是 SAM/BAM/CRAM。下游根据 assay 转成 gene counts、fragment BED、bedGraph 或 BigWig。必须记录 genome_build，因为 peak、gene annotation 和 browser track 都依赖同一坐标体系。</p>"
+        },
+        {
+          "type": "how",
+          "icon": "原理",
+          "title": "它是如何工作的",
+          "content": "<p>aligner 在参考基因组上寻找 read 或 read pair 的最佳位置，并输出 mapping quality、flag、CIGAR 等信息。paired-end 数据还提供 fragment length，这是 CUT&Tag/ATAC-seq 判断片段来源和质量的重要信号。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Bowtie2 paired-end alignment",
+          "code": "bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant \\\n  --phred33 -I 10 -X 700 -p 8 -x indexes/hg38 \\\n  -1 sample_R1.fastq.gz -2 sample_R2.fastq.gz \\\n  -S align/sample.sam\nsamtools view -bS -F 0x04 align/sample.sam > align/sample.mapped.bam\nsamtools sort -o align/sample.sorted.bam align/sample.mapped.bam\nsamtools index align/sample.sorted.bam"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么 paired-end CUT&Tag 常限制 insert size？",
+              "options": [
+                "为了删除所有短片段",
+                "为了保留合理 chromatin fragment 并排除异常配对",
+                "为了提高 FASTQ 压缩率",
+                "为了替代 peak calling"
+              ],
+              "answer": 1,
+              "explanation": "CUT&Tag 分析通常关注合理范围内的片段，如教程示例使用 10-700 bp alignment 参数，并在 BED 处理时过滤异常长片段。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "count-matrix",
+      "name": "Count Matrix 与 Feature Matrix",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "genome-alignment"
+      ],
+      "nextTopic": "cuttag-analysis",
+      "sections": [
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "矩阵是跨组学接口",
+          "content": "<p>RNA-seq 的 gene x sample count matrix、ATAC/CUT&Tag 的 region x sample count matrix 都是统计建模和 ML/DL 的入口。差异分析应使用 raw counts 或 estimated counts，而不是已标准化信号。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "生物学解释边界",
+          "content": "<p>gene count 代表转录本或基因层面的表达证据；region count 代表某个 genomic interval 的片段富集证据。两者都可以作为 feature_matrix，但 row identity、normalization 和 contrast_design 必须明确。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Region count matrix 思路",
+          "code": "bedtools multicov -bams bam/*.sorted.bam -bed peaks/master_peaks.bed > matrix/peak_counts.tsv"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "DESeq2 输入为什么不应使用 CPM/TPM/BigWig 信号？",
+              "options": [
+                "DESeq2 只接受图片",
+                "DESeq2 内部建模 raw counts 的均值-方差关系并校正 library size",
+                "因为 counts 文件更小",
+                "因为 R 不能读浮点数"
+              ],
+              "answer": 1,
+              "explanation": "DESeq2 基于负二项分布建模 count data，并在模型内部处理 size factor/dispersion。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "cuttag-analysis",
+      "name": "CUT&Tag 分析流程",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "ngs-fastq-qc",
+        "genome-alignment",
+        "count-matrix"
+      ],
+      "nextTopic": "rnaseq-deseq2",
+      "citations": [
+        {
+          "id": "Kaya-Okur2019",
+          "label": "Kaya-Okur et al. 2019, Nature Communications",
+          "url": "https://www.nature.com/articles/s41467-019-09982-5"
+        },
+        {
+          "id": "ZhengCUTTagTutorial2021",
+          "label": "Ye Zheng CUT&Tag tutorial",
+          "url": "https://yezhengstat.github.io/CUTTag_tutorial/"
+        },
+        {
+          "id": "SEACR2019",
+          "label": "Meers et al. 2019, Epigenetics & Chromatin",
+          "url": "https://doi.org/10.1186/s13072-019-0287-4"
+        },
+        {
+          "id": "DESeq22014",
+          "label": "Love et al. 2014, Genome Biology",
+          "url": "https://doi.org/10.1186/s13059-014-0550-8"
+        }
+      ],
+      "workflowModules": [
+        {
+          "module_id": "cuttag_fastq_qc",
+          "module_name": "FASTQ QC",
+          "omics_type": "epigenomics",
+          "module_type": "qc",
+          "biological_question": "原始 reads 是否可进入分析？",
+          "inputs": [
+            "R1/R2 FASTQ"
+          ],
+          "outputs": [
+            "FastQC HTML",
+            "MultiQC report"
+          ],
+          "tools": [
+            "FastQC",
+            "MultiQC"
+          ],
+          "key_parameters": [
+            "threads",
+            "adapter list"
+          ],
+          "qc_metrics": [
+            "per-base quality",
+            "adapter content",
+            "GC",
+            "duplication"
+          ],
+          "decision_rules": [
+            "CUT&Tag read 开头 sequence content 异常不能单独判失败"
+          ],
+          "failure_modes": [
+            "adapter/read-through",
+            "低质量尾端",
+            "样本污染"
+          ],
+          "upstream_modules": [],
+          "downstream_modules": [
+            "cuttag_lane_merge",
+            "cuttag_host_alignment"
+          ],
+          "cross_omics_interfaces": [
+            "sample_metadata"
+          ],
+          "ml_dl_connection": "QC metrics 可用于异常检测和 batch effect 建模",
+          "citations": [
+            "FastQC",
+            "MultiQC",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_lane_merge",
+          "module_name": "lane merge",
+          "omics_type": "epigenomics",
+          "module_type": "preprocess",
+          "biological_question": "同一样本多 lane 是否合并？",
+          "inputs": [
+            "lane FASTQ"
+          ],
+          "outputs": [
+            "sample FASTQ"
+          ],
+          "tools": [
+            "cat",
+            "MultiQC"
+          ],
+          "key_parameters": [
+            "sample_id",
+            "lane_id"
+          ],
+          "qc_metrics": [
+            "lane-level read count",
+            "lane-level QC"
+          ],
+          "decision_rules": [
+            "若要评估 lane reproducibility，可先分别比对"
+          ],
+          "failure_modes": [
+            "sample index 混淆",
+            "lane 文件错配"
+          ],
+          "upstream_modules": [
+            "cuttag_fastq_qc"
+          ],
+          "downstream_modules": [
+            "cuttag_trimming_decision"
+          ],
+          "cross_omics_interfaces": [
+            "sample_metadata"
+          ],
+          "ml_dl_connection": "保留 lane metadata 便于批次建模",
+          "citations": [
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_trimming_decision",
+          "module_name": "trimming decision",
+          "omics_type": "epigenomics",
+          "module_type": "decision",
+          "biological_question": "是否需要 adapter trimming？",
+          "inputs": [
+            "FastQC report",
+            "read length"
+          ],
+          "outputs": [
+            "trimmed FASTQ or original FASTQ"
+          ],
+          "tools": [
+            "Cutadapt",
+            "FastQC"
+          ],
+          "key_parameters": [
+            "read length",
+            "adapter sequence",
+            "minimum length"
+          ],
+          "qc_metrics": [
+            "adapter content",
+            "read length distribution"
+          ],
+          "decision_rules": [
+            "标准 25x25 PE CUT&Tag 通常不需要 trimming；长读长有 adapter read-through 时再 trim"
+          ],
+          "failure_modes": [
+            "过度 trimming 造成短片段损失",
+            "未 trim 造成 mapping 下降"
+          ],
+          "upstream_modules": [
+            "cuttag_lane_merge"
+          ],
+          "downstream_modules": [
+            "cuttag_host_alignment"
+          ],
+          "cross_omics_interfaces": [
+            "sample_metadata"
+          ],
+          "ml_dl_connection": "trimming 策略影响 fragment length feature",
+          "citations": [
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_host_alignment",
+          "module_name": "host alignment",
+          "omics_type": "epigenomics",
+          "module_type": "alignment",
+          "biological_question": "片段来自宿主基因组哪里？",
+          "inputs": [
+            "FASTQ",
+            "host Bowtie2 index"
+          ],
+          "outputs": [
+            "SAM/BAM",
+            "alignment summary"
+          ],
+          "tools": [
+            "Bowtie2",
+            "samtools"
+          ],
+          "key_parameters": [
+            "--very-sensitive",
+            "-I 10",
+            "-X 700",
+            "--no-mixed",
+            "--no-discordant"
+          ],
+          "qc_metrics": [
+            "overall alignment rate",
+            "mapped fragments",
+            "multi-mapping"
+          ],
+          "decision_rules": [
+            "高质量数据 alignment rate 通常应较高；低比对率要检查 genome build、污染和 adapter"
+          ],
+          "failure_modes": [
+            "genome build 错误",
+            "污染",
+            "adapter 未处理"
+          ],
+          "upstream_modules": [
+            "cuttag_trimming_decision"
+          ],
+          "downstream_modules": [
+            "cuttag_fragment_processing",
+            "cuttag_spikein_alignment"
+          ],
+          "cross_omics_interfaces": [
+            "genome_build",
+            "sample_metadata"
+          ],
+          "ml_dl_connection": "alignment metrics 可作为 QC covariates",
+          "citations": [
+            "Bowtie2",
+            "samtools",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_spikein_alignment",
+          "module_name": "spike-in alignment",
+          "omics_type": "epigenomics",
+          "module_type": "normalization",
+          "biological_question": "不同样本间全局信号能否校准？",
+          "inputs": [
+            "FASTQ",
+            "E.coli/spike-in index"
+          ],
+          "outputs": [
+            "spike-in mapped fragments",
+            "scale factor"
+          ],
+          "tools": [
+            "Bowtie2",
+            "samtools"
+          ],
+          "key_parameters": [
+            "--no-overlap",
+            "--no-dovetail",
+            "C=10000"
+          ],
+          "qc_metrics": [
+            "spike-in mapped fragments",
+            "scale factor"
+          ],
+          "decision_rules": [
+            "只在同一实验设计/批次假设成立时使用 spike-in 比例"
+          ],
+          "failure_modes": [
+            "spike-in 太低",
+            "跨批次不可比",
+            "spike-in 污染"
+          ],
+          "upstream_modules": [
+            "cuttag_host_alignment"
+          ],
+          "downstream_modules": [
+            "cuttag_coverage_track",
+            "cuttag_peak_calling"
+          ],
+          "cross_omics_interfaces": [
+            "normalized_signal"
+          ],
+          "ml_dl_connection": "scale factor 可作为模型 offset/covariate",
+          "citations": [
+            "ZhengCUTTagTutorial2021",
+            "Kaya-Okur2019"
+          ]
+        },
+        {
+          "module_id": "cuttag_fragment_processing",
+          "module_name": "fragment processing",
+          "omics_type": "epigenomics",
+          "module_type": "format_conversion",
+          "biological_question": "哪些 paired reads 构成可信 chromatin fragments？",
+          "inputs": [
+            "mapped BAM"
+          ],
+          "outputs": [
+            "BEDPE",
+            "fragment BED"
+          ],
+          "tools": [
+            "samtools",
+            "bedtools",
+            "awk"
+          ],
+          "key_parameters": [
+            "same chromosome",
+            "fragment length <1000"
+          ],
+          "qc_metrics": [
+            "fragment length distribution",
+            "duplication",
+            "unique library size"
+          ],
+          "decision_rules": [
+            "histone mark 常见 nucleosomal length；TF 可有更短片段"
+          ],
+          "failure_modes": [
+            "异常长片段",
+            "PCR duplicates",
+            "低复杂度"
+          ],
+          "upstream_modules": [
+            "cuttag_host_alignment"
+          ],
+          "downstream_modules": [
+            "cuttag_coverage_track",
+            "cuttag_peak_calling"
+          ],
+          "cross_omics_interfaces": [
+            "genomic_region"
+          ],
+          "ml_dl_connection": "fragment length distribution 可做样本质量特征",
+          "citations": [
+            "bedtools",
+            "ZhengCUTTagTutorial2021",
+            "SEACR"
+          ]
+        },
+        {
+          "module_id": "cuttag_coverage_track",
+          "module_name": "coverage track",
+          "omics_type": "epigenomics",
+          "module_type": "signal",
+          "biological_question": "目标修饰/蛋白在基因组上的信号如何分布？",
+          "inputs": [
+            "fragment BED",
+            "chrom.sizes",
+            "scale factor"
+          ],
+          "outputs": [
+            "bedGraph",
+            "BigWig"
+          ],
+          "tools": [
+            "bedtools genomecov",
+            "deepTools bamCoverage"
+          ],
+          "key_parameters": [
+            "-bg",
+            "-scale",
+            "binSize",
+            "normalizeUsing"
+          ],
+          "qc_metrics": [
+            "signal distribution",
+            "browser sanity check"
+          ],
+          "decision_rules": [
+            "用于可视化和 metaplot，不直接替代 raw counts 做差异检验"
+          ],
+          "failure_modes": [
+            "chrom naming mismatch",
+            "scale factor 错误"
+          ],
+          "upstream_modules": [
+            "cuttag_fragment_processing",
+            "cuttag_spikein_alignment"
+          ],
+          "downstream_modules": [
+            "cuttag_visualization",
+            "cuttag_multiomics_linking"
+          ],
+          "cross_omics_interfaces": [
+            "normalized_signal",
+            "visualization_object"
+          ],
+          "ml_dl_connection": "BigWig 可采样成 sequence model 的连续 track",
+          "citations": [
+            "bedtools",
+            "deepTools",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_peak_calling",
+          "module_name": "peak calling",
+          "omics_type": "epigenomics",
+          "module_type": "peak_calling",
+          "biological_question": "哪些 genomic regions 显著富集？",
+          "inputs": [
+            "bedGraph",
+            "IgG/control bedGraph"
+          ],
+          "outputs": [
+            "peak BED"
+          ],
+          "tools": [
+            "SEACR",
+            "MACS2"
+          ],
+          "key_parameters": [
+            "norm/non",
+            "stringent/relaxed",
+            "top fraction"
+          ],
+          "qc_metrics": [
+            "peak number",
+            "peak width",
+            "FRiP"
+          ],
+          "decision_rules": [
+            "CUT&Tag 低背景优先考虑 SEACR；ATAC/ChIP 可考虑 MACS2"
+          ],
+          "failure_modes": [
+            "IgG control 差",
+            "过严/过松阈值",
+            "broad/narrow peak 混用"
+          ],
+          "upstream_modules": [
+            "cuttag_coverage_track"
+          ],
+          "downstream_modules": [
+            "cuttag_peak_annotation",
+            "cuttag_differential_peak"
+          ],
+          "cross_omics_interfaces": [
+            "genomic_region"
+          ],
+          "ml_dl_connection": "peak set 定义 region-level feature space",
+          "citations": [
+            "SEACR2019",
+            "SEACR",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_peak_annotation",
+          "module_name": "peak annotation",
+          "omics_type": "epigenomics",
+          "module_type": "annotation",
+          "biological_question": "peak 靠近哪些基因或功能区域？",
+          "inputs": [
+            "peak BED",
+            "TxDb/GTF"
+          ],
+          "outputs": [
+            "annotated peaks",
+            "peak-to-gene table"
+          ],
+          "tools": [
+            "ChIPseeker",
+            "HOMER",
+            "bedtools closest"
+          ],
+          "key_parameters": [
+            "TSS window",
+            "genome build",
+            "gene annotation"
+          ],
+          "qc_metrics": [
+            "promoter/intron/intergenic proportion",
+            "distance to TSS"
+          ],
+          "decision_rules": [
+            "必须保持 peak 和 gene annotation 的 genome build 一致"
+          ],
+          "failure_modes": [
+            "hg19/hg38 混用",
+            "gene ID 版本不一致"
+          ],
+          "upstream_modules": [
+            "cuttag_peak_calling"
+          ],
+          "downstream_modules": [
+            "cuttag_motif_enrichment",
+            "cuttag_multiomics_linking"
+          ],
+          "cross_omics_interfaces": [
+            "gene_id",
+            "genomic_region"
+          ],
+          "ml_dl_connection": "peak-to-gene table 是 RNA 联合建模桥梁",
+          "citations": [
+            "ChIPseeker"
+          ]
+        },
+        {
+          "module_id": "cuttag_differential_peak",
+          "module_name": "differential peak analysis",
+          "omics_type": "epigenomics",
+          "module_type": "statistics",
+          "biological_question": "哪些 peaks 在条件间改变？",
+          "inputs": [
+            "master peak BED",
+            "BAM files",
+            "sample metadata"
+          ],
+          "outputs": [
+            "region count matrix",
+            "differential_result_table"
+          ],
+          "tools": [
+            "DESeq2",
+            "DiffBind",
+            "limma",
+            "GenomicRanges"
+          ],
+          "key_parameters": [
+            "design formula",
+            "contrast",
+            "FDR",
+            "lfcThreshold"
+          ],
+          "qc_metrics": [
+            "PCA",
+            "dispersion",
+            "MA plot",
+            "replicate correlation"
+          ],
+          "decision_rules": [
+            "使用 raw fragment counts；低计数 peak 先过滤"
+          ],
+          "failure_modes": [
+            "重复数不足",
+            "design confounded",
+            "normalized signal 当 counts"
+          ],
+          "upstream_modules": [
+            "cuttag_peak_calling"
+          ],
+          "downstream_modules": [
+            "cuttag_motif_enrichment",
+            "cuttag_multiomics_linking"
+          ],
+          "cross_omics_interfaces": [
+            "feature_matrix",
+            "contrast_design",
+            "differential_result_table"
+          ],
+          "ml_dl_connection": "差异 peak 可作为监督特征、标签或解释层",
+          "citations": [
+            "DESeq22014",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_motif_enrichment",
+          "module_name": "motif/enrichment analysis",
+          "omics_type": "epigenomics",
+          "module_type": "enrichment",
+          "biological_question": "富集 peak 指向哪些 TF motif 或 pathway？",
+          "inputs": [
+            "peak BED",
+            "background BED",
+            "genome FASTA"
+          ],
+          "outputs": [
+            "motif table",
+            "enrichment_result"
+          ],
+          "tools": [
+            "HOMER",
+            "MEME",
+            "clusterProfiler"
+          ],
+          "key_parameters": [
+            "background set",
+            "motif database",
+            "FDR"
+          ],
+          "qc_metrics": [
+            "known motif recovery",
+            "background matching"
+          ],
+          "decision_rules": [
+            "背景区域应匹配 GC/长度/可检测区域"
+          ],
+          "failure_modes": [
+            "背景选择错误",
+            "motif 过度解释"
+          ],
+          "upstream_modules": [
+            "cuttag_peak_annotation",
+            "cuttag_differential_peak"
+          ],
+          "downstream_modules": [
+            "cuttag_visualization",
+            "cuttag_multiomics_linking"
+          ],
+          "cross_omics_interfaces": [
+            "enrichment_result"
+          ],
+          "ml_dl_connection": "motif features 可输入 sequence model 或解释 CNN filters",
+          "citations": [
+            "HOMER",
+            "ChIPseeker"
+          ]
+        },
+        {
+          "module_id": "cuttag_visualization",
+          "module_name": "visualization",
+          "omics_type": "epigenomics",
+          "module_type": "visualization",
+          "biological_question": "结果是否在基因组上下文中可信？",
+          "inputs": [
+            "BigWig",
+            "peak BED",
+            "gene BED"
+          ],
+          "outputs": [
+            "IGV tracks",
+            "heatmap",
+            "profile plot"
+          ],
+          "tools": [
+            "IGV",
+            "UCSC",
+            "deepTools"
+          ],
+          "key_parameters": [
+            "referencePoint/scale-regions",
+            "binSize",
+            "region list"
+          ],
+          "qc_metrics": [
+            "peak-centered heatmap",
+            "gene body metaplot",
+            "replicate consistency"
+          ],
+          "decision_rules": [
+            "统计显著结果必须用浏览器和 heatmap 做 sanity check"
+          ],
+          "failure_modes": [
+            "track 未归一化",
+            "region order 混乱",
+            "样本标签错"
+          ],
+          "upstream_modules": [
+            "cuttag_coverage_track",
+            "cuttag_motif_enrichment"
+          ],
+          "downstream_modules": [
+            "cuttag_multiomics_linking"
+          ],
+          "cross_omics_interfaces": [
+            "visualization_object"
+          ],
+          "ml_dl_connection": "可视化对象可用于模型解释报告",
+          "citations": [
+            "deepTools",
+            "ZhengCUTTagTutorial2021"
+          ]
+        },
+        {
+          "module_id": "cuttag_multiomics_linking",
+          "module_name": "multi-omics linking",
+          "omics_type": "multiomics",
+          "module_type": "integration",
+          "biological_question": "chromatin change 是否解释 expression/protein/metabolite change？",
+          "inputs": [
+            "annotated peaks",
+            "differential peaks",
+            "DE genes",
+            "sample metadata"
+          ],
+          "outputs": [
+            "peak-gene links",
+            "joint feature matrix",
+            "integrated report"
+          ],
+          "tools": [
+            "bedtools",
+            "ChIPseeker",
+            "DESeq2",
+            "MOFA/scVI/PyTorch"
+          ],
+          "key_parameters": [
+            "TSS window",
+            "correlation method",
+            "contrast alignment"
+          ],
+          "qc_metrics": [
+            "sample concordance",
+            "effect direction consistency"
+          ],
+          "decision_rules": [
+            "只连接同一 genome build、同一 sample/contrast 下的结果"
+          ],
+          "failure_modes": [
+            "样本错配",
+            "gene ID 混乱",
+            "方向解释过度"
+          ],
+          "upstream_modules": [
+            "cuttag_peak_annotation",
+            "cuttag_differential_peak",
+            "cuttag_visualization"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "sample_metadata",
+            "gene_id",
+            "genomic_region",
+            "feature_matrix",
+            "differential_result_table"
+          ],
+          "ml_dl_connection": "构建多模态 feature matrix / graph，用于分类、聚类和调控预测",
+          "citations": [
+            "DESeq22014",
+            "ChIPseeker"
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>CUT&Tag 像给染色质上的目标蛋白贴 GPS 标签：</strong>抗体找到目标，pA-Tn5 在附近插入测序接头，测序后把 reads 放回参考基因组，就能看到目标蛋白或 histone mark 在哪里富集。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "核心概念",
+          "content": "<p>CUT&Tag 使用 antibody-tethered pA-Tn5 在原位给目标附近 DNA tagmentation，生成高分辨率、低背景的 chromatin profiling library。它适合 histone modification、RNA polymerase II、transcription factor 等目标。分析的核心对象不是 gene expression，而是 <strong>genomic regions / fragments / peaks / signal tracks</strong>。</p>"
+        },
+        {
+          "type": "expert",
+          "icon": "参考",
+          "title": "专家视角",
+          "content": "<p>Kaya-Okur 等提出 CUT&Tag 可在低细胞量和 single-cell 场景中进行 epigenomic profiling；Ye Zheng 教程给出实用 pipeline：FastQC、lane merge、Bowtie2 host/spike-in alignment、samtools/bedtools fragment processing、SEACR peak calling、deepTools visualization、DESeq2 differential analysis。</p><p>SEACR 为低背景 CUT&RUN/CUT&Tag enrichment 设计；DESeq2 基于 count data 的负二项模型，适合对 master peak count matrix 做 differential peak analysis。</p>"
+        },
+        {
+          "type": "how",
+          "icon": "原理",
+          "title": "它是如何工作的",
+          "content": "<ol><li>FASTQ QC：检查 base quality、adapter、GC、duplication，但 CUT&Tag 的 read 开头碱基组成异常不一定失败。</li><li>Lane merge：同一样本多 lane 可先合并；若要检查 lane reproducibility，可分别比对。</li><li>Host alignment：Bowtie2 到 hg38/mm10 等主基因组。</li><li>Spike-in alignment：若协议含 E. coli carry-over/spike-in，可估计 scaling factor。</li><li>Fragment processing：SAM/BAM 转 paired-end BED，再得到 fragment BED。</li><li>Coverage track：bedGraph/BigWig 供 IGV/UCSC/deepTools 可视化。</li><li>Peak calling：SEACR 适合低背景 CUT&RUN/CUT&Tag 数据；TF narrow peak 和部分 histone broad domain 需区别解释。</li><li>Differential peaks：用 master peak list 生成 region count matrix，再用 DESeq2/limma/DiffBind 建模。</li></ol>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "生物学背景",
+          "content": "<p>CUT&Tag 回答的是“某个 chromatin protein 或 histone mark 在基因组哪里富集”。H3K4me3 常用于 promoter/active transcription start site，H3K27me3 常用于 repressive Polycomb domain；TF CUT&Tag 更关注窄峰和 motif enrichment。与 RNA-seq 联合时，可以把 promoter/enhancer peak changes 连接到基因表达变化。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "最小可运行骨架",
+          "code": "proj=project_cuttag\nsample=K27me3_rep1\ncores=8\nref=indexes/hg38\nchrom=refs/hg38.chrom.sizes\nmkdir -p $proj/{qc,align/{sam,bam,bed,bedgraph,bigwig},peaks}\n\nfastqc -t $cores -o $proj/qc data/${sample}_R*.fastq.gz\nmultiqc $proj/qc -o $proj/qc\n\nbowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant \\\n  --phred33 -I 10 -X 700 -p $cores -x $ref \\\n  -1 data/${sample}_R1.fastq.gz -2 data/${sample}_R2.fastq.gz \\\n  -S $proj/align/sam/${sample}.sam 2> $proj/align/sam/${sample}.bowtie2.txt\n\nsamtools view -bS -F 0x04 $proj/align/sam/${sample}.sam > $proj/align/bam/${sample}.mapped.bam\nbedtools bamtobed -bedpe -i $proj/align/bam/${sample}.mapped.bam > $proj/align/bed/${sample}.bedpe\nawk '$1==$4 && $6-$2 < 1000 {print $1\"\\t\"$2\"\\t\"$6}' $proj/align/bed/${sample}.bedpe \\\n  | sort -k1,1 -k2,2n -k3,3n > $proj/align/bed/${sample}.fragments.bed\n\nbedtools genomecov -bg -i $proj/align/bed/${sample}.fragments.bed -g $chrom \\\n  > $proj/align/bedgraph/${sample}.fragments.bedgraph\n\nbash SEACR_1.3.sh $proj/align/bedgraph/${sample}.fragments.bedgraph \\\n  $proj/align/bedgraph/IgG_rep1.fragments.bedgraph norm stringent \\\n  $proj/peaks/${sample}.seacr"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CUT&Tag differential peak analysis 应优先输入什么？",
+              "options": [
+                "BigWig 平滑信号",
+                "每个 master peak 的 raw fragment counts",
+                "FastQC HTML",
+                "只输入 peak name"
+              ],
+              "answer": 1,
+              "explanation": "DESeq2/limma 等统计模型需要 region x sample count matrix，而不是浏览器轨道。"
+            },
+            {
+              "q": "使用 spike-in normalization 的关键假设是什么？",
+              "options": [
+                "E. coli reads 与目标信号完全无关",
+                "同一批样本中 spike-in 与实验体系可作为比例校准",
+                "所有样本必须同一测序深度",
+                "IgG 不再需要"
+              ],
+              "answer": 1,
+              "explanation": "教程用 E. coli mapped fragments 计算 scaling factor，但也强调不要随意跨实验批次比较。"
+            },
+            {
+              "q": "SEACR peak calling 更适合哪类数据？",
+              "options": [
+                "低背景 CUT&RUN/CUT&Tag enrichment",
+                "16S taxonomy",
+                "蛋白质结构预测",
+                "GWAS genotype imputation"
+              ],
+              "answer": 0,
+              "explanation": "SEACR 为低背景 chromatin profiling peak/enriched region calling 设计。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rnaseq-deseq2",
+      "name": "RNA-seq 与 DESeq2 差异表达",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "count-matrix"
+      ],
+      "nextTopic": "atacseq-analysis",
+      "sections": [
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "负二项模型",
+          "content": "<p>RNA-seq 差异表达的核心是 count data 建模。DESeq2 估计 size factor、均值-方差关系、dispersion 和 fold-change shrinkage，提高小重复数实验的稳定性。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "生物学解释",
+          "content": "<p>差异表达表不是最终答案，而是候选基因清单。需要结合 effect size、FDR、表达量、样本 metadata、通路富集和上游染色质证据解释。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "DESeq2 最小模板",
+          "code": "library(DESeq2)\ncts <- read.csv(\"gene_counts.csv\", row.names=1)\ncoldata <- read.csv(\"sample_metadata.csv\", row.names=1)\ndds <- DESeqDataSetFromMatrix(cts, coldata, design = ~ condition)\ndds <- DESeq(dds)\nres <- results(dds, contrast=c(\"condition\",\"treated\",\"control\"))"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "RNA-seq 差异分析为什么要做 FDR 校正？",
+              "options": [
+                "因为只检验一个基因",
+                "因为通常同时检验上万个基因",
+                "因为 FASTQ 太大",
+                "因为 BAM 不能排序"
+              ],
+              "answer": 1,
+              "explanation": "高通量检验会产生大量假阳性，需要控制 false discovery rate。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "atacseq-analysis",
+      "name": "ATAC-seq 染色质开放性分析",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "genome-alignment",
+        "count-matrix"
+      ],
+      "nextTopic": "multiomics-integration",
+      "sections": [
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "开放染色质",
+          "content": "<p>ATAC-seq 用 loaded transposase 在开放染色质位点插入测序接头，read ends 标记 accessible chromatin sites。ENCODE ATAC pipeline 以 FASTQ 为输入，输出 BAM、BigWig、narrowPeak/gappedPeak 和 QC 指标。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "和 CUT&Tag 的区别",
+          "content": "<p>ATAC-seq 测 transposase-accessible chromatin，不依赖特定抗体；CUT&Tag 测抗体指定的 protein 或 histone mark 附近片段。ATAC 更适合开放性和 TF footprint，CUT&Tag 更适合 mark-specific regulation。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "ATAC peak calling 示例",
+          "code": "macs2 callpeak -t sample.filtered.bam -f BAMPE -g hs -n sample_atac --outdir peaks -q 0.01"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "ATAC-seq 与 CUT&Tag 的核心差异是什么？",
+              "options": [
+                "ATAC 测开放染色质，CUT&Tag 测抗体指定目标附近的染色质片段",
+                "两者完全一样",
+                "CUT&Tag 只能测 RNA",
+                "ATAC 不需要测序"
+              ],
+              "answer": 0,
+              "explanation": "ATAC-seq 反映 transposase-accessible chromatin；CUT&Tag 依赖抗体靶向特定蛋白或修饰。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "multiomics-integration",
+      "name": "多组学接口与整合分析",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "cuttag-analysis",
+        "rnaseq-deseq2",
+        "atacseq-analysis"
+      ],
+      "nextTopic": "",
+      "interfaceSpec": {
+        "sample_metadata": [
+          "sample_id",
+          "condition",
+          "batch",
+          "replicate",
+          "assay",
+          "tissue",
+          "cell_type"
+        ],
+        "genome_build": [
+          "hg19",
+          "hg38",
+          "mm10",
+          "mm39"
+        ],
+        "gene_id": [
+          "ensembl",
+          "entrez",
+          "symbol",
+          "uniprot"
+        ],
+        "genomic_region": [
+          "chrom",
+          "start",
+          "end",
+          "strand",
+          "region_id"
+        ],
+        "feature_matrix": [
+          "rows",
+          "samples",
+          "values",
+          "row_type",
+          "value_type"
+        ],
+        "normalized_signal": [
+          "bigwig",
+          "bedgraph",
+          "matrix",
+          "normalization"
+        ],
+        "contrast_design": [
+          "design_formula",
+          "numerator",
+          "denominator",
+          "covariates"
+        ],
+        "differential_result_table": [
+          "feature_id",
+          "baseMean",
+          "log2FoldChange",
+          "stat",
+          "pvalue",
+          "padj"
+        ],
+        "enrichment_result": [
+          "term_id",
+          "term_name",
+          "pvalue",
+          "padj",
+          "genes"
+        ],
+        "visualization_object": [
+          "igv_track",
+          "heatmap",
+          "profile_plot",
+          "volcano",
+          "pca",
+          "umap",
+          "network"
+        ]
+      },
+      "sections": [
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "统一接口",
+          "content": "<p>多组学整合不是把图拼在一起，而是统一 sample metadata、genome build、gene ID、genomic region、feature matrix、contrast design、differential result 和 visualization object。任何跨组学结论都必须能追溯到这些接口。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "跨组学解释链",
+          "content": "<p>典型解释链是：某个 enhancer/promoter 的 ATAC 或 CUT&Tag signal 改变，连接到 nearby gene 或 peak-to-gene model，再观察 RNA 表达方向和 pathway enrichment 是否一致。蛋白组和代谢组则进一步检查功能层结果是否跟随转录变化。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "统一对象草案",
+          "code": "interface MultiOmicsFeatureMatrix {\n  assay: \"rnaseq\" | \"atacseq\" | \"cuttag\" | \"chipseq\" | \"proteomics\" | \"metabolomics\";\n  rows: string[];\n  samples: string[];\n  values: number[][];\n  rowType: \"gene\" | \"region\" | \"protein\" | \"metabolite\" | \"pathway\";\n  normalization: \"raw_counts\" | \"size_factor\" | \"cpm\" | \"tpm\" | \"rlog\" | \"bigwig_signal\";\n}"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "peak-to-gene linking 最需要统一哪两个坐标体系？",
+              "options": [
+                "genomic_region 与 gene annotation",
+                "FASTQ 文件名与颜色",
+                "GPU 型号与 R 版本",
+                "HTML 报告与 PDF"
+              ],
+              "answer": 0,
+              "explanation": "peak 是 genomic interval，gene 是注释实体；二者必须在同一 genome build 和 gene annotation 下连接。"
             }
           ]
         }

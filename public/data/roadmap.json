@@ -106,7 +106,15 @@
         "Pandas",
         "Matplotlib",
         "scikit-learn",
-        "PyTorch"
+        "PyTorch",
+        "FastQC",
+        "MultiQC",
+        "Bowtie2",
+        "samtools",
+        "bedtools",
+        "SEACR",
+        "deepTools",
+        "DESeq2"
       ],
       "projects": [
         {
@@ -144,6 +152,20 @@
         {
           "name": "深度学习笔记（中文翻译版）",
           "type": "中文笔记"
+        },
+        {
+          "name": "Ye Zheng CUT&Tag tutorial",
+          "type": "教程"
+        }
+      ],
+      "bioinfoTopics": [
+        {
+          "name": "NGS FASTQ 与质量控制",
+          "description": "理解 FASTQ、Phred quality、adapter、GC bias、duplication 和 MultiQC 汇总；能判断哪些 QC warning 是 assay-specific，哪些会影响后续比对。"
+        },
+        {
+          "name": "参考基因组与注释文件",
+          "description": "理解 genome build、FASTA、GTF/GFF、BED、chrom.sizes、gene ID 版本，避免 hg19/hg38 或 Ensembl/Entrez/Symbol 混用。"
         }
       ]
     },
@@ -291,7 +313,15 @@
         "imbalanced-learn",
         "lifelines",
         "caret (R)",
-        "tidymodels (R)"
+        "tidymodels (R)",
+        "FastQC",
+        "MultiQC",
+        "Bowtie2",
+        "samtools",
+        "bedtools",
+        "SEACR",
+        "deepTools",
+        "DESeq2"
       ],
       "projects": [
         {
@@ -308,6 +338,11 @@
           "name": "突变致病性预测",
           "description": "使用随机森林预测SNP的致病性",
           "starterCode": "import xgboost as xgb\nfrom sklearn.model_selection import cross_val_score\nimport pandas as pd\n\n# 用多维基因组特征预测SNP致病性\nfeatures = pd.read_csv(\"variant_features.csv\")\nX = features.drop(columns=[\"variant_id\", \"pathogenic\"])\ny = features[\"pathogenic\"]\n\nmodel = xgb.XGBClassifier(n_estimators=200, max_depth=6)\nscores = cross_val_score(model, X, y, cv=5, scoring=\"roc_auc\")\nprint(f\"AUC: {scores.mean():.3f} ± {scores.std():.3f}\")"
+        },
+        {
+          "name": "CUT&Tag histone mark 分析",
+          "description": "从 paired-end FASTQ 生成 host/spike-in 比对、fragment BED、BigWig、SEACR peaks、peak annotation 和 differential peak table。",
+          "starterCode": "fastqc -t 8 -o qc fastq/*.fastq.gz\nbowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -I 10 -X 700 -p 8 -x indexes/hg38 -1 sample_R1.fastq.gz -2 sample_R2.fastq.gz -S align/sample.sam\nsamtools view -bS -F 0x04 align/sample.sam | samtools sort -o align/sample.sorted.bam\nsamtools index align/sample.sorted.bam"
         }
       ],
       "resources": [
@@ -326,6 +361,24 @@
         {
           "name": "Stanford CS231n",
           "type": "课程"
+        },
+        {
+          "name": "Ye Zheng CUT&Tag tutorial",
+          "type": "教程"
+        }
+      ],
+      "bioinfoTopics": [
+        {
+          "name": "基因组比对与文件格式转换",
+          "description": "掌握 Bowtie2、STAR、BWA 的使用边界，理解 SAM/BAM/CRAM、BED、bedGraph、BigWig 和 fragment BED 的转换关系。"
+        },
+        {
+          "name": "Count Matrix 与 Feature Matrix",
+          "description": "把 RNA-seq 的 gene count、ATAC/CUT&Tag 的 region count 统一成 feature_matrix，区分 raw counts、normalized counts 和浏览器信号。"
+        },
+        {
+          "name": "CUT&Tag 标准流程",
+          "description": "以 CUT&Tag 为示范专题，完成 QC、lane merge、trimming decision、host/spike-in alignment、fragment processing、SEACR peak calling、peak annotation 和 differential peak analysis。"
         }
       ]
     },
@@ -441,7 +494,15 @@
         "WandB",
         "TensorBoard",
         "JAX",
-        "einops"
+        "einops",
+        "FastQC",
+        "MultiQC",
+        "Bowtie2",
+        "samtools",
+        "bedtools",
+        "SEACR",
+        "deepTools",
+        "DESeq2"
       ],
       "projects": [
         {
@@ -476,6 +537,20 @@
         {
           "name": "Deep Graph Library教程",
           "type": "教程"
+        },
+        {
+          "name": "Ye Zheng CUT&Tag tutorial",
+          "type": "教程"
+        }
+      ],
+      "bioinfoTopics": [
+        {
+          "name": "ATAC-seq 与 ChIP/CUT&Tag 对比",
+          "description": "比较开放染色质、抗体靶向富集和传统 ChIP-seq 的 peak 类型、背景模型、replicate reproducibility、motif enrichment 与 visualization。"
+        },
+        {
+          "name": "RNA-seq + 表观组联合解释",
+          "description": "把 differential expression、differential peak、peak-to-gene linking、motif enrichment 和 pathway enrichment 连接成调控解释链。"
         }
       ]
     },
@@ -579,7 +654,15 @@
         "MLflow",
         "Streamlit",
         "DESeq2 (R)",
-        "Seurat (R)"
+        "Seurat (R)",
+        "FastQC",
+        "MultiQC",
+        "Bowtie2",
+        "samtools",
+        "bedtools",
+        "SEACR",
+        "deepTools",
+        "DESeq2"
       ],
       "projects": [
         {
@@ -601,6 +684,11 @@
           "name": "单细胞注释与批次校正",
           "description": "使用scVI进行单细胞数据整合与细胞类型注释",
           "starterCode": "import scvi\nimport scanpy as sc\n\n# scVI批次校正 + 细胞类型注释\nadata = sc.read(\"multi_batch_sc.h5ad\")\nscvi.model.SCVI.setup_anndata(adata, batch_key=\"batch\")\n\n# 训练scVI进行批次校正\nmodel = scvi.model.SCVI(adata, n_latent=30, n_hidden=128)\nmodel.train()\nadata.obsm[\"X_scVI\"] = model.get_latent_representation()\n\n# 基于校正后的表示进行聚类和注释\nsc.pp.neighbors(adata, use_rep=\"X_scVI\")\nsc.tl.umap(adata)\nsc.tl.leiden(adata, resolution=0.5)"
+        },
+        {
+          "name": "RNA-seq + CUT&Tag 多组学整合",
+          "description": "把 DE genes、differential peaks、peak-to-gene links 和 pathway enrichment 统一成可解释的多组学报告。",
+          "starterCode": "interface MultiOmicsFeatureMatrix {\n  assay: \"rnaseq\" | \"atacseq\" | \"cuttag\";\n  rowType: \"gene\" | \"region\" | \"pathway\";\n  samples: string[];\n  values: number[][];\n}"
         }
       ],
       "resources": [
@@ -619,6 +707,20 @@
         {
           "name": "CS25: Transformers United (Stanford)",
           "type": "课程"
+        },
+        {
+          "name": "Ye Zheng CUT&Tag tutorial",
+          "type": "教程"
+        }
+      ],
+      "bioinfoTopics": [
+        {
+          "name": "多组学整合项目",
+          "description": "统一 sample_metadata、genome_build、gene_id、genomic_region、feature_matrix、normalized_signal、contrast_design、differential_result_table 和 enrichment_result。"
+        },
+        {
+          "name": "ML/DL 多模态建模",
+          "description": "把 RNA、ATAC、CUT&Tag、蛋白组、代谢组转为可联合训练的矩阵、图或 embedding，用于分类、聚类、表征学习和调控预测。"
         }
       ]
     }

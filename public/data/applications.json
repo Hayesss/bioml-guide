@@ -1021,6 +1021,134 @@
           }
         ]
       }
+    },
+    {
+      "id": "bioinformatics-workflows",
+      "name": "生物信息学分析流程",
+      "description": "从 FASTQ、BAM、BED、count matrix 到差异分析、peak annotation、pathway enrichment 和多组学整合的端到端工作流。这个方向把可复现生信流程作为 ML/DL 的特征工程层：先把测序数据转成可信矩阵、区域、信号轨道和统计结果，再进入模型训练与解释。",
+      "color": "#2F6B4F",
+      "decisionGuidance": {
+        "summary": "先用标准生信流程生成可靠特征和统计结果；当研究问题需要预测、分型、表征学习或跨模态整合时，再引入 ML/DL。",
+        "rules": [
+          {
+            "when": "FASTQ 到 peak/gene count 的可复现处理",
+            "use": "Workflow + statistics",
+            "why": "需要 QC、比对、计数、归一化和可追踪参数"
+          },
+          {
+            "when": "基于 QC 指标识别异常样本或批次",
+            "use": "ML",
+            "why": "QC metrics 是结构化特征，适合异常检测和分类"
+          },
+          {
+            "when": "RNA + ATAC + CUT&Tag 联合表征细胞状态",
+            "use": "DL / representation learning",
+            "why": "多模态数据需要学习共同低维空间"
+          }
+        ]
+      },
+      "mlMethods": [
+        {
+          "name": "QC-driven feature engineering",
+          "description": "把 alignment rate、duplication、FRiP、insert size、library size、spike-in scale factor 等 QC 指标转为批次诊断、异常样本检测和回归校正特征。",
+          "tools": [
+            "MultiQC",
+            "scikit-learn"
+          ],
+          "codeSnippet": "import pandas as pd\nfrom sklearn.ensemble import IsolationForest\nqc = pd.read_csv(\"multiqc_cuttag_metrics.tsv\", sep=\"\\t\")\nfeatures = qc[[\"alignment_rate\", \"frip\", \"duplication\", \"median_fragment_size\"]]\nqc[\"qc_outlier\"] = IsolationForest(random_state=42).fit_predict(features)"
+        },
+        {
+          "name": "Peak / gene matrix 监督学习",
+          "description": "用 peak count matrix、RNA count matrix 或 pathway score 预测条件、表型、药物响应或细胞状态；模型输入必须带有清晰的 sample metadata 和 contrast design。",
+          "tools": [
+            "DESeq2",
+            "bedtools",
+            "XGBoost"
+          ],
+          "codeSnippet": "import xgboost as xgb\nimport pandas as pd\nX = pd.read_csv(\"matrix/peak_counts_normalized.csv\", index_col=0).T\ny = pd.read_csv(\"metadata/sample_metadata.csv\").set_index(\"sample_id\").loc[X.index, \"condition\"]\nmodel = xgb.XGBClassifier(eval_metric=\"logloss\").fit(X, y)"
+        },
+        {
+          "name": "Differential result prioritization",
+          "description": "把 log2FC、FDR、peak annotation、motif enrichment 和 RNA expression direction 联合排序，优先解释更可能具有调控意义的 feature。",
+          "tools": [
+            "DESeq2",
+            "ChIPseeker",
+            "pandas"
+          ]
+        }
+      ],
+      "dlMethods": [
+        {
+          "name": "Multi-omics representation learning",
+          "description": "把表达矩阵、开放染色质区域、CUT&Tag histone mark signal 编码为联合 embedding，用于聚类、分类、批次校正和调控状态推断。",
+          "tools": [
+            "PyTorch",
+            "scVI",
+            "Transformers"
+          ]
+        },
+        {
+          "name": "Sequence-to-function models",
+          "description": "将 peak 序列、motif、conservation 和 chromatin signal 输入 CNN/Transformer，预测调控活性、变异效应或 enhancer-gene linkage。",
+          "tools": [
+            "Enformer",
+            "PyTorch"
+          ],
+          "codeSnippet": "import torch\n# X_seq: one-hot peak sequence, X_signal: CUT&Tag/ATAC signal bins\nX = torch.cat([X_seq.flatten(1), X_signal], dim=1)\nlogits = model(X)"
+        }
+      ],
+      "datasets": [
+        {
+          "name": "GEO/SRA",
+          "description": "公共 NGS 原始数据和处理数据，适合下载 FASTQ 或作者提供的 count/peak 文件复现分析。",
+          "size": "百万级条目"
+        },
+        {
+          "name": "ENCODE",
+          "description": "标准化 ChIP-seq、ATAC-seq、RNA-seq 等功能基因组数据和 pipeline 产物。",
+          "size": "大规模实验集合"
+        },
+        {
+          "name": "CUT&Tag tutorial data GSE145187",
+          "description": "K562 histone modification CUT&Tag 示例数据，用于学习 host/spike-in alignment、SEACR 和 deepTools 可视化。",
+          "size": "多条件多重复"
+        },
+        {
+          "name": "TCGA / GTEx",
+          "description": "bulk RNA-seq 与临床/组织 metadata，用于表达、通路和生存分析。",
+          "size": "数万样本"
+        }
+      ],
+      "keyPapers": [
+        {
+          "title": "CUT&Tag for efficient epigenomic profiling of small samples and single cells",
+          "authors": "Kaya-Okur et al.",
+          "year": 2019,
+          "venue": "Nature Communications",
+          "url": "https://www.nature.com/articles/s41467-019-09982-5"
+        },
+        {
+          "title": "Peak calling by Sparse Enrichment Analysis for CUT&RUN chromatin profiling",
+          "authors": "Meers et al.",
+          "year": 2019,
+          "venue": "Epigenetics & Chromatin",
+          "url": "https://doi.org/10.1186/s13072-019-0287-4"
+        },
+        {
+          "title": "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2",
+          "authors": "Love et al.",
+          "year": 2014,
+          "venue": "Genome Biology",
+          "url": "https://doi.org/10.1186/s13059-014-0550-8"
+        }
+      ],
+      "gettingStarted": [
+        "先用 FastQC + MultiQC 建立原始数据 QC 基线，保留 sample/lane/batch metadata。",
+        "用 Bowtie2、STAR 或 BWA 完成 assay-specific alignment，并记录 genome build 与软件参数。",
+        "用 samtools、bedtools、featureCounts 或 GenomicRanges 生成 fragment、region count 或 gene count matrix。",
+        "用 SEACR/MACS2 调 peak，用 DESeq2/limma/edgeR 做差异分析，明确 raw counts 与 normalized signal 的使用边界。",
+        "把 differential_result_table、enrichment_result、BigWig/heatmap 和 sample metadata 接入解释、报告和 ML/DL 建模。"
+      ]
     }
   ]
 }

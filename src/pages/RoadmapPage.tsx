@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
 import { useProgress } from '../hooks/useProgress';
-import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp, Check, RefreshCw } from 'lucide-react';
+import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp, Check, RefreshCw, Dna } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
 interface Stage {
@@ -14,6 +14,7 @@ interface Stage {
   mlTopics: { name: string; description: string }[];
   dlTopics: { name: string; description: string }[];
   mathTopics: { name: string; description: string; mathId?: string }[];
+  bioinfoTopics?: { name: string; description: string }[];
   tools: string[];
   projects: { name: string; description: string; starterCode?: string }[];
   resources: { name: string; type: string }[];
@@ -45,6 +46,7 @@ export default function RoadmapPage() {
       for (const t of stage.mlTopics) keys.push(`stage-${stage.id}-ml-${t.name}`);
       for (const t of stage.dlTopics) keys.push(`stage-${stage.id}-dl-${t.name}`);
       for (const t of stage.mathTopics) keys.push(`stage-${stage.id}-math-${t.name}`);
+      for (const t of stage.bioinfoTopics || []) keys.push(`stage-${stage.id}-bioinfo-${t.name}`);
     }
     return keys;
   }, [stages]);
@@ -291,6 +293,54 @@ export default function RoadmapPage() {
                       })}
                     </div>
                   </div>
+
+                  {stage.bioinfoTopics && stage.bioinfoTopics.length > 0 && (
+                    <div className="mt-5 rounded-lg p-4 border border-brand-border-light bg-[#E9F5EF]">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Dna size={14} className="text-[#2F6B4F]" />
+                        <h4 className="text-sm font-semibold text-[#2F6B4F]">生信流程</h4>
+                      </div>
+                      <div className="space-y-3">
+                        {stage.bioinfoTopics.map((topic) => {
+                          const key = `stage-${stage.id}-bioinfo-${topic.name}`;
+                          const done = isTopicDone(key);
+                          return (
+                            <div key={topic.name}>
+                              <div
+                                className="flex items-start gap-2 cursor-pointer"
+                                onClick={() => toggleTopic(key)}
+                              >
+                                <span
+                                  className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                  style={{
+                                    borderColor: done ? '#2D5A3D' : '#CCCCCC',
+                                    backgroundColor: done ? '#2D5A3D' : 'transparent',
+                                  }}
+                                >
+                                  {done && <Check size={10} style={{ color: 'white' }} />}
+                                </span>
+                                <div>
+                                  <div
+                                    className="font-medium text-sm"
+                                    style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                  >
+                                    {topicKeyMap[topic.name] ? (
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#2F6B4F' }}>
+                                        {topic.name} <span className="text-[10px] opacity-40">↗</span>
+                                      </Link>
+                                    ) : (
+                                      topic.name
+                                    )}
+                                  </div>
+                                  <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-2">

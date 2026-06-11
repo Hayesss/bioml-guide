@@ -10,6 +10,36 @@ interface Question {
 
 const questions: Question[] = [
   {
+    q: 'CUT&Tag 的核心实验信号来自什么？',
+    options: ['抗体靶向 pA-Tn5 在目标附近插入接头形成的片段', 'RNA poly(A) 捕获', '蛋白质质谱峰', '16S V区扩增'],
+    answer: 0,
+    explanation: 'CUT&Tag 通过抗体把 pA-Tn5 tether 到目标 chromatin protein 附近，产生可测序片段；分析对象是 genomic regions、fragments、peaks 和 signal tracks。',
+  },
+  {
+    q: 'CUT&Tag 中 FastQC 的 per-base sequence content 失败应如何处理？',
+    options: ['立即丢弃样本', '结合 Tn5 preference、adapter、alignment rate 等指标综合判断', '一定要改用 RNA-seq 流程', '只看 Q30 即可'],
+    answer: 1,
+    explanation: 'CUT&Tag read 开头碱基组成偏差可能是 Tn5 特性，不能单独判失败，需要结合下游比对率、片段分布和富集指标。',
+  },
+  {
+    q: 'SEACR peak calling 的典型输入是什么？',
+    options: ['paired-end fragment bedGraph', 'raw FASTQ', 'gene TPM matrix', 'protein FASTA'],
+    answer: 0,
+    explanation: 'SEACR 设计为使用 paired-end fragment coverage 的 bedGraph 进行低背景 peak/enriched region calling。',
+  },
+  {
+    q: '差异 peak 分析中 DESeq2 应输入什么？',
+    options: ['BigWig signal', '每个 peak/region 的 raw fragment counts', 'IGV 截图', 'FastQC zip'],
+    answer: 1,
+    explanation: 'DESeq2 对 count data 建模，输入应是 master peak x sample 的未标准化 fragment counts，而不是浏览器轨道。',
+  },
+  {
+    q: '多组学整合中最容易造成错误解释的问题是？',
+    options: ['统一 sample_metadata 和 genome_build', '混用 hg19/hg38 或 gene ID 版本', '保存 BigWig', '使用 MultiQC'],
+    answer: 1,
+    explanation: 'peak-to-gene、region matrix 和表达矩阵连接必须使用一致的 genome build 和 gene annotation，否则会把区域连到错误基因。',
+  },
+  {
     q: '在生物信息学中，用随机森林预测SNP致病性时，哪个指标最适合评估模型在严重不平衡数据上的性能？',
     options: ['准确率 (Accuracy)', 'ROC-AUC', '精确率-召回率曲线下面积 (PR-AUC)', 'F1分数'],
     answer: 2,

@@ -29,7 +29,7 @@ function fuzzyMatch(text: string, query: string): boolean {
 function buildIndex(
   tools: { name: string; description?: string }[],
   resources: { name: string; author: string; type: string; level: string }[],
-  roadmapStages: { id: number; name: string; description?: string; mlTopics?: { name: string; description?: string }[]; dlTopics?: { name: string; description?: string }[]; mathTopics?: { name: string; description?: string }[]; projects?: { name: string; description?: string }[] }[],
+  roadmapStages: { id: number; name: string; description?: string; mlTopics?: { name: string; description?: string }[]; dlTopics?: { name: string; description?: string }[]; mathTopics?: { name: string; description?: string }[]; bioinfoTopics?: { name: string; description?: string }[]; projects?: { name: string; description?: string }[] }[],
   applications: { name: string; description?: string; mlMethods?: { name: string }[]; dlMethods?: { name: string }[]; datasets?: { name: string; description?: string; size: string }[] }[],
   mathTopics: { name: string; description?: string; keyConcepts?: { name: string; description?: string }[] }[],
 ): SearchItem[] {
@@ -82,6 +82,14 @@ function buildIndex(
         snippet: t.description?.slice(0, 80) || '',
         path: '/roadmap',
         category: '数学',
+      });
+    }
+    for (const t of stage.bioinfoTopics || []) {
+      items.push({
+        label: t.name,
+        snippet: t.description?.slice(0, 80) || '',
+        path: '/roadmap',
+        category: '生信流程',
       });
     }
     for (const p of stage.projects || []) {

@@ -54,6 +54,73 @@ print(f"Atoms: {mol.GetNumAtoms()}")`,
     ],
   },
   {
+    icon: Terminal,
+    title: 'NGS / 多组学流程',
+    color: '#2F6B4F',
+    items: [
+      {
+        label: 'FastQC/MultiQC',
+        code: `mkdir -p qc/fastqc qc/multiqc
+fastqc -t 8 -o qc/fastqc fastq/*.fastq.gz
+multiqc qc/fastqc -o qc/multiqc`,
+      },
+      {
+        label: 'Bowtie2',
+        code: `bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant \\
+  --phred33 -I 10 -X 700 -p 8 -x indexes/hg38 \\
+  -1 sample_R1.fastq.gz -2 sample_R2.fastq.gz \\
+  -S align/sample.sam 2> align/sample.bowtie2.txt`,
+      },
+      {
+        label: 'samtools',
+        code: `samtools view -bS -F 0x04 align/sample.sam > align/sample.mapped.bam
+samtools sort -@ 8 -o align/sample.sorted.bam align/sample.mapped.bam
+samtools index align/sample.sorted.bam
+samtools flagstat align/sample.sorted.bam > qc/sample.flagstat.txt`,
+      },
+      {
+        label: 'bedtools',
+        code: `bedtools bamtobed -bedpe -i align/sample.mapped.bam > bed/sample.bedpe
+awk '$1==$4 && $6-$2 < 1000 {print $1"\\t"$2"\\t"$6}' bed/sample.bedpe \\
+  | sort -k1,1 -k2,2n -k3,3n > bed/sample.fragments.bed
+bedtools genomecov -bg -i bed/sample.fragments.bed -g refs/hg38.chrom.sizes \\
+  > signal/sample.bedgraph`,
+      },
+      {
+        label: 'SEACR',
+        code: `bash SEACR_1.3.sh signal/sample.bedgraph signal/IgG.bedgraph \\
+  norm stringent peaks/sample_seacr`,
+      },
+      {
+        label: 'deepTools',
+        code: `bamCoverage -b align/sample.sorted.bam -o signal/sample.bw --binSize 10 -p 8
+computeMatrix reference-point -S signal/sample.bw -R peaks/sample.bed \\
+  --referencePoint center -a 3000 -b 3000 -o matrix/sample.mat.gz -p 8
+plotHeatmap -m matrix/sample.mat.gz -out plots/sample_peak_heatmap.png`,
+      },
+      {
+        label: 'DESeq2',
+        code: `library(DESeq2)
+cts <- read.csv("matrix/counts.csv", row.names = 1)
+meta <- read.csv("metadata/sample_metadata.csv", row.names = 1)
+dds <- DESeqDataSetFromMatrix(countData = cts, colData = meta, design = ~ condition)
+dds <- dds[rowSums(counts(dds)) > 5, ]
+dds <- DESeq(dds)
+res <- results(dds, contrast = c("condition", "treated", "control"))
+write.csv(as.data.frame(res), "results/deseq2_results.csv")`,
+      },
+      {
+        label: 'peak annotation',
+        code: `library(ChIPseeker)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+peak <- readPeakFile("peaks/sample.bed")
+anno <- annotatePeak(peak, TxDb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+                     tssRegion = c(-3000, 3000))
+write.csv(as.data.frame(anno), "results/peak_annotation.csv")`,
+      },
+    ],
+  },
+  {
     icon: Code,
     title: 'ML 常用模式',
     color: '#1E3A5F',
