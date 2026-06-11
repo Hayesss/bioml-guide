@@ -89,6 +89,22 @@ for (const sectionType of ['analogy', 'concept', 'expert', 'how', 'bio', 'code',
 if (!Array.isArray(cuttag.workflowModules) || cuttag.workflowModules.length < 13) {
   fail('cuttag-analysis must include at least 13 workflowModules');
 }
+const cuttagText = JSON.stringify(cuttag);
+for (const expected of [
+  'Alignment frequencies are expected to be >80%',
+  '不推荐默认去重',
+  '10-bp sawtooth periodicity',
+  'S = C / fragments mapped to E. coli genome',
+  'SEACR normalization option',
+  'FRagment proportion in Peaks',
+  'computeMatrix',
+  'master peak list',
+  'ChIPseqSpikeInFree',
+]) {
+  if (!cuttagText.includes(expected)) {
+    fail(`cuttag-analysis tutorial alignment missing ${expected}`);
+  }
+}
 
 for (const id of requiredTools) {
   if (!tools.tools?.some((tool) => tool.id === id)) {
