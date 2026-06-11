@@ -96,7 +96,15 @@
     "cuttag-analysis",
     "rnaseq-deseq2",
     "atacseq-analysis",
-    "multiomics-integration"
+    "multiomics-integration",
+    "single-preprocessing",
+    "single-clustering",
+    "single-annotation",
+    "single-trajectory",
+    "single-communication",
+    "single-grn",
+    "single-downstream",
+    "single-multiomics"
   ],
   "topics": [
     {
@@ -6793,6 +6801,534 @@
               "explanation": "peak 是 genomic interval，gene 是注释实体；二者必须在同一 genome build 和 gene annotation 下连接。"
             }
           ]
+        }
+      ]
+    },
+    {
+      "key": "single-preprocessing",
+      "name": "单细胞数据预处理与质控",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [
+        "ngs-fastq-qc",
+        "genome-alignment"
+      ],
+      "nextTopic": "single-clustering",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>单细胞预处理像淘金筛沙：</strong>先筛掉碎石（死细胞/双细胞），洗掉泥土（标准化），再选出金砂颗粒（高变基因），最后摊开在盘子里观察分布（降维可视化）。每一步都影响后续分析的准确性。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "单细胞预处理管线",
+          "content": "<p>单细胞预处理是分析的基石。标准流程包括：<strong>质控过滤</strong>（去除死细胞、双细胞、空液滴）、<strong>标准化</strong>（消除测序深度差异）、<strong>高变基因选择</strong>（HVG，保留信息量最大的基因）、<strong>降维</strong>（PCA线性降维）和<strong>嵌入</strong>（UMAP/tSNE非线性可视化）。OmicVerse 提供三种计算模式：纯CPU、CPU-GPU混合和纯GPU，通过 <code>ov.pp</code> 模块统一接口调用。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "质控参数选择指南",
+          "content": "<p>QC参数需要根据样本类型调整：<strong>线粒体比例</strong>（mito_perc）— PBMC通常设0.2，心肌细胞可能需要更高；<strong>UMI数量</strong>（nUMIs）— 取决于测序深度，10x Genomics PBMC通常>500；<strong>检测基因数</strong>（detected_genes）— 过低表示空液滴或死细胞。Scrublet双细胞检测对10x数据有效，但SMART-seq等全长方法不适用。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "OmicVerse 标准预处理",
+          "code": "import omicverse as ov\nimport scanpy as sc\n\n# 加载10x数据\nadata = ov.io.read_10x_mtx(\n    'data/filtered_gene_bc_matrices/hg19/',\n    var_names='gene_symbols')\n\n# 质控\nadata = ov.pp.qc(adata,\n    tresh={'mito_perc': 0.2, 'nUMIs': 500,\n           'detected_genes': 250},\n    doublets_method='scrublet')\n\n# 保存原始计数\nov.utils.store_layers(adata, layers='counts')\n\n# 标准化 + HVG (shift-log + Pearson残差)\nov.pp.preprocess(adata, mode='shiftlog|pearson',\n                 n_HVGs=2000, target_sum=5e5)\n\n# 缩放 + 降维\nov.pp.scale(adata)\nov.pp.pca(adata, layer='scaled', n_pcs=50)\n\n# 邻居图 + UMAP\nov.pp.neighbors(adata, n_neighbors=15,\n                use_rep='X_pca')\nov.pp.umap(adata)\n\n# 可视化\nov.pl.embedding(adata, basis='umap',\n                color=['leiden'],\n                frameon='small')"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GPU加速预处理 (RAPIDS)",
+          "code": "# 需要 RAPIDS 24.04+ 和 CUDA GPU\nimport omicverse as ov\nimport rapids_singlecell as rsc\n\n# 转移数据到GPU\nov.pp.anndata_to_GPU(adata)\n\n# GPU加速邻居图 (CAGRA算法)\nov.pp.neighbors(adata, n_neighbors=15,\n                method='cagra')\n\n# GPU UMAP\nov.pp.umap(adata)\n\n# 转移回CPU\nov.pp.anndata_to_CPU(adata)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么要先存储原始计数层 (store_layers) 再标准化？",
+              "options": [
+                "为了节省内存",
+                "标准化会修改表达矩阵，原始计数后续可能需要用于差异分析等方法",
+                "只是为了备份",
+                "没有实际用途"
+              ],
+              "answer": 1,
+              "explanation": "标准化（如shift-log）会改变数据分布，而后续的差异表达分析（如DESeq2）需要原始整数计数。存储原始层确保可以随时恢复。"
+            },
+            {
+              "q": "Pearson残差HVG选择相比seurat_v3的优势是什么？",
+              "options": [
+                "速度更慢",
+                "不需要LOESS回归，对小批次数据更稳定",
+                "只能用于GPU",
+                "结果完全相同"
+              ],
+              "answer": 1,
+              "explanation": "seurat_v3使用LOESS回归估计方差趋势，小批次(<500细胞)会失败。Pearson残差方法不需要LOESS，对小数据集更鲁棒。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-preprocessing",
+          "content": "<p>此模块对应 AI Skill <code>/single-preprocessing</code>，在 Claude Code 中调用可自动生成预处理代码。</p><p><strong>Skill 功能：</strong>单细胞QC、标准化、HVG检测、PCA、邻居图、UMAP/tSNE嵌入管线</p><p><strong>适用场景：</strong>任何单细胞分析的第一步，支持CPU/GPU模式切换。基于PBMC3k示例数据。</p><p><strong>调用方式：</strong><code>/single-preprocessing</code> — Skill会引导你完成完整的预处理流程，包括数据下载、QC参数调优和可视化。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-clustering",
+      "name": "单细胞聚类与批次校正",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "single-preprocessing"
+      ],
+      "nextTopic": "single-annotation",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>细胞聚类像分拣快递：</strong>根据包裹特征（基因表达）自动分类到不同区域（细胞群），但不同仓库（批次）的分类标准可能不同，需要统一标准（批次校正）才能合并分拣。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "聚类算法与批次效应",
+          "content": "<p><strong>Leiden聚类</strong>是单细胞标准算法，通过分辨率参数控制聚类粒度。批次效应是来自实验批次、测序平台或样本处理的技术差异，会混淆生物信号。<strong>Harmony</strong>在PCA空间迭代校正，<strong>scVI</strong>使用深度生成模型学习批次无关的潜在表示，<strong>BBKNN</strong>构建批次感知的邻居图。选择方法时需权衡：简单数据用Harmony，复杂非线性批次用scVI，大规模图谱用BBKNN。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "聚类参数选择策略",
+          "content": "<p>分辨率是Leiden聚类最关键的参数：<strong>0.3-0.5</strong>适合识别主要细胞类型，<strong>0.8-1.2</strong>适合发现亚群，<strong>1.5+</strong>用于精细亚型。过聚类没有\"正确\"分辨率，应该基于已知标记基因和生物学意义判断。建议尝试多个分辨率，观察已知标记的表达模式来确定最佳参数。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Leiden聚类 + Harmony批次校正",
+          "code": "import omicverse as ov\n\n# 验证批次列存在且无NaN（必须！）\nif 'batch' not in adata.obs.columns:\n    adata.obs['batch'] = 'batch_1'\nadata.obs['batch'] = adata.obs['batch'].fillna('unknown')\nadata.obs['batch'] = adata.obs['batch'].astype(str).astype('category')\n\n# Leiden聚类\nov.pp.leiden(adata, resolution=1.0)\n\n# Harmony批次校正\nov.pp.harmony(adata, batch_key='batch')\n\n# 重新邻居图（基于Harmony嵌入）\nsc.pp.neighbors(adata, use_rep='X_pca_harmony')\nov.pp.umap(adata)\n\n# 查看批次整合效果\nov.pl.embedding(adata, basis='umap',\n                color=['batch', 'leiden'])"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "scVI深度学习整合",
+          "code": "# scVI需要独立安装\nimport scvi\n\n# 设置scVI模型\nscvi.model.SCVI.setup_anndata(\n    adata, batch_key='batch')\n\nvae = scvi.model.SCVI(adata,\n    n_layers=2, n_latent=30,\n    gene_likelihood='zinb')\n\n# 训练\nvae.train(max_epochs=400,\n          early_stopping=True)\n\n# 获取潜在表示\nadata.obsm['X_scVI'] = vae.get_latent_representation()\n\n# 基于scVI嵌入的聚类\nsc.pp.neighbors(adata, use_rep='X_scVI')\nov.pp.leiden(adata, resolution=1.0)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Harmony和scVI批次校正的区别是什么？",
+              "options": [
+                "没有区别",
+                "Harmony在PCA空间迭代校正，scVI用深度生成模型学习批次无关潜在空间",
+                "Harmony是深度学习，scVI是线性方法",
+                "Harmony只能用于2个批次"
+              ],
+              "answer": 1,
+              "explanation": "Harmony在低维PCA空间进行模糊聚类和迭代校正，速度快且效果稳定。scVI使用变分自编码器学习批次条件概率分布，能建模更复杂的非线性批次效应。"
+            },
+            {
+              "q": "BBKNN和Harmony的主要策略差异？",
+              "options": [
+                "BBKNN改变基因表达值",
+                "BBKNN修改邻居图构建，Harmony校正PCA嵌入",
+                "两者完全相同",
+                "BBKNN不能用于单细胞"
+              ],
+              "answer": 1,
+              "explanation": "BBKNN在构建邻居图时限制跨批次连接，不修改表达或嵌入空间。Harmony直接在PCA空间迭代移动细胞位置来消除批次差异。两者策略互补。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-clustering",
+          "content": "<p>此模块对应 AI Skill <code>/single-clustering</code>。</p><p><strong>Skill 功能：</strong>单细胞聚类（Leiden/Louvain/scICE/GMM）、批次校正（Harmony/scVI/BBKNN/Combat）、主题建模和cNMF</p><p><strong>调用方式：</strong><code>/single-clustering</code> — 自动推荐聚类算法和批次校正方法，生成含防御性检查的健壮代码。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-annotation",
+      "name": "单细胞类型注释",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "single-clustering"
+      ],
+      "nextTopic": "single-trajectory",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>细胞注释像给无名照片贴标签：</strong>通过已知标记基因（照片特征）识别每个聚类是什么细胞类型。传统方法是手动查看标记基因，现代方法使用自动注释工具、参考数据库甚至大语言模型来加速这一过程。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "注释策略体系",
+          "content": "<p>OmicVerse 提供多层注释策略：<strong>SCSA</strong>基于标记基因数据库（CellMarker/PanglaoDB）的自动注释；<strong>MetaTiME</strong>专门用于肿瘤微环境细胞状态鉴定；<strong>CellVote</strong>通过多注释源共识投票提高准确性；<strong>CellMatch</strong>将注释映射到标准细胞本体（Cell Ontology）；<strong>GPTAnno</strong>利用大语言模型基于差异基因推理细胞类型；<strong>PopV</strong>整合10种算法进行群体级别共识注释。推荐策略：先SCSA快速注释 -> CellVote共识验证 -> GPTAnno确认疑难群体。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "SCSA自动注释",
+          "code": "import omicverse as ov\n\n# 准备工作：需要聚类结果和差异基因\nsc.tl.rank_genes_groups(adata,\n    groupby='leiden', method='wilcoxon')\n\n# SCSA注释\nscsa = ov.single.pySCSA(adata,\n    target='cellmarker',\n    tissue='Blood',\n    model_path='pySCSA_2024_v1_plus.db')\n\n# 执行注释\nscsa.cell_anno(clustertype='leiden',\n    result_key='scsa_celltype_cellmarker')\n\n# 可视化注释结果\nov.pl.embedding(adata, basis='umap',\n    color=['scsa_celltype_cellmarker'])"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GPTAnno大模型注释",
+          "code": "# 获取每个聚类的标记基因\nmarker_dict = ov.single.get_celltype_marker(\n    adata, clustertype='leiden',\n    rank=True, key='rank_genes_groups',\n    foldchange=2, topgenenumber=5)\n\n# GPT注释 (需要API key)\nresult = ov.single.gptcelltype(\n    adata,\n    tissue='Human PBMC',\n    provider='openai',\n    model='gpt-4o-mini',\n    topgenenumber=5)\n\n# 处理结果\nadata.obs['gpt_celltype'] = [\n    r.split(': ')[-1] if ': ' in r else r\n    for r in result.values()\n]"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CellVote的核心优势是什么？",
+              "options": [
+                "速度最快",
+                "通过多个注释源的共识投票减少单一方法的偏差",
+                "不需要标记基因",
+                "只能用于人类数据"
+              ],
+              "answer": 1,
+              "explanation": "CellVote整合SCSA、GPTAnno等多种注释结果，通过投票机制选择最一致的标签，有效减少单一方法的系统性偏差。"
+            },
+            {
+              "q": "PopV适合什么场景？",
+              "options": [
+                "单个样本的快速注释",
+                "大规模图谱的群体级别细胞注释，需要整合多种参考",
+                "只需要手动注释",
+                "不适用于PBMC"
+              ],
+              "answer": 1,
+              "explanation": "PopV设计用于群体级别的细胞注释，整合10种算法（包括SCVI、CellTypist、OnClass等），适合需要与多个参考数据集对齐的大规模图谱项目。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skills：single-annotation / single-popv-annotation",
+          "content": "<p><strong>Skill 功能：</strong><code>/single-annotation</code> — SCSA/MetaTiME/CellVote/CellMatch/GPTAnno注释；<code>/single-popv-annotation</code> — PopV 10种算法共识投票</p><p><strong>调用方式：</strong>基础注释用 <code>/single-annotation</code>，群体级别用 <code>/single-popv-annotation</code>。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-trajectory",
+      "name": "单细胞轨迹推断与RNA速度",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "single-annotation"
+      ],
+      "nextTopic": "single-communication",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>轨迹推断像绘制河流地图：</strong>RNA速度告诉我们每个细胞的\"水流方向\"（mRNA的剪接动力学），轨迹推断则绘制出从源头到入海口的完整河道（发育路径）。两者结合可以重建细胞状态转变的动态过程。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "轨迹推断与RNA速度原理",
+          "content": "<p><strong>PAGA</strong>（基于图的抽象）保持拓扑结构描述群间关系；<strong>Palantir</strong>通过扩散映射计算伪时间和分化潜能；<strong>VIA</strong>使用图自编码器保持拓扑推断轨迹。<strong>RNA速度</strong>通过未剪接/剪接mRNA比率推断转录动态：<strong>scVelo</strong>（随机模型）、<strong>dynamo</strong>（代谢标记兼容）、<strong>latentvelo</strong>（变分推断）、<strong>graphvelo</strong>（图神经网络）。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Palantir伪时间 + PAGA",
+          "code": "import omicverse as ov\n\n# PAGA 图抽象\nov.single.paga(adata, groups='celltype')\nsc.pl.paga(adata, threshold=0.1)\n\n# Palantir 伪时间分析\n# 指定根细胞（如干细胞群体）\nroot_cell = adata[adata.obs['celltype']\n                  == 'HSC'].obs_names[0]\n\nov.single.palantir(adata,\n    root_cell=root_cell)\n\n# 可视化伪时间\nov.pl.embedding(adata, basis='umap',\n    color=['palantir_pseudotime'],\n    cmap='viridis')"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "RNA速度 (scVelo)",
+          "code": "# 需要未剪接/剪接计数层\nimport scvelo as scv\n\n# 预处理\nscv.pp.filter_and_normalize(adata)\nscv.pp.moments(adata, n_pcs=30,\n               n_neighbors=30)\n\n# 速度估计 (随机模型)\nscv.tl.velocity(adata,\n    mode='stochastic')\n\n# 速度图\nscv.tl.velocity_graph(adata)\n\n# 速度可视化\nscv.pl.velocity_embedding_stream(\n    adata, basis='umap',\n    color='celltype')\n\n# 伪时间 (速度推断方向)\nscv.tl.velocity_pseudotime(adata)\nscv.pl.scatter(adata,\n    color='velocity_pseudotime',\n    cmap='gnuplot')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "RNA速度分析需要什么特殊数据？",
+              "options": [
+                "只需要基因表达矩阵",
+                "需要区分未剪接(unspliced)和剪接(spliced)的mRNA计数",
+                "只需要蛋白质数据",
+                "只需要ATAC数据"
+              ],
+              "answer": 1,
+              "explanation": "RNA速度基于未剪接mRNA（新生转录本）与剪接mRNA（成熟转录本）的比例来推断基因表达的动态变化方向。这需要测序数据区分两类转录本。"
+            },
+            {
+              "q": "PAGA和Palantir的区别？",
+              "options": [
+                "完全相同",
+                "PAGA提供图抽象的拓扑关系，Palantir提供连续的伪时间排序",
+                "Palantir不需要根细胞",
+                "PAGA使用深度学习"
+              ],
+              "answer": 1,
+              "explanation": "PAGA在聚类图上保留拓扑结构，适合理解群间连接关系。Palantir通过扩散映射计算每个细胞的连续伪时间值，适合精细的发育轨迹重建。两者互补使用。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skills：single-trajectory / single-cellfate-analysis",
+          "content": "<p><strong>Skill 功能：</strong><code>/single-trajectory</code> — PAGA/Palantir/VIA轨迹 + scVelo/dynamo RNA速度；<code>/single-cellfate-analysis</code> — CellFateGenie命运基因发现</p><p><strong>调用方式：</strong><code>/single-trajectory</code> 进行轨迹和速度分析，<code>/single-cellfate-analysis</code> 发现命运决定基因。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-communication",
+      "name": "细胞间通讯分析",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "single-annotation"
+      ],
+      "nextTopic": "single-grn",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>细胞通讯像社交网络分析：</strong>每个细胞类型是一个\"用户\"，配体是发出的\"消息\"，受体是接收的\"耳朵\"。CellPhoneDB分析哪些细胞群在\"聊天\"，聊什么话题（信号通路），以及谁和谁的互动最频繁。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "配体-受体分析原理",
+          "content": "<p><strong>CellPhoneDB v5</strong>包含多亚基配体-受体复合物的 curated 数据库。分析通过排列检验评估两个细胞群之间特定配体-受体对的富集显著性。<strong>CellChatViz</strong>提供改进的通讯可视化，<code>ccc_heatmap</code>展示通讯强度热图，<code>ccc_network_plot</code>绘制细胞间通讯网络，<code>ccc_stat_plot</code>比较不同条件下的通讯统计。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "CellPhoneDB v5 通讯分析",
+          "code": "import omicverse as ov\n\n# 注意：CellPhoneDB需要Linux环境\n# 确保 adata 包含 celltype 注释\n\n# 运行CellPhoneDB分析\nov.single.cellphonedb(\n    adata,\n    celltype_key='celltype',\n    organism='human',\n    method='statistical_analysis',\n    output_path='./cpdb_results')\n\n# 通讯热图\nov.pl.ccc_heatmap(\n    adata,\n    celltype_key='celltype',\n    interaction_pairs=[\n        'CD4_T|CD8_T',\n        'Monocyte|NK_cell'\n    ])\n\n# 通讯网络图\nov.pl.ccc_network_plot(\n    adata,\n    celltype_key='celltype')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CellPhoneDB的排列检验(p-value)在测试什么？",
+              "options": [
+                "细胞类型的差异表达",
+                "两个细胞群之间特定配体-受体对的表达是否显著高于随机期望",
+                "基因的变异程度",
+                "细胞的绝对数量"
+              ],
+              "answer": 1,
+              "explanation": "CellPhoneDB通过随机打乱细胞类型标签进行排列检验，测试在真实细胞类型分组下，配体和受体的共表达是否显著高于随机情况。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-cellphone-db",
+          "content": "<p><strong>Skill 功能：</strong>CellPhoneDB v5配体-受体分析、CellChatViz绘图、ccc_heatmap/ccc_network_plot/ccc_stat_plot通讯可视化</p><p><strong>调用方式：</strong><code>/single-cellphone-db</code> — 自动配置CellPhoneDB环境并运行通讯分析。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-grn",
+      "name": "基因调控网络分析 (SCENIC)",
+      "stage": 5,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "single-annotation"
+      ],
+      "nextTopic": "single-downstream",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>SCENIC像绘制公司组织架构图：</strong>转录因子是\"部门经理\"，regulon是\"部门\"（被该TF调控的基因集合）。通过分析哪些\"经理\"在哪些细胞类型中活跃，理解细胞身份的执行层面。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "SCENIC流程三步骤",
+          "content": "<p>SCENIC通过三个步骤推断转录因子调控网络：<strong>1. RegDiffusion/GRNBoost2</strong> — 基于共表达推断TF-靶基因关系；<strong>2. cisTarget</strong> — 使用motif数据库修剪假阳性，保留有DNA结合motif支持的调控关系；<strong>3. AUCell</strong> — 在每个细胞中评分regulon的活性。RSS（Regulon Specificity Score）衡量regulon在不同细胞类型中的特异性。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "SCENIC GRN分析",
+          "code": "import omicverse as ov\n\n# 1. RegDiffusion推断共表达网络\nov.single.RegDiffusion(\n    adata,\n    tf_list='hs_hgnc_tfs.txt')\n\n# 2. cisTarget regulon修剪\nov.single.cistarget(\n    adata,\n    database='hg38__refseq-r80__10kb_up_and_down_tss.mc9nr.feather',\n    motif_annotations='motifs-v9-nr.hgnc-m0.001-o0.0.tbl')\n\n# 3. AUCell活性评分\nov.single.aucell(\n    adata,\n    regulon_key='regulons')\n\n# RSS调控特异性\nov.single.rss(\n    adata,\n    groupby='celltype')\n\n# Regulon活性热图\nsc.pl.heatmap(adata,\n    var_names=top_regulons,\n    groupby='celltype')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "cisTarget步骤为什么重要？",
+              "options": [
+                "只是为了加速计算",
+                "通过DNA motif验证去除仅由共表达推断的假阳性调控关系",
+                "不重要，可以跳过",
+                "只增加噪声"
+              ],
+              "answer": 1,
+              "explanation": "共表达不等于调控。cisTarget通过检查TF是否在靶基因附近有DNA结合motif来验证调控关系，大幅减少假阳性。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-scenic-grn",
+          "content": "<p><strong>Skill 功能：</strong>SCENIC基因调控网络：RegDiffusion GRN推断、cisTarget regulon修剪、AUCell评分、RSS、regulon嵌入</p><p><strong>调用方式：</strong><code>/single-scenic-grn</code> — 需要pySCENIC和相关数据库文件。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-downstream",
+      "name": "单细胞下游分析与功能注释",
+      "stage": 5,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "single-annotation"
+      ],
+      "nextTopic": "single-multiomics",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>下游分析像为每个细胞群做体检报告：</strong>AUCell看代谢能力（通路活性），MetaCell DEG找群体特征（差异基因），scDrug预测药物反应（个性化治疗），把细胞身份转化为生物学解释。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "功能注释工具箱",
+          "content": "<p><strong>AUCell</strong>对每个细胞评估通路基因集的活性，适合发现功能异质性；<strong>MetaCell DEG</strong>在元细胞水平进行差异表达，减少单细胞稀疏性影响；<strong>scDrug</strong>映射药物靶标基因到细胞群，预测药物敏感性；<strong>NOCD</strong>通过重叠社区检测发现功能模块；<strong>cNMF</strong>使用非负矩阵分解发现基因表达程序。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "下游分析综合示例",
+          "code": "# AUCell通路活性\nov.single.aucell_pathway(\n    adata,\n    pathway_database='MSigDB_Hallmark_2020')\n\n# 可视化通路活性\nov.pl.embedding(adata, basis='umap',\n    color=['Hallmark_IFNG_response',\n           'Hallmark_TNFA_signaling'])\n\n# MetaCell差异表达\nov.single.metacell_deg(\n    adata,\n    groupby='celltype',\n    method='wilcoxon')\n\n# scDrug药物响应\nov.single.scdrug(\n    adata,\n    celltype_key='celltype',\n    drug_database='GDSC')\n\n# NOCD社区检测\nov.single.nocd(adata,\n    use_rep='X_pca')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "MetaCell DEG相比单细胞DEG的优势？",
+              "options": [
+                "没有优势",
+                "MetaCell合并相似细胞减少稀疏性，提高统计功效",
+                "计算更快",
+                "只需要一个基因"
+              ],
+              "answer": 1,
+              "explanation": "单细胞数据高度稀疏（大量dropout），直接在单细胞水平做差异表达统计功效低。MetaCell将相似细胞合并为\"元细胞\"，增加检测基因数，提高差异分析的可靠性。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-downstream-analysis",
+          "content": "<p><strong>Skill 功能：</strong>AUCell通路评分、MetaCell DEG、scDrug药物响应、SCENIC regulons、cNMF程序、NOCD社区检测</p><p><strong>调用方式：</strong><code>/single-downstream-analysis</code> — 在注释完成后使用，挖掘功能层面的生物学意义。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-multiomics",
+      "name": "单细胞多组学整合分析",
+      "stage": 6,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "single-annotation",
+        "atacseq-analysis"
+      ],
+      "nextTopic": null,
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>多组学整合像翻译两种语言：</strong>scRNA-seq告诉我们\"说了什么\"（基因表达），scATAC-seq告诉我们\"能说什么\"（染色质可及性）。MOFA找到两种语言的共同\"主题\"，GLUE把两本\"词典\"对齐，实现跨模态的理解。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "多组学整合策略",
+          "content": "<p><strong>配对数据（同一细胞多组学）：</strong>MOFA发现跨组学的共享因子，适合10x Multiome数据。<strong>非配对数据（不同细胞来源）：</strong>GLUE使用图对齐学习跨模态嵌入，不需要细胞配对；SIMBA和TOSICA提供替代的批次校正和标签迁移方案。StaVIA扩展轨迹推断到多模态数据。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "MOFA因子分析 (配对)",
+          "code": "# 10x Multiome: 同一细胞同时测RNA和ATAC\nov.single.mofa(\n    adata,\n    use_rep=['X_scRNA', 'X_scATAC'],\n    n_factors=15,\n    n_iterations=1000)\n\n# 查看因子解释的方差\nmofa.plot_variance_explained()\n\n# 因子在不同组学中的权重\nmofa.plot_factor_weights(factor=1)"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GLUE非配对对齐",
+          "code": "# scRNA参考 + scATAC查询 (非配对)\nov.single.glue(\n    adata_rna,\n    adata_atac,\n    annotation_key='celltype',\n    use_rep_rna='X_pca',\n    use_rep_atac='X_lsi')\n\n# 对齐后的联合嵌入\ncombined = ov.utils.concat_embeddings(\n    [adata_rna, adata_atac],\n    embedding_key='X_glue')\n\nov.pl.embedding(combined,\n    basis='X_glue',\n    color=['celltype', 'modality'])"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "MOFA和GLUE的主要区别？",
+              "options": [
+                "完全相同",
+                "MOFA用于配对多组学（同一细胞），GLUE用于非配对数据（不同细胞来源的scRNA和scATAC）",
+                "MOFA只能用于RNA",
+                "GLUE不需要任何输入"
+              ],
+              "answer": 1,
+              "explanation": "MOFA假设有配对的观测（同一细胞的多组学测量），发现跨组学的共享因子。GLUE不需要细胞配对，通过先验知识图（基因-峰关联）学习跨模态对齐。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-multiomics",
+          "content": "<p><strong>Skill 功能：</strong>多组学整合：MOFA因子分析、GLUE非配对对齐、SIMBA批次校正、TOSICA标签迁移、StaVIA轨迹</p><p><strong>调用方式：</strong><code>/single-multiomics</code> — 支持配对和非配对的scRNA+scATAC整合分析。</p>"
         }
       ]
     }

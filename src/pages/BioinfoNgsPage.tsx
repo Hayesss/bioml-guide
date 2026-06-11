@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope } from 'lucide-react';
 import { useData } from '../hooks/useData';
 
 interface TopicSection {
@@ -107,6 +107,42 @@ export default function BioinfoNgsPage() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* 其他组学入口 */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Microscope size={17} className="text-[#2F6B4F]" />
+            <h2 className="text-lg font-bold text-brand-ink">组学专题</h2>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Link
+            to="/single-cell"
+            className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-[#2F6B4F]">
+                  <Microscope size={13} />
+                </span>
+                <h3 className="text-sm font-semibold text-brand-ink">单细胞组学分析</h3>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
+                专题
+              </span>
+            </div>
+            <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
+              基于 OmicVerse 的单细胞转录组全流程分析：预处理、聚类、注释、轨迹推断、RNA速度、
+              细胞通讯、基因调控网络、多组学整合与空间映射。配备11个AI Skill支持自动化分析。
+            </p>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#2F6B4F]">
+              进入专题
+              <ArrowRight size={13} />
+            </div>
+          </Link>
         </div>
       </section>
 

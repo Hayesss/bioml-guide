@@ -16,6 +16,7 @@ import CheatSheetPage from './pages/CheatSheetPage';
 import TopicLearnPage from './pages/TopicLearnPage';
 import IntroPage from './pages/IntroPage';
 import BioinfoNgsPage from './pages/BioinfoNgsPage';
+import SingleCellPage from './pages/SingleCellPage';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/ngs" element={<BioinfoNgsPage />} />
+<Route path="/single-cell" element={<SingleCellPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/tools" element={<ToolsPage />} />
