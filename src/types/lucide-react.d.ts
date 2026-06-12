@@ -44,8 +44,7 @@ declare module 'lucide-react' {
   export const ArrowLeftRight: LucideIcon;
   export const Sparkles: LucideIcon;
   export const CircleDot: LucideIcon;
-  export const ChevronDown: LucideIcon;
-  export const ChevronUp: LucideIcon;
   export const GitMerge: LucideIcon;
   export const BarChart4: LucideIcon;
+  export const ExternalLink: LucideIcon;
 }

@@ -17,6 +17,7 @@ import TopicLearnPage from './pages/TopicLearnPage';
 import IntroPage from './pages/IntroPage';
 import BioinfoNgsPage from './pages/BioinfoNgsPage';
 import SingleCellPage from './pages/SingleCellPage';
+import FoundationModelsPage from './pages/FoundationModelsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/ngs" element={<BioinfoNgsPage />} />
 <Route path="/single-cell" element={<SingleCellPage />} />
+<Route path="/foundation-models" element={<FoundationModelsPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/tools" element={<ToolsPage />} />
