@@ -107,7 +107,8 @@
     "single-grn",
     "single-downstream",
     "single-multiomics",
-    "single-spatial"
+    "single-spatial",
+    "foundation-models"
   ],
   "topics": [
     {
@@ -7843,6 +7844,72 @@
               ],
               "answer": 1,
               "explanation": "scHi-C填补方法（如scHiCluster）假设相似细胞（在嵌入空间中邻近）共享相似的染色质构象，因此可以用邻近细胞的聚合信息填补目标细胞的缺失接触。这一假设在细胞类型内通常是合理的。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "foundation-models",
+      "name": "单细胞基础模型 (Foundation Models)",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "single-preprocessing",
+        "single-annotation"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>基础模型像预训练的万能翻译器：</strong>传统方法需要为每个任务从头训练模型（像每次学一门新语言），基础模型在海量单细胞数据上预训练后，可以直接\"翻译\"各种下游任务——细胞注释、基因扰动预测、跨物种映射——只需少量调整甚至零样本就能工作。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "单细胞基础模型原理",
+          "content": "<p><strong>单细胞基础模型</strong>是在数百万到数千万个单细胞转录组数据上预训练的大规模深度神经网络。核心思想借鉴NLP中的BERT/GPT：通过自监督学习（掩码基因预测、对比学习、自回归生成）学习基因表达的\"语法\"和\"语义\"。</p><p><strong>三大范式：</strong></p><ul><li><strong>编码器架构（GeneFormer）：</strong>类似BERT，通过掩码语言模型学习基因间关系。擅长基因功能预测和调控网络推断</li><li><strong>生成式架构（scGPT）：</strong>类似GPT，自回归预测基因表达。支持条件生成，可模拟基因扰动和虚拟细胞生成</li><li><strong>对比学习架构（UCE）：</strong>学习跨物种/跨平台的统一细胞表示空间。适合非模式生物和跨数据集整合</li></ul>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "为什么基础模型改变单细胞分析？",
+          "content": "<p>传统单细胞分析面临三大瓶颈：<strong>批次效应</strong>（不同实验室/平台的数据难以整合）、<strong>标注稀缺</strong>（细胞类型注释依赖专家知识）、<strong>跨物种壁垒</strong>（非模式生物缺乏参考数据）。基础模型通过预训练学习到的通用表示，实现零样本细胞注释（不需要训练数据）、自动批次校正（模型已学习批次不变特征）、跨物种细胞类型映射（统一的嵌入空间）。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "OmicVerse ov.fm 统一API示例",
+          "code": "import omicverse as ov\n\n# 加载预训练模型（自动下载权重）\nscgpt = ov.fm.load_model('scGPT')\ngeneformer = ov.fm.load_model('GeneFormer')\n\n# 提取嵌入\nadata.obsm['X_scGPT'] = ov.fm.embed('scGPT', adata)\nadata.obsm['X_GeneFormer'] = ov.fm.embed('GeneFormer', adata)\n\n# 零样本注释\nadata.obs['scGPT_celltype'] = ov.fm.annotate(\n    'scGPT', adata, tissue='blood')\n\n# 基因扰动预测\nperturb = ov.fm.predict_perturbation(\n    'scGPT', adata,\n    target_genes=['TP53', 'MYC'])\n\n# 跨物种映射\nuce_emb = ov.fm.embed('UCE', adata_mouse,\n                       species='mouse')\nmapped = ov.fm.map_species('UCE',\n    adata_human, adata_mouse)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "GeneFormer和scGPT的主要区别是什么？",
+              "options": [
+                "没有区别",
+                "GeneFormer是BERT式编码器（擅长基因关系预测），scGPT是GPT式生成模型（擅长条件生成和虚拟细胞）",
+                "GeneFormer只能用于人类",
+                "scGPT不需要预训练"
+              ],
+              "answer": 1,
+              "explanation": "GeneFormer使用掩码语言模型（MLM），擅长学习基因间的调控关系。scGPT使用自回归生成，支持条件生成模式模拟基因扰动效应。两者架构目标不同，选择取决于具体任务。"
+            },
+            {
+              "q": "UCE相比其他基础模型的核心优势？",
+              "options": [
+                "速度最快",
+                "跨物种通用细胞嵌入——可以将人类和小鼠的细胞映射到同一空间进行比较",
+                "只能用于人类数据",
+                "不需要基因表达数据"
+              ],
+              "answer": 1,
+              "explanation": "UCE（Universal Cell Embedding）使用蛋白质语言模型初始化基因嵌入，使不同物种的基因获得语义相关的初始表示，实现真正的跨物种细胞类型对齐。这是其他基础模型不具备的能力。"
             }
           ]
         }
