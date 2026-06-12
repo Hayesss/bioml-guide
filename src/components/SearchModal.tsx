@@ -306,8 +306,7 @@ export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalPr
           {results.map((item, i) => (
             <button
               key={`${item.category}-${item.label}`}
-              className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-              style={{ backgroundColor: i === selectedIdx ? '#FAFAFA' : 'transparent' }}
+              className={`w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${i === selectedIdx ? 'bg-brand-off-white' : ''}`}
               onClick={() => navigateTo(item)}
               onMouseEnter={() => setSelectedIdx(i)}
             >

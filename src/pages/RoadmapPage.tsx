@@ -110,11 +110,8 @@ export default function RoadmapPage() {
             </div>
             <div className="w-full h-2 rounded-full bg-brand-border-light">
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  backgroundColor: overall.pct === 100 ? '#2D5A3D' : '#1E3A5F',
-                  width: `${overall.pct}%`,
-                }}
+                className={`h-full rounded-full transition-all duration-500 ${overall.pct === 100 ? 'bg-brand-dl' : 'bg-brand-accent'}`}
+                style={{ width: `${overall.pct}%` }}
               />
             </div>
           </div>
@@ -165,22 +162,17 @@ export default function RoadmapPage() {
                               onClick={() => toggleTopic(key)}
                             >
                               <span
-                                className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
-                                style={{
-                                  borderColor: done ? '#2D5A3D' : '#CCCCCC',
-                                  backgroundColor: done ? '#2D5A3D' : 'transparent',
-                                }}
+                                className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${done ? 'border-brand-dl bg-brand-dl' : 'border-gray-300 bg-transparent'}`}
                               >
-                                {done && <Check size={10} style={{ color: 'white' }} />}
+                                {done && <Check size={10} className="text-white" />}
                               </span>
                               <div>
                                 <div className="flex items-center gap-1.5">
                                   <div
-                                    className="font-medium text-sm"
-                                    style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                    className={`font-medium text-sm ${done ? 'text-brand-ink-muted line-through' : 'text-brand-ink'}`}
                                   >
                                     {topicKeyMap[topic.name] ? (
-                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#1A1A5F' }}>
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className={`no-underline hover:underline ${done ? 'text-brand-ink-muted' : 'text-brand-accent'}`}>
                                         {topic.name} <span className="text-[10px] opacity-40">↗</span>
                                       </Link>
                                     ) : (
@@ -213,21 +205,16 @@ export default function RoadmapPage() {
                               onClick={() => toggleTopic(key)}
                             >
                               <span
-                                className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
-                                style={{
-                                  borderColor: done ? '#2D5A3D' : '#CCCCCC',
-                                  backgroundColor: done ? '#2D5A3D' : 'transparent',
-                                }}
+                                className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${done ? 'border-brand-dl bg-brand-dl' : 'border-gray-300 bg-transparent'}`}
                               >
-                                {done && <Check size={10} style={{ color: 'white' }} />}
+                                {done && <Check size={10} className="text-white" />}
                               </span>
                               <div>
                                 <div
-                                  className="font-medium text-sm"
-                                  style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                  className={`font-medium text-sm ${done ? 'text-brand-ink-muted line-through' : 'text-brand-ink'}`}
                                 >
                                     {topicKeyMap[topic.name] ? (
-                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#2D5A3D' }}>
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className={`no-underline hover:underline ${done ? 'text-brand-ink-muted' : 'text-brand-dl'}`}>
                                         {topic.name} <span className="text-[10px] opacity-40">↗</span>
                                       </Link>
                                     ) : (
@@ -260,18 +247,13 @@ export default function RoadmapPage() {
                             onClick={() => toggleTopic(key)}
                           >
                             <span
-                              className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
-                              style={{
-                                borderColor: done ? '#2D5A3D' : '#CCCCCC',
-                                backgroundColor: done ? '#2D5A3D' : 'transparent',
-                              }}
+                              className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${done ? 'border-brand-dl bg-brand-dl' : 'border-gray-300 bg-transparent'}`}
                             >
                               {done && <Check size={10} style={{ color: 'white' }} />}
                             </span>
                             <div>
                               <div
-                                className="font-medium text-xs"
-                                style={{ color: done ? '#8A8A8A' : '#4A4A4A', textDecoration: done ? 'line-through' : 'none' }}
+                                className={`font-medium text-xs ${done ? 'text-brand-ink-muted line-through' : 'text-brand-ink-light'}`}
                               >
                                 {topicKeyMap[topic.name] ? (
                                   <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline text-brand-accent">
@@ -295,10 +277,10 @@ export default function RoadmapPage() {
                   </div>
 
                   {stage.bioinfoTopics && stage.bioinfoTopics.length > 0 && (
-                    <div className="mt-5 rounded-lg p-4 border border-brand-border-light bg-[#E9F5EF]">
+                    <div className="mt-5 rounded-lg p-4 border border-brand-border-light bg-brand-dl-light">
                       <div className="flex items-center gap-2 mb-3">
-                        <Dna size={14} className="text-[#2F6B4F]" />
-                        <h4 className="text-sm font-semibold text-[#2F6B4F]">生信流程</h4>
+                        <Dna size={14} className="text-brand-dl" />
+                        <h4 className="text-sm font-semibold text-brand-dl">生信流程</h4>
                       </div>
                       <div className="space-y-3">
                         {stage.bioinfoTopics.map((topic) => {
@@ -311,21 +293,16 @@ export default function RoadmapPage() {
                                 onClick={() => toggleTopic(key)}
                               >
                                 <span
-                                  className="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors"
-                                  style={{
-                                    borderColor: done ? '#2D5A3D' : '#CCCCCC',
-                                    backgroundColor: done ? '#2D5A3D' : 'transparent',
-                                  }}
+                                  className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${done ? 'border-brand-dl bg-brand-dl' : 'border-gray-300 bg-transparent'}`}
                                 >
-                                  {done && <Check size={10} style={{ color: 'white' }} />}
+                                  {done && <Check size={10} className="text-white" />}
                                 </span>
                                 <div>
                                   <div
-                                    className="font-medium text-sm"
-                                    style={{ color: done ? '#8A8A8A' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none' }}
+                                    className={`font-medium text-sm ${done ? 'text-brand-ink-muted line-through' : 'text-brand-ink'}`}
                                   >
                                     {topicKeyMap[topic.name] ? (
-                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className="no-underline hover:underline" style={{ color: done ? '#8A8A8A' : '#2F6B4F' }}>
+                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className={`no-underline hover:underline ${done ? 'text-brand-ink-muted' : 'text-brand-dl'}`}>
                                         {topic.name} <span className="text-[10px] opacity-40">↗</span>
                                       </Link>
                                     ) : (

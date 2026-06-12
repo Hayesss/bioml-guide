@@ -105,24 +105,24 @@ export default function TopicLearnPage() {
     bioinfo: '生物信息学',
   };
 
-  const typeStyles: Record<string, { bg: string; fg: string }> = {
-    ml: { bg: '#E8EDF2', fg: '#1E3A5F' },
-    dl: { bg: '#E8F0E9', fg: '#2D5A3D' },
-    math: { bg: '#F5F5F0', fg: '#8B4513' },
-    bioinfo: { bg: '#E9F5EF', fg: '#2F6B4F' },
+  const typeStyles: Record<string, string> = {
+    ml: 'bg-brand-accent-light text-brand-accent',
+    dl: 'bg-brand-dl-light text-brand-dl',
+    math: 'bg-brand-warm text-brand-error',
+    bioinfo: 'bg-brand-dl-light text-brand-dl',
   };
 
   const sectionBgColors: Record<string, string> = {
-    analogy: '#FFF8E7',
-    concept: '#FFFFFF',
-    expert: '#FFFDF5',
-    how: '#FAFAFA',
-    bio: '#E8F0E9',
-    code: '#E8EDF2',
-    check: '#F5F0FF',
+    analogy: 'bg-amber-50',
+    concept: 'bg-white',
+    expert: 'bg-yellow-50',
+    how: 'bg-brand-off-white',
+    bio: 'bg-brand-dl-light',
+    code: 'bg-brand-accent-light',
+    check: 'bg-purple-50',
   };
 
-  const typeStyle = typeStyles[topic.type] ?? { bg: '#E8EDF2', fg: '#1E3A5F' };
+  const typeStyle = typeStyles[topic.type] ?? 'bg-brand-accent-light text-brand-accent';
 
   return (
     <div className="max-w-[800px] mx-auto py-8 px-6">
@@ -138,13 +138,7 @@ export default function TopicLearnPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <span
-            className="text-xs font-medium px-2.5 py-0.5 rounded"
-            style={{
-              backgroundColor: typeStyle.bg,
-              color: typeStyle.fg,
-            }}
-          >
+          <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${typeStyle}`}>
             {typeNames[topic.type] || topic.type}
           </span>
           <span className="text-xs px-2 py-0.5 rounded bg-brand-border-light text-brand-ink-muted">
@@ -200,8 +194,7 @@ export default function TopicLearnPage() {
         {topic.sections.map((section, i) => (
           <div
             key={i}
-            className="border rounded-lg overflow-hidden border-brand-border-light"
-            style={{ backgroundColor: sectionBgColors[section.type] || '#FFFFFF' }}
+            className={`border rounded-lg overflow-hidden border-brand-border-light ${sectionBgColors[section.type] || 'bg-white'}`}
           >
             <div className="px-5 py-3 border-b border-brand-border-light flex items-center gap-2">
               <span className="text-lg">{section.icon}</span>

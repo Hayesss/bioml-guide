@@ -38,8 +38,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
               <Link
                 key={item.path}
                 to={item.path}
-                className="relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors"
-                style={{ color: active ? '#1E3A5F' : '#4A4A4A' }}
+                className={`relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
               >
                 <item.icon size={15} />
                 {item.label}
@@ -77,8 +76,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
               <Link
                 key={item.path}
                 to={item.path}
-                className="flex items-center gap-2 py-1.5 text-sm font-medium no-underline"
-                style={{ color: active ? '#1E3A5F' : '#4A4A4A' }}
+                className={`flex items-center gap-2 py-1.5 text-sm font-medium no-underline ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
                 onClick={() => setMobileOpen(false)}
               >
                 <item.icon size={15} />

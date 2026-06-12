@@ -81,12 +81,7 @@ export default function ResourcesPage() {
               <button
                 key={c}
                 onClick={() => setCat(c)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-                style={{
-                  backgroundColor: cat === c ? '#1E3A5F' : '#FFFFFF',
-                  color: cat === c ? 'white' : '#4A4A4A',
-                  borderColor: cat === c ? '#1E3A5F' : '#E5E5E5',
-                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${cat === c ? 'bg-brand-accent text-white border-brand-accent' : 'bg-white text-brand-ink-light border-brand-border'}`}
               >
                 {c}
               </button>
@@ -105,12 +100,7 @@ export default function ResourcesPage() {
                 <button
                   key={l}
                   onClick={() => setLevel(l)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-                  style={{
-                    backgroundColor: level === l ? '#1E3A5F' : '#FFFFFF',
-                    color: level === l ? 'white' : '#4A4A4A',
-                    borderColor: level === l ? '#1E3A5F' : '#E5E5E5',
-                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${level === l ? 'bg-brand-accent text-white border-brand-accent' : 'bg-white text-brand-ink-light border-brand-border'}`}
                 >
                   {l}
                 </button>
@@ -128,12 +118,7 @@ export default function ResourcesPage() {
                 <button
                   key={c}
                   onClick={() => setCost(c)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-                  style={{
-                    backgroundColor: cost === c ? '#1E3A5F' : '#FFFFFF',
-                    color: cost === c ? 'white' : '#4A4A4A',
-                    borderColor: cost === c ? '#1E3A5F' : '#E5E5E5',
-                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${cost === c ? 'bg-brand-accent text-white border-brand-accent' : 'bg-white text-brand-ink-light border-brand-border'}`}
                 >
                   {c}
                 </button>
@@ -163,11 +148,7 @@ export default function ResourcesPage() {
                 </span>
               </div>
               <span
-                className="text-xs px-2 py-0.5 rounded"
-                style={{
-                  backgroundColor: r.cost === '免费' ? '#E8F0E9' : '#F5F5F0',
-                  color: r.cost === '免费' ? '#2D5A3D' : '#8A8A8A',
-                }}
+                className={`text-xs px-2 py-0.5 rounded ${r.cost === '免费' ? 'bg-brand-dl-light text-brand-dl' : 'bg-brand-warm text-brand-ink-muted'}`}
               >
                 {r.cost}
               </span>

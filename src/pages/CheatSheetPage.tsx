@@ -5,7 +5,7 @@ const sections = [
   {
     icon: Terminal,
     title: '环境一键搭建',
-    color: '#1E3A5F',
+    color: 'text-brand-accent',
     items: [
       {
         label: 'Conda 环境',
@@ -19,7 +19,7 @@ pip install deepchem rdkit jupyterlab wandb`,
   {
     icon: Database,
     title: '数据加载速查',
-    color: '#2D5A3D',
+    color: 'text-brand-dl',
     items: [
       {
         label: 'DNA 序列 (FASTA)',
@@ -56,7 +56,7 @@ print(f"Atoms: {mol.GetNumAtoms()}")`,
   {
     icon: Terminal,
     title: 'NGS / 多组学流程',
-    color: '#2F6B4F',
+    color: 'text-brand-dl',
     items: [
       {
         label: 'FastQC/MultiQC',
@@ -123,7 +123,7 @@ write.csv(as.data.frame(anno), "results/peak_annotation.csv")`,
   {
     icon: Code,
     title: 'ML 常用模式',
-    color: '#1E3A5F',
+    color: 'text-brand-accent',
     items: [
       {
         label: '训练/测试划分 + 交叉验证',
@@ -160,7 +160,7 @@ shap.summary_plot(shap_values, X_test, feature_names=features)`,
   {
     icon: Zap,
     title: 'DL 常用模式',
-    color: '#5B3A7B',
+    color: 'text-brand-purple',
     items: [
       {
         label: 'PyTorch 训练循环',
@@ -205,7 +205,7 @@ adata.obsm["X_scVI"] = model.get_latent_representation()`,
   {
     icon: Calculator,
     title: '数学公式 → 代码',
-    color: '#8B4513',
+    color: 'text-brand-error',
     items: [
       {
         label: 'One-Hot 编码 DNA 序列',
@@ -254,7 +254,7 @@ explained_var = S[:k]**2 / np.sum(S**2)`,
   {
     icon: Zap,
     title: '生物信息学特有操作',
-    color: '#4A6741',
+    color: 'text-brand-dl',
     items: [
       {
         label: 'DNA k-mer 特征提取',
@@ -321,7 +321,7 @@ export default function CheatSheetPage() {
         {sections.map((section) => (
           <section key={section.title}>
             <div className="flex items-center gap-2.5 mb-4">
-              <section.icon size={18} style={{ color: section.color }} />
+              <section.icon size={18} className={section.color} />
               <h2 className="text-lg font-bold text-brand-ink">{section.title}</h2>
             </div>
             <div className="space-y-3">

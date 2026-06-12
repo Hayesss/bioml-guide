@@ -100,12 +100,7 @@ export default function ToolsPage() {
             <button
               key={c}
               onClick={() => setActiveCat(c)}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-              style={{
-                backgroundColor: activeCat === c ? '#1E3A5F' : '#FFFFFF',
-                color: activeCat === c ? 'white' : '#4A4A4A',
-                borderColor: activeCat === c ? '#1E3A5F' : '#E5E5E5',
-              }}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${activeCat === c ? 'bg-brand-accent text-white border-brand-accent' : 'bg-white text-brand-ink-light border-brand-border'}`}
             >
               {c}
             </button>
@@ -174,15 +169,11 @@ export default function ToolsPage() {
               <div className="mt-2.5 flex items-center gap-1.5">
                 <span className="text-xs text-brand-ink-muted">难度:</span>
                 <span
-                  className="text-xs px-2 py-0.5 rounded font-medium"
-                  style={{
-                    backgroundColor:
-                      tool.difficulty === '入门' ? '#E8F0E9' :
-                      tool.difficulty === '中级' ? '#E8EDF2' : '#F5F5F0',
-                    color:
-                      tool.difficulty === '入门' ? '#2D5A3D' :
-                      tool.difficulty === '中级' ? '#1E3A5F' : '#4A4A4A',
-                  }}
+                  className={`text-xs px-2 py-0.5 rounded font-medium ${
+                    tool.difficulty === '入门' ? 'bg-brand-dl-light text-brand-dl' :
+                    tool.difficulty === '中级' ? 'bg-brand-accent-light text-brand-accent' :
+                    'bg-brand-warm text-brand-ink-light'
+                  }`}
                 >
                   {tool.difficulty}
                 </span>

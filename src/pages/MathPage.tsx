@@ -169,11 +169,7 @@ export default function MathPage() {
                   <td className="px-4 py-3 font-medium text-brand-ink">{row.name}</td>
                   <td className="px-4 py-3">
                     <span
-                      className="text-xs px-2 py-0.5 rounded"
-                      style={{
-                        backgroundColor: row.diff === '入门' ? '#E8F0E9' : '#E8EDF2',
-                        color: row.diff === '入门' ? '#2D5A3D' : '#1E3A5F',
-                      }}
+                      className={`text-xs px-2 py-0.5 rounded ${row.diff === '入门' ? 'bg-brand-dl-light text-brand-dl' : 'bg-brand-accent-light text-brand-accent'}`}
                     >
                       {row.diff}
                     </span>

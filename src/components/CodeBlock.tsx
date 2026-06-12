@@ -64,7 +64,7 @@ export default function CodeBlock({ code, label, language = 'python', collapsibl
           {({ style, tokens, getLineProps, getTokenProps }) => (
             <pre
               className="m-0 px-3 py-2.5 text-xs overflow-x-auto bg-brand-off-white"
-              style={{ ...style, whiteSpace: 'pre', backgroundColor: '#FAFAFA' }}
+              style={{ ...style, whiteSpace: 'pre' }}
             >
               {tokens.map((line, i) => (
                 <div key={i} {...getLineProps({ line, key: i })}>
