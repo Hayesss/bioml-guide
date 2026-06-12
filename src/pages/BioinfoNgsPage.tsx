@@ -71,6 +71,17 @@ const omicsTabs: OmicsTab[] = [
     topicKeys: ['cuttag-analysis', 'atacseq-analysis', 'bulk-hic-analysis', 'single-cell-hic'],
   },
   {
+    id: 'single-cell',
+    label: '单细胞组学',
+    icon: <Microscope size={15} />,
+    description: '单细胞转录组全流程分析：预处理、聚类、注释、轨迹、通讯、GRN、多组学整合',
+    topicKeys: [
+      'single-preprocessing', 'single-clustering', 'single-annotation',
+      'single-trajectory', 'single-communication', 'single-grn',
+      'single-downstream', 'single-multiomics', 'single-spatial'
+    ],
+  },
+  {
     id: 'multiomics',
     label: '多组学整合',
     icon: <Layers size={15} />,
@@ -104,8 +115,8 @@ export default function BioinfoNgsPage() {
           <h1 className="text-3xl font-bold text-brand-ink">生信NGS流程</h1>
         </div>
         <p className="text-base text-brand-ink-muted max-w-[800px]" style={{ lineHeight: 1.8 }}>
-          覆盖转录组学（RNA-seq）、表观组学（CUT&Tag / ATAC-seq / Hi-C）和多组学整合的完整生信分析流程。
-          每个专题包含可执行的代码、最佳实践和AI Skill支持。
+          覆盖转录组学、表观组学、单细胞组学和多组学整合的完整生信分析流程。
+          通过顶部Tab切换组学类型，每个专题包含可执行的代码、最佳实践和AI Skill支持。
         </p>
       </header>
 
@@ -235,39 +246,35 @@ export default function BioinfoNgsPage() {
         </section>
       )}
 
-      {/* Other omics portals */}
+      {/* Single-cell full page link — visible on single-cell tab */}
+      {activeTab === 'single-cell' && (
+        <section className="border rounded-lg p-5 border-brand-border bg-brand-accent-light">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-brand-ink mb-1">单细胞组学完整专题</h2>
+              <p className="text-xs text-brand-ink-light" style={{ lineHeight: 1.6 }}>
+                包含9个学习专题的完整内容、11个AI Skill参考和Skills快速参考表。支持可展开的详细文档内容。
+              </p>
+            </div>
+            <Link
+              to="/single-cell"
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand-accent text-white no-underline hover:opacity-90 transition-opacity"
+            >
+              进入完整专题 <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Foundation Models — standalone section */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Microscope size={17} className="text-brand-dl" />
-            <h2 className="text-lg font-bold text-brand-ink">其他组学专题</h2>
+            <Sparkles size={17} className="text-brand-accent" />
+            <h2 className="text-lg font-bold text-brand-ink">单细胞基础模型</h2>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Link
-            to="/single-cell"
-            className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
-          >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-brand-accent">
-                  <Microscope size={13} />
-                </span>
-                <h3 className="text-sm font-semibold text-brand-ink">单细胞组学分析</h3>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
-                专题
-              </span>
-            </div>
-            <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
-              基于 OmicVerse 的单细胞转录组全流程分析：预处理、聚类、注释、轨迹推断、RNA速度、
-              细胞通讯、基因调控网络、多组学整合与空间映射。配备11个AI Skill支持自动化分析。
-            </p>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-brand-dl">
-              进入专题
-              <ArrowRight size={13} />
-            </div>
-          </Link>
           <Link
             to="/foundation-models"
             className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
@@ -277,7 +284,7 @@ export default function BioinfoNgsPage() {
                 <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-brand-accent">
                   <Sparkles size={13} />
                 </span>
-                <h3 className="text-sm font-semibold text-brand-ink">单细胞基础模型</h3>
+                <h3 className="text-sm font-semibold text-brand-ink">单细胞基础模型 (Foundation Models)</h3>
               </div>
               <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
                 专题
