@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers, Microscope } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch } from 'lucide-react';
 import { useData } from '../hooks/useData';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorDisplay from '../components/ErrorDisplay';
 
 interface TopicSection {
   type: string;
@@ -17,8 +20,12 @@ interface WorkflowModule {
   inputs: string[];
   outputs: string[];
   tools: string[];
+  key_parameters?: string[];
   qc_metrics: string[];
   decision_rules: string[];
+  failure_modes?: string[];
+  upstream_modules?: string[];
+  downstream_modules?: string[];
   cross_omics_interfaces: string[];
   ml_dl_connection: string;
 }
@@ -40,45 +47,97 @@ interface TopicsData {
   topics: Topic[];
 }
 
-const ngsTopicKeys = [
-  'ngs-fastq-qc',
-  'genome-alignment',
-  'count-matrix',
-  'cuttag-analysis',
-  'rnaseq-deseq2',
-  'atacseq-analysis',
-  'multiomics-integration',
+interface OmicsTab {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+  topicKeys: string[];
+}
+
+const omicsTabs: OmicsTab[] = [
+  {
+    id: 'transcriptomics',
+    label: '转录组学',
+    icon: <Dna size={15} />,
+    description: '从 FASTQ 到差异表达基因的完整 RNA-seq 分析流程',
+    topicKeys: ['ngs-fastq-qc', 'genome-alignment', 'count-matrix', 'rnaseq-deseq2'],
+  },
+  {
+    id: 'epigenomics',
+    label: '表观组学',
+    icon: <GitBranch size={15} />,
+    description: 'CUT&Tag 组蛋白修饰、ATAC-seq 染色质可及性、Hi-C 三维基因组',
+    topicKeys: ['cuttag-analysis', 'atacseq-analysis', 'bulk-hic-analysis', 'single-cell-hic'],
+  },
+  {
+    id: 'multiomics',
+    label: '多组学整合',
+    icon: <Layers size={15} />,
+    description: '跨组学数据整合与接口规范',
+    topicKeys: ['multiomics-integration'],
+  },
 ];
 
 export default function BioinfoNgsPage() {
   const { data, loading, error } = useData<TopicsData>('topics');
+  const [activeTab, setActiveTab] = useState('epigenomics');
 
-  if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
-  if (error || !data) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;
+  if (loading) return <LoadingSpinner />;
+  if (error || !data) return <ErrorDisplay message={error || '数据加载失败'} />;
 
-  const topics = ngsTopicKeys
+  const activeOmics = omicsTabs.find((t) => t.id === activeTab) ?? omicsTabs[0]!;
+  const topics = activeOmics.topicKeys
     .map((key) => data.topics.find((topic) => topic.key === key))
     .filter((topic): topic is Topic => Boolean(topic));
-  const cuttag = data.topics.find((topic) => topic.key === 'cuttag-analysis');
-  const integration = data.topics.find((topic) => topic.key === 'multiomics-integration');
+
+  // Collect workflow modules from all visible topics
+  const workflowTopics = topics.filter((t) => t.workflowModules && t.workflowModules.length > 0);
+  const integration = topics.find((t) => t.key === 'multiomics-integration');
 
   return (
     <div className="space-y-10">
+      {/* Header */}
       <header>
         <div className="flex items-center gap-2 mb-3">
-          <Dna size={20} className="text-[#2F6B4F]" />
+          <Dna size={20} className="text-brand-dl" />
           <h1 className="text-3xl font-bold text-brand-ink">生信NGS流程</h1>
         </div>
-        <p className="text-base text-brand-ink-muted max-w-[760px]" style={{ lineHeight: 1.8 }}>
-          从 FASTQ QC、参考基因组比对、count matrix，到 CUT&Tag、RNA-seq、ATAC-seq 和多组学接口。
-          这个页面把分散专题组织成一条可执行的 NGS workflow。
+        <p className="text-base text-brand-ink-muted max-w-[800px]" style={{ lineHeight: 1.8 }}>
+          覆盖转录组学（RNA-seq）、表观组学（CUT&Tag / ATAC-seq / Hi-C）和多组学整合的完整生信分析流程。
+          每个专题包含可执行的代码、最佳实践和AI Skill支持。
         </p>
       </header>
 
+      {/* Omics Type Selector */}
+      <section>
+        <div className="flex flex-wrap gap-2 mb-5">
+          {omicsTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                activeTab === tab.id
+                  ? 'bg-brand-accent text-white border-brand-accent'
+                  : 'bg-white text-brand-ink-light border-brand-border hover:bg-brand-off-white'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-brand-ink-muted" style={{ lineHeight: 1.6 }}>
+          {activeOmics.description}
+        </p>
+      </section>
+
+      {/* Topic Cards Grid */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Layers size={17} className="text-brand-accent" />
-          <h2 className="text-lg font-bold text-brand-ink">流程总览</h2>
+          <h2 className="text-lg font-bold text-brand-ink">专题导航</h2>
+          <span className="text-[11px] text-brand-ink-extra-muted ml-2">点击进入完整教程</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {topics.map((topic, index) => (
@@ -89,19 +148,19 @@ export default function BioinfoNgsPage() {
             >
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-[#2F6B4F]">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-brand-accent">
                     {index + 1}
                   </span>
                   <h3 className="text-sm font-semibold text-brand-ink">{topic.name}</h3>
                 </div>
                 <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
-                  阶段{topic.stage}
+                  {topic.difficulty}
                 </span>
               </div>
               <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
                 {topic.sections.find((section) => section.type === 'concept')?.content?.replace(/<[^>]*>/g, '').slice(0, 120) || topic.difficulty}
               </p>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-[#2F6B4F]">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-brand-dl">
                 进入专题
                 <ArrowRight size={13} />
               </div>
@@ -110,79 +169,52 @@ export default function BioinfoNgsPage() {
         </div>
       </section>
 
-      {/* 其他组学入口 */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
+      {/* Workflow Modules — shown per topic with modules */}
+      {workflowTopics.length > 0 && (
+        <section className="space-y-8">
           <div className="flex items-center gap-2">
-            <Microscope size={17} className="text-[#2F6B4F]" />
-            <h2 className="text-lg font-bold text-brand-ink">组学专题</h2>
+            <Database size={17} className="text-brand-accent" />
+            <h2 className="text-lg font-bold text-brand-ink">模块化流程卡片</h2>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Link
-            to="/single-cell"
-            className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
-          >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-[#2F6B4F]">
-                  <Microscope size={13} />
-                </span>
-                <h3 className="text-sm font-semibold text-brand-ink">单细胞组学分析</h3>
+          {workflowTopics.map((wt) => (
+            <div key={wt.key}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-brand-ink">{wt.name}</h3>
+                <Link to={`/learn/${wt.key}`} className="text-xs no-underline hover:underline text-brand-accent">
+                  查看完整专题
+                </Link>
               </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
-                专题
-              </span>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {wt.workflowModules!.map((module) => (
+                  <article key={module.module_id} className="border rounded-lg p-4 border-brand-border bg-white hover:shadow-sm transition-shadow">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h4 className="text-sm font-semibold text-brand-ink">{module.module_name}</h4>
+                        <p className="text-xs mt-0.5 text-brand-ink-muted">{module.module_type} · {module.omics_type}</p>
+                      </div>
+                      <Check size={14} className="text-brand-dl shrink-0" />
+                    </div>
+                    <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
+                      {module.biological_question}
+                    </p>
+                    <ChipLine label="输入" items={module.inputs} />
+                    <ChipLine label="输出" items={module.outputs} />
+                    <ChipLine label="工具" items={module.tools} />
+                    {module.cross_omics_interfaces.length > 0 && (
+                      <ChipLine label="跨组学接口" items={module.cross_omics_interfaces} />
+                    )}
+                    <p className="text-xs text-brand-ink-muted mt-2 pt-2 border-t border-brand-border-light" style={{ lineHeight: 1.5 }}>
+                      <span className="font-medium text-brand-ink-light">ML/DL:</span> {module.ml_dl_connection}
+                    </p>
+                  </article>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
-              基于 OmicVerse 的单细胞转录组全流程分析：预处理、聚类、注释、轨迹推断、RNA速度、
-              细胞通讯、基因调控网络、多组学整合与空间映射。配备11个AI Skill支持自动化分析。
-            </p>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[#2F6B4F]">
-              进入专题
-              <ArrowRight size={13} />
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {cuttag?.workflowModules && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Database size={17} className="text-[#2F6B4F]" />
-              <h2 className="text-lg font-bold text-brand-ink">CUT&Tag 模块化流程卡片</h2>
-            </div>
-            <Link to="/learn/cuttag-analysis" className="text-xs no-underline hover:underline text-brand-accent">
-              查看完整专题
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {cuttag.workflowModules.map((module) => (
-              <article key={module.module_id} className="border rounded-lg p-4 border-brand-border bg-white">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <h3 className="text-sm font-semibold text-brand-ink">{module.module_name}</h3>
-                    <p className="text-xs mt-0.5 text-brand-ink-muted">{module.module_type} · {module.omics_type}</p>
-                  </div>
-                  <Check size={14} className="text-[#2F6B4F] shrink-0" />
-                </div>
-                <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
-                  {module.biological_question}
-                </p>
-                <ChipLine label="输入" items={module.inputs} />
-                <ChipLine label="输出" items={module.outputs} />
-                <ChipLine label="工具" items={module.tools} />
-                <ChipLine label="接口" items={module.cross_omics_interfaces} />
-                <p className="text-xs text-brand-ink-muted mt-2" style={{ lineHeight: 1.5 }}>
-                  <span className="font-medium text-brand-ink-light">ML/DL:</span> {module.ml_dl_connection}
-                </p>
-              </article>
-            ))}
-          </div>
+          ))}
         </section>
       )}
 
+      {/* Multiomics Interface Spec */}
       {integration?.interfaceSpec && (
         <section className="border rounded-lg p-5 border-brand-border bg-brand-off-white">
           <h2 className="text-lg font-bold mb-4 text-brand-ink">多组学接口规范</h2>
@@ -202,6 +234,42 @@ export default function BioinfoNgsPage() {
           </div>
         </section>
       )}
+
+      {/* Other omics portals */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Microscope size={17} className="text-brand-dl" />
+            <h2 className="text-lg font-bold text-brand-ink">其他组学专题</h2>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Link
+            to="/single-cell"
+            className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-brand-accent">
+                  <Microscope size={13} />
+                </span>
+                <h3 className="text-sm font-semibold text-brand-ink">单细胞组学分析</h3>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
+                专题
+              </span>
+            </div>
+            <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
+              基于 OmicVerse 的单细胞转录组全流程分析：预处理、聚类、注释、轨迹推断、RNA速度、
+              细胞通讯、基因调控网络、多组学整合与空间映射。配备11个AI Skill支持自动化分析。
+            </p>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-brand-dl">
+              进入专题
+              <ArrowRight size={13} />
+            </div>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

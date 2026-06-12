@@ -96,6 +96,8 @@
     "cuttag-analysis",
     "rnaseq-deseq2",
     "atacseq-analysis",
+    "bulk-hic-analysis",
+    "single-cell-hic",
     "multiomics-integration",
     "single-preprocessing",
     "single-clustering",
@@ -7535,6 +7537,314 @@
           "icon": "技能",
           "title": "关联 Skill：single-to-spatial-mapping / spatial-tutorials",
           "content": "<p><strong>Skill 功能：</strong><code>/single-to-spatial-mapping</code> — Single2Spatial深度森林映射；<code>/spatial-tutorials</code> — 空间转录组全景教程（Visium/HD/Stereo-seq/Slide-seq预处理、去卷积、聚类、整合）</p><p><strong>调用方式：</strong>单细胞到空间映射用 <code>/single-to-spatial-mapping</code>，空间数据预处理和分析用 <code>/spatial-tutorials</code>。</p>"
+        }
+      ]
+    },
+    {
+      "key": "bulk-hic-analysis",
+      "name": "Bulk Hi-C 分析：接触图谱、区室与TAD",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "ngs-fastq-qc",
+        "genome-alignment"
+      ],
+      "nextTopic": "single-cell-hic",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Hi-C像绘制城市的3D交通流量图：</strong>显微镜能看清单个建筑（基因），但看不清建筑之间的\"街道\"和\"区域\"如何连接。Hi-C通过化学交联捕获空间中邻近的DNA片段，绘制出全基因组的3D相互作用图谱——哪些区域在空间中靠近（区室A/B），哪些区域形成局部\"社区\"（TAD），以及哪些\"建筑物\"之间有直接\"通道\"（染色质环）。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "Hi-C 与 3D 基因组",
+          "content": "<p><strong>Hi-C（High-throughput Chromosome Conformation Capture）</strong>是捕获全基因组染色质3D结构的核心技术。实验流程：甲醛交联固定空间邻近的DNA片段→限制酶酶切→生物素标记→近距离连接→纯化→高通量测序→生成接触矩阵。核心分析层次：</p><ul><li><strong>接触图谱（Contact Map）：</strong>原始Hi-C数据经比对、过滤、binning后生成对称矩阵，矩阵元素(i,j)表示基因组位点i和j之间的接触频率</li><li><strong>A/B区室（Compartments）：</strong>通过PCA分析接触矩阵的第一主成分（PC1），将基因组分为活跃的A区室（开放染色质，基因富集）和抑制的B区室（封闭染色质，基因贫乏）</li><li><strong>TAD（Topologically Associating Domains）：</strong>基因组中自我相互作用的区域（~100kb-1Mb），TAD内部接触频率远高于TAD之间，是基因调控的基本结构单元</li><li><strong>染色质环（Loops）：</strong>增强子-启动子等远距离调控元件之间的点对点接触</li></ul>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "3D基因组在疾病研究中的应用",
+          "content": "<p>3D基因组结构异常与多种疾病相关：<strong>TAD边界破坏</strong>可导致增强子\"劫持\"（enhancer hijacking）——增强子跨过TAD边界激活原本不应调控的癌基因（如髓母细胞瘤中的GFI1激活）；<strong>区室切换（Compartment switching）</strong>在细胞分化和癌症中常见，反映大规模染色质状态变化；<strong>染色质环异常</strong>可影响基因表达调控网络。Hi-C分析在癌症、发育疾病和神经退行性疾病研究中具有重要价值。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "OmicVerse Bulk Hi-C 分析",
+          "code": "import omicverse as ov\nimport numpy as np\n\n# 1. 加载Hi-C接触矩阵\nhic_data = ov.epi.load_hic(\n    'data/sample.hic',\n    resolution=25000,  # 25kb分辨率\n    normalization='KR'  # Knight-Ruiz标准化\n)\n\n# 2. 生成接触图谱\nov.epi.plot_contact_map(\n    hic_data,\n    chrom='chr1',\n    start=0,\n    end=5000000,\n    cmap='RdBu_r'\n)\n\n# 3. A/B区室分析 (PCA)\ncompartments = ov.epi.call_compartments(\n    hic_data,\n    method='pca',\n    reference='gc_content'  # GC含量校正\n)\n\n# 4. TAD调用\nfrom ov.epi import call_tads\ntads = call_tads(\n    hic_data,\n    method='directionality_index',\n    window=50000\n)\n\n# 5. 可视化区室和TAD\nov.epi.plot_compartments(compartments, chrom='chr1')\nov.epi.plot_tads(tads, chrom='chr1:0-5000000')"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "Hi-C分析最佳实践",
+          "content": "<p><strong>分辨率选择：</strong>Hi-C分辨率取决于测序深度——一般建议至少1亿reads实现25kb分辨率，5亿reads实现5kb分辨率。<strong>标准化方法：</strong>KR（Knight-Ruiz）标准化是最常用的矩阵平衡方法，适用于大多数分析；ICE（Iterative Correction and Eigenvector decomposition）是替代方案。<strong>区室分析：</strong>PC1的正负对应A/B区室，需要参考基因密度或GC含量来确定符号方向（GC含量高的通常是A区室）。<strong>TAD调用：</strong>方向性指数（Directionality Index）和绝缘分数（Insulation Score）是两种主流TAD检测方法，推荐用多种方法交叉验证。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "Hi-C分析工具推荐",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>用途</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>语言</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse集成</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>cooler</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>Hi-C数据存储（.cool/.mcool格式）</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.epi</code>模块使用cooler作为后端</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>cooltools</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>区室、TAD、insulation分析</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'>ov.epi封装调用</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>HiCExplorer</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>全面的Hi-C分析套件</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'>外部调用</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>juicer</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>Hi-C数据处理平台</td><td style='padding:6px;border:1px solid #E0E0E0;'>Java</td><td style='padding:6px;border:1px solid #E0E0E0;'>预处理用，下游在OmicVerse</td></tr></tbody></table>"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Hi-C接触矩阵中PC1的正负分别对应什么？",
+              "options": [
+                "PC1正值=A区室（开放），PC1负值=B区室（封闭）",
+                "两个方向都代表同一区室",
+                "PC1与区室无关",
+                "PC1正负只代表测序深度的差异"
+              ],
+              "answer": 0,
+              "explanation": "接触矩阵PCA的第一主成分（PC1）将基因组分为A区室（正值，对应开放染色质、基因富集区域）和B区室（负值，对应封闭染色质、基因贫乏区域）。需要用基因密度或GC含量验证方向。"
+            },
+            {
+              "q": "TAD的典型大小范围是多少？",
+              "options": [
+                "1-10kb",
+                "100kb-1Mb",
+                "10-100Mb",
+                "与染色体大小相同"
+              ],
+              "answer": 1,
+              "explanation": "TAD（拓扑关联结构域）通常大小在100kb到1Mb之间。小于100kb的结构可能是sub-TAD或染色质环，大于1Mb可能是区室级别的结构。TAD边界通常由CTCF和cohesin蛋白结合定义。"
+            }
+          ]
+        }
+      ],
+      "workflowModules": [
+        {
+          "module_id": "hic_alignment_qc",
+          "module_name": "Hi-C 比对与QC",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "Hi-C reads是否成功比对？接触矩阵质量是否足够？",
+          "inputs": [
+            "paired-end FASTQ",
+            "参考基因组",
+            "限制酶位点文件"
+          ],
+          "outputs": [
+            "valid pairs (.pairs)",
+            "接触矩阵 (.cool)",
+            "QC报告"
+          ],
+          "tools": [
+            "pairtools",
+            "cooler",
+            "HiC-Pro",
+            "distiller"
+          ],
+          "key_parameters": [
+            "resolution=25000",
+            "mapq>=30",
+            "--remove_duplicates"
+          ],
+          "qc_metrics": [
+            "cis/trans比例",
+            "valid pairs比例",
+            "接触矩阵稀疏度"
+          ],
+          "decision_rules": [
+            "cis/trans > 0.7",
+            "valid pairs > 50%"
+          ],
+          "failure_modes": [
+            "酶切位点偏好",
+            "连接效率低",
+            "PCR重复"
+          ],
+          "upstream_modules": [
+            "ngs-fastq-qc"
+          ],
+          "downstream_modules": [
+            "hic_compartment",
+            "hic_tad",
+            "hic_loop"
+          ],
+          "cross_omics_interfaces": [
+            "scHi-C embedding",
+            "scATAC co-accessibility"
+          ],
+          "ml_dl_connection": "Hi-C接触矩阵可用CNN/autoencoder进行增强（HiCPlus/DeepHiC）或3D结构重建",
+          "citations": [
+            "Rao2014",
+            "Lieberman-Aiden2009"
+          ]
+        },
+        {
+          "module_id": "hic_compartment",
+          "module_name": "A/B 区室分析",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "基因组哪些区域处于活跃的A区室或抑制的B区室？细胞状态转变中区室如何变化？",
+          "inputs": [
+            "标准化接触矩阵 (.cool)",
+            "基因密度/GC含量参考"
+          ],
+          "outputs": [
+            "区室bedGraph",
+            "区室切换BED",
+            "saddle plot"
+          ],
+          "tools": [
+            "cooltools",
+            "ov.epi.call_compartments"
+          ],
+          "key_parameters": [
+            "eigenvector=PC1",
+            "reference_track=gc_content"
+          ],
+          "qc_metrics": [
+            "区室特征值方差解释",
+            "与ChIP-seq/RNA-seq一致性"
+          ],
+          "decision_rules": [
+            "PC1与基因密度相关系数>0.3",
+            "saddle plot区分度明显"
+          ],
+          "failure_modes": [
+            "低分辨率下区室信号弱",
+            "GC含量偏差未校正"
+          ],
+          "upstream_modules": [
+            "hic_alignment_qc"
+          ],
+          "downstream_modules": [
+            "hic_tad"
+          ],
+          "cross_omics_interfaces": [
+            "ATAC-seq openness",
+            "RNA-seq expression"
+          ],
+          "ml_dl_connection": "区室切换预测可用随机森林或梯度提升树结合多组学特征",
+          "citations": [
+            "Lieberman-Aiden2009",
+            "Fortin2015"
+          ]
+        },
+        {
+          "module_id": "hic_tad",
+          "module_name": "TAD 检测与边界分析",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "基因组中TAD结构域的位置和边界在哪里？边界富集哪些蛋白结合？",
+          "inputs": [
+            "标准化接触矩阵",
+            "CTCF ChIP-seq peaks（可选）"
+          ],
+          "outputs": [
+            "TAD坐标BED",
+            "TAD边界BED",
+            "绝缘分数track"
+          ],
+          "tools": [
+            "cooltools",
+            "ov.epi.call_tads",
+            "HiCExplorer"
+          ],
+          "key_parameters": [
+            "window=50kb",
+            "min_size=100kb",
+            "insulation_score"
+          ],
+          "qc_metrics": [
+            "TAD数量与分辨率一致性",
+            "边界CTCF富集倍数>2"
+          ],
+          "decision_rules": [
+            "TAD平均大小>100kb",
+            "边界与CTCF结合位点重合>60%"
+          ],
+          "failure_modes": [
+            "分辨率不足导致TAD偏大",
+            "绝缘分数噪声"
+          ],
+          "upstream_modules": [
+            "hic_compartment"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "ATAC-seq footprinting",
+            "ChIP-seq CTCF/cohesin"
+          ],
+          "ml_dl_connection": "TAD边界预测可用CNN（如TADbound）或GNN从序列特征预测",
+          "citations": [
+            "Dixon2012",
+            "Rao2014"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "single-cell-hic",
+      "name": "单细胞 Hi-C：填补与细胞周期嵌入",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "bulk-hic-analysis",
+        "single-preprocessing"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>scHi-C像给每个细胞拍一张3D自拍照：</strong>Bulk Hi-C是1000人合影——你只能看到平均站姿。scHi-C是每个人单独拍照——你可以看到每个细胞的独特3D基因组折叠方式，以及细胞周期不同阶段（拍照时摆的pose）对应的染色质构象变化。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "scHi-C 的挑战与方法",
+          "content": "<p><strong>单细胞Hi-C的核心挑战是极端稀疏性：</strong>单个二倍体细胞只有2个拷贝的每个基因组位点，理论最大接触数远低于Bulk Hi-C。实际scHi-C每个细胞的接触数通常在1万-10万之间（Bulk Hi-C可达数亿），矩阵稀疏度>99%。</p><p><strong>关键分析方法：</strong></p><ul><li><strong>填补（Imputation）：</strong>利用相似细胞的接触模式或深度学习模型预测缺失的接触值。常用方法包括scHiCluster（基于卷积的填补）、Higashi（超图神经网络）、scVI-3D（变分自编码器）</li><li><strong>细胞周期嵌入：</strong>scHi-C接触模式随细胞周期变化——G1期染色质较松散，S期复制中的DNA显示特定模式，M期染色体高度凝聚。OmicVerse将这些动态变化嵌入低维空间进行分析</li><li><strong>单细胞区室和TAD分析：</strong>在填补后的数据上调用Bulk Hi-C的分析方法</li></ul>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "OmicVerse scHi-C 分析",
+          "code": "import omicverse as ov\n\n# 1. 加载多个单细胞的Hi-C接触矩阵\nsc_hic = ov.epi.load_sc_hic(\n    'data/sc_hic_data/',\n    resolution=100000,  # 100kb分辨率（scHi-C通常用较低分辨率）\n    format='cool'\n)\n\n# 2. 填补（Imputation）\nfrom ov.epi import sc_hic_impute\nsc_hic_imputed = sc_hic_impute(\n    sc_hic,\n    method='scHiCluster',  # 基于卷积的填补方法\n    n_components=32,\n    chromosome='chr1'\n)\n\n# 3. 细胞周期嵌入\ncell_cycle_embedding = ov.epi.cell_cycle_embed(\n    sc_hic_imputed,\n    n_neighbors=30,\n    min_dist=0.5\n)\n\n# 4. 可视化细胞周期阶段\nov.pl.embedding(\n    cell_cycle_embedding,\n    basis='umap',\n    color=['cell_cycle_stage', 'replication_score'],\n    frameon='small'\n)\n\n# 5. 单细胞区室分析\nsc_compartments = ov.epi.call_compartments(\n    sc_hic_imputed,\n    per_cell=True,\n    reference='gc_content'\n)"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "scHi-C 分析最佳实践",
+          "content": "<p><strong>分辨率权衡：</strong>scHi-C通常使用100kb-1Mb分辨率（Bulk Hi-C可达5-25kb）。更高分辨率导致矩阵极度稀疏，分析结果不可靠。<strong>填补方法选择：</strong>scHiCluster适合大规模数据集（>100细胞），速度快但假设细胞间相似性；Higashi使用超图神经网络建模高阶关系，适合复杂组织。<strong>细胞周期校正：</strong>scHi-C信号的很大部分变异来自细胞周期——应在细胞周期校正后再进行生物学解释。<strong>与其他单细胞数据整合：</strong>scHi-C嵌入可以与scRNA-seq联合分析，通过MOFA或GLUE整合不同模态。</p>"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么scHi-C需要使用比Bulk Hi-C更低的分辨率？",
+              "options": [
+                "scHi-C测序质量更好",
+                "单个细胞接触数有限，高分辨率会导致矩阵极度稀疏",
+                "低分辨率的生物学意义更大",
+                "scHi-C数据不需要高分辨率"
+              ],
+              "answer": 1,
+              "explanation": "单个二倍体细胞每个位点只有2个拷贝，总接触数通常仅1-10万。使用25kb分辨率时绝大多数bin的接触数为0，矩阵稀疏度>99.9%，无法进行可靠的下游分析。100kb-1Mb分辨率能保证足够的接触密度。"
+            },
+            {
+              "q": "scHi-C填补（imputation）的核心假设是什么？",
+              "options": [
+                "所有细胞的3D结构完全相同",
+                "相似细胞具有相似的3D基因组构象",
+                "填补后的数据完全准确",
+                "不需要任何假设"
+              ],
+              "answer": 1,
+              "explanation": "scHi-C填补方法（如scHiCluster）假设相似细胞（在嵌入空间中邻近）共享相似的染色质构象，因此可以用邻近细胞的聚合信息填补目标细胞的缺失接触。这一假设在细胞类型内通常是合理的。"
+            }
+          ]
         }
       ]
     }
