@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Microscope, Database, GitBranch, Network, Dna, BoxSelect, Workflow, BarChart3, Hash, ArrowLeftRight, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
+import { allSkillsData, type FullSkillData } from '../data/skillsContent';
 
 interface SkillRef {
   name: string;
@@ -523,190 +525,8 @@ export default function SingleCellPage() {
 }
 
 // ============================================================
-// Expandable Skills Table Component
+// Expandable Skills Table Component (full content from SKILL.md)
 // ============================================================
-
-interface SkillDetail {
-  name: string;
-  desc: string;
-  cmd: string;
-  scenario: string;
-  overview: string;
-  capabilities: string[];
-  keyApi: string[];
-}
-
-const skillsData: SkillDetail[] = [
-  {
-    name: 'single-preprocessing',
-    desc: 'QC、标准化、HVG、PCA、UMAP/tSNE嵌入管线',
-    cmd: '/single-preprocessing',
-    scenario: '任何单细胞分析的第一步，数据清洗和基础嵌入',
-    overview: '基于OmicVerse的t_preprocess笔记本系列，涵盖10x PBMC3k数据集的标准预处理流程。支持三种计算模式：纯CPU（Scanpy标准）、CPU-GPU混合（OmicVerse >=1.7.0）和纯GPU（RAPIDS 24.04加速）。',
-    capabilities: [
-      '质控过滤：线粒体比例、UMI数、检测基因数阈值，Scrublet双细胞检测',
-      '标准化：shift-log + Pearson残差HVG选择（小批次安全，无需LOESS）',
-      '原始计数层存储与恢复（ov.utils.store_layers / retrieve_layers）',
-      'PCA降维 + 邻居图构建（CPU/GPU/CAGRA三种后端）',
-      'UMAP / tSNE / MDE / SUDE多种嵌入方法',
-      'Scrublet双细胞检测 + cell cycle scoring'
-    ],
-    keyApi: ['ov.io.read_10x_mtx', 'ov.pp.qc', 'ov.pp.preprocess', 'ov.pp.scale', 'ov.pp.pca', 'ov.pp.neighbors', 'ov.pp.umap']
-  },
-  {
-    name: 'single-clustering',
-    desc: 'Leiden/Louvain/scICE聚类 + Harmony/scVI/BBKNN批次校正',
-    cmd: '/single-clustering',
-    scenario: '细胞分群、去除批次效应、跨样本整合',
-    overview: '基于t_cluster和t_single_batch教程，提供多种聚类算法和批次校正方案。根据sc-best-practices建议：Leiden是推荐算法（优于已停止维护的Louvain），分辨率参数从低到高探索（0.25/0.5/1.0），n_iterations=2平衡质量与速度。',
-    capabilities: [
-      'Leiden/Louvain聚类（igraph后端，支持GPU加速，50-100x速度提升）',
-      'scICE信息熵聚类：自动确定最佳聚类数',
-      'GMM高斯混合模型：概率软分配',
-      'Harmony PCA空间迭代校正（快速，适合中小数据集）',
-      'scVI深度生成模型（复杂非线性批次，需GPU）',
-      'BBKNN批次感知图（保留生物异质性）',
-      'Combat线性批次校正（快速，已知批次变量）'
-    ],
-    keyApi: ['ov.pp.leiden', 'ov.single.leiden', 'ov.single.scICE', 'ov.pp.harmony', 'ov.single.bbknn']
-  },
-  {
-    name: 'single-annotation',
-    desc: 'SCSA/MetaTiME/CellVote/CellMatch/GPTAnno注释',
-    cmd: '/single-annotation',
-    scenario: '自动化细胞类型鉴定，支持多种注释策略',
-    overview: '基于t_cellanno、t_metatime、t_cellvote、t_cellmatch、t_gptanno、t_anno_trans六个教程。sc-best-practices强调：自动注释应作为起点而非终点，最终需人工验证标记基因表达——"expression of known marker genes is still the most accepted support for a cell type annotation"。',
-    capabilities: [
-      'SCSA：基于CellMarker/PanglaoDB的标记基因数据库自动注释',
-      'MetaTiME：肿瘤微环境细胞状态鉴定（需要scVI潜在表示）',
-      'CellVote：多注释源（SCSA+GPT+GBI）共识投票，减少单一方法偏差',
-      'CellMatch：映射注释到标准细胞本体（Cell Ontology），支持SentenceTransformer',
-      'GPTAnno：大语言模型基于差异基因推理细胞类型（支持OpenAI/Qwen/Kimi等）',
-      '加权KNN标签迁移：跨模态（RNA→ATAC）的标签传递'
-    ],
-    keyApi: ['ov.single.pySCSA', 'ov.single.MetaTiME', 'ov.single.CellVote', 'ov.single.CellOntologyMapper', 'ov.single.gptcelltype']
-  },
-  {
-    name: 'single-popv-annotation',
-    desc: 'PopV群体注释：10种算法共识投票',
-    cmd: '/single-popv-annotation',
-    scenario: '大规模图谱的群体级别细胞注释',
-    overview: 'PopV整合SCVI、SCANVI、CellTypist、OnClass、随机森林、SVM、XGBoost、BBKNN、Harmony、Scanorama十种算法，通过共识投票确定细胞类型。适合需要与多个参考数据集对齐的大规模图谱项目。支持预训练hub模型。',
-    capabilities: [
-      '10种算法并行注释（深度学习方法 + 传统ML + 图方法）',
-      '共识投票机制：多数票决定最终标签',
-      '预训练hub模型：无需重新训练，直接预测',
-      '不确定性估计：低共识细胞标记为不确定'
-    ],
-    keyApi: ['popv.annotation.annotate_data', 'popv.hub']
-  },
-  {
-    name: 'single-trajectory',
-    desc: 'PAGA/Palantir/VIA轨迹 + scVelo/dynamo RNA速度',
-    cmd: '/single-trajectory',
-    scenario: '发育轨迹、分化路径、RNA速度方向性',
-    overview: '基于多个轨迹和速度教程的综合分析。sc-best-practices指出：伪时间分析的根细胞选择至关重要——应基于生物先验知识指定起始群体。RNA速度需要未剪接/剪接计数（使用STAR --soloFeatures=GeneFull生成）。',
-    capabilities: [
-      'PAGA图抽象：保留拓扑结构的群间关系',
-      'Palantir：扩散映射伪时间 + 分化潜能',
-      'VIA：图自编码器拓扑保持轨迹推断',
-      'scVelo随机/动态模型（标准选择）',
-      'dynamo：代谢标记兼容的速度分析',
-      'latentvelo变分推断 + graphvelo图神经网络',
-      'RNA速度流图（stream plot）和伪时间可视化'
-    ],
-    keyApi: ['ov.single.paga', 'ov.single.palantir', 'ov.single.via', 'ov.single.Velo', 'ov.single.Fate']
-  },
-  {
-    name: 'single-cellfate-analysis',
-    desc: 'CellFateGenie伪时间基因发现、Mellon密度',
-    cmd: '/single-cellfate-analysis',
-    scenario: '发现命运决定基因、密度估计',
-    overview: 'CellFateGenie解决两个核心问题：沿伪时间哪些基因变化最显著？哪些基因特异性驱动特定谱系？分两阶段工作：基因选择（自适应阈值回归迭代筛选）和谱系评分（Mellon密度估计识别低密度过渡区 + 谱系特异性变异评分）。需要预先计算的伪时间列。',
-    capabilities: [
-      '自适应阈值回归（ATR）：迭代去除低系数基因，监控R²找最小基因集',
-      'Mellon密度估计：流形上的密度推断，识别过渡态细胞',
-      '谱系特异性基因评分：区分共同命运 vs 谱系特异命运基因',
-      '多谱系比较：同时分析多个分化路径'
-    ],
-    keyApi: ['ov.single.Fate.cellfategenie', 'ov.single.Fate.mellon_density', 'ov.single.Fate.lineage_score']
-  },
-  {
-    name: 'single-cellphone-db',
-    desc: 'CellPhoneDB v5配体-受体、CellChatViz通讯可视化',
-    cmd: '/single-cellphone-db',
-    scenario: '细胞间信号交流网络分析',
-    overview: '基于CellPhoneDB v5的curated多亚基配体-受体数据库。推荐优先使用ccc_*系列公共API生成出版级可视化，需要方法级别控制时使用CellChatViz。sc-best-practices提醒：通讯强度不等于功能重要性——需要实验验证。',
-    capabilities: [
-      'CellPhoneDB v5统计分析：排列检验评估配体-受体对富集显著性',
-      'ccc_heatmap：细胞类型间通讯强度热图',
-      'ccc_network_plot：细胞间通讯网络图',
-      'ccc_stat_plot：不同条件下的通讯统计比较',
-      'CellChatViz：低级别自定义可视化'
-    ],
-    keyApi: ['ov.single.cellphonedb', 'ov.pl.ccc_heatmap', 'ov.pl.ccc_network_plot', 'ov.pl.ccc_stat_plot']
-  },
-  {
-    name: 'single-scenic-grn',
-    desc: 'SCENIC GRN：RegDiffusion + cisTarget + AUCell',
-    cmd: '/single-scenic-grn',
-    scenario: '转录因子调控网络推断和活性评分',
-    overview: '经典SCENIC三阶段流程：1) RegDiffusion（深度学习方法，比GRNBoost2快10倍）推断TF→靶基因链接；2) cisTarget motif富集验证直接靶向关系；3) AUCell对每个细胞量化regulon活性。sc-best-practices强调：GRN推断必须基于原始计数（不能用标准化数据），大数据集建议MetaCell子采样。',
-    capabilities: [
-      'RegDiffusion：深度学习GRN推断，速度快10倍',
-      'cisTarget：DNA motif数据库修剪假阳性',
-      'AUCell：单细胞水平的regulon活性评分',
-      'RSS（Regulon Specificity Score）：跨细胞类型调控子特异性',
-      'Regulon嵌入：低维表示调控关系'
-    ],
-    keyApi: ['ov.single.RegDiffusion', 'ov.single.cistarget', 'ov.single.aucell', 'ov.single.rss']
-  },
-  {
-    name: 'single-downstream-analysis',
-    desc: 'AUCell通路、MetaCell DEG、scDrug、NOCD',
-    cmd: '/single-downstream-analysis',
-    scenario: '注释后的功能挖掘和生物学解释',
-    overview: '注释完成后将细胞身份与功能通路关联。AUCell在单细胞分辨率评估通路活性（优于传统GSEA，更好地处理稀疏性）；MetaCell DEG通过合并相似细胞减少稀疏性（推荐pseudobulk方法进行样本级比较）；scDrug映射药物靶标到细胞群预测敏感性。',
-    capabilities: [
-      'AUCell通路评分：单细胞分辨率的基因集活性',
-      'MetaCell DEG：元细胞合并减少稀疏性，提高统计功效',
-      'scDrug药物响应：基于GDSC/CTRP的药物敏感性预测',
-      'cNMF基因表达程序：非负矩阵分解发现功能模块',
-      'NOCD重叠社区检测：跨细胞类型的功能模块'
-    ],
-    keyApi: ['ov.single.aucell_pathway', 'ov.single.metacell_deg', 'ov.single.scdrug', 'ov.single.nocd']
-  },
-  {
-    name: 'single-multiomics',
-    desc: 'MOFA/GLUE/SIMBA/TOSICA/StaVIA多组学整合',
-    cmd: '/single-multiomics',
-    scenario: 'scRNA+scATAC配对或非配对整合分析',
-    overview: 'sc-best-practices区分两类整合场景：配对整合（10x Multiome，同一细胞多组学）和非配对整合（独立scRNA和scATAC数据集）。MOFA发现跨组学共享因子（配对首选），GLUE使用知识图对齐非配对数据。非配对整合的不确定性高于配对，需保守解读。',
-    capabilities: [
-      'MOFA贝叶斯因子分析：发现跨组学共享变异（配对）',
-      'GLUE图对齐：知识引导的非配对scRNA+scATAC对齐',
-      'SIMBA软对齐：多模态批次校正',
-      'TOSICA Transformer标签迁移',
-      'StaVIA：多模态轨迹推断（变分自编码器）'
-    ],
-    keyApi: ['ov.single.mofa', 'ov.single.glue', 'ov.single.simba', 'ov.single.tosica', 'ov.single.stavia']
-  },
-  {
-    name: 'single-to-spatial-mapping',
-    desc: 'Single2Spatial深度森林空间映射',
-    cmd: '/single-to-spatial-mapping',
-    scenario: '将单细胞数据映射到空间转录组切片',
-    overview: '基于t_single2spatial教程，将scRNA-seq参考图谱映射到空间转录组切片（Visium/Stereo-seq等）。Single2Spatial使用深度森林（集成学习，无需GPU）学习基因表达到细胞类型的映射，与Tangram（深度学习）、cell2location（贝叶斯）等方法互补。',
-    capabilities: [
-      '深度森林训练：基于树集成学习，计算效率高',
-      'Spot级别细胞类型比例预测',
-      '标记基因空间可视化',
-      '映射质量评估工具',
-      '支持多种空间平台（Visium、Stereo-seq、Slide-seq）'
-    ],
-    keyApi: ['ov.single.Single2Spatial', 'ov.single.deep_forest_train', 'ov.single.spot_assessment']
-  }
-];
 
 function ExpandableSkillsTable() {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -715,26 +535,26 @@ function ExpandableSkillsTable() {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <Sparkles size={17} className="text-brand-accent" />
-        <h2 className="text-lg font-bold text-brand-ink">Skills 快速参考</h2>
-        <span className="text-[11px] text-brand-ink-extra-muted ml-2">点击行展开查看 Skill 详细内容</span>
+        <h2 className="text-lg font-bold text-brand-ink">Skills 完整参考</h2>
+        <span className="text-[11px] text-brand-ink-extra-muted ml-2">点击展开查看完整 Skill 文档内容</span>
       </div>
       <div className="space-y-2">
-        {skillsData.map((skill) => {
-          const open = expanded === skill.name;
+        {allSkillsData.map((skill: FullSkillData) => {
+          const open = expanded === skill.key;
           return (
-            <div key={skill.name} className="border rounded-lg overflow-hidden border-brand-border hover:border-brand-accent/30 transition-colors">
+            <div key={skill.key} className="border rounded-lg overflow-hidden border-brand-border hover:border-brand-accent/30 transition-colors">
               <button
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-brand-off-white transition-colors"
-                onClick={() => setExpanded(open ? null : skill.name)}
+                onClick={() => setExpanded(open ? null : skill.key)}
               >
                 <code className="text-[11px] font-mono text-brand-accent bg-brand-off-white px-2 py-1 rounded shrink-0">
-                  {skill.name}
+                  {skill.key}
                 </code>
                 <span className="flex-1 text-xs text-brand-ink-light" style={{ lineHeight: 1.5 }}>
-                  {skill.desc}
+                  {skill.description}
                 </span>
                 <code className="text-[11px] font-mono text-brand-dl bg-brand-dl-light px-1.5 py-0.5 rounded shrink-0">
-                  {skill.cmd}
+                  /{skill.key}
                 </code>
                 {open
                   ? <ChevronUp size={14} className="text-brand-ink-muted shrink-0" />
@@ -742,41 +562,8 @@ function ExpandableSkillsTable() {
                 }
               </button>
               {open && (
-                <div className="px-4 pb-4 pt-0 border-t border-brand-border-light bg-brand-off-white">
-                  {/* Overview */}
-                  <div className="mt-3 mb-3">
-                    <span className="text-[10px] font-semibold text-brand-ink uppercase tracking-wider">概述</span>
-                    <p className="text-xs text-brand-ink-light mt-1" style={{ lineHeight: 1.7 }}>
-                      {skill.overview}
-                    </p>
-                  </div>
-                  {/* Capabilities */}
-                  <div className="mb-3">
-                    <span className="text-[10px] font-semibold text-brand-ink uppercase tracking-wider">核心能力</span>
-                    <ul className="mt-1 space-y-0.5">
-                      {skill.capabilities.map((cap, i) => (
-                        <li key={i} className="text-xs text-brand-ink-light flex items-start gap-1.5" style={{ lineHeight: 1.6 }}>
-                          <span className="text-brand-accent mt-0.5 shrink-0">•</span>
-                          {cap}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {/* Key API */}
-                  <div className="mb-2">
-                    <span className="text-[10px] font-semibold text-brand-ink uppercase tracking-wider">核心 API</span>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {skill.keyApi.map((fn) => (
-                        <code key={fn} className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-white text-brand-accent border border-brand-border-light">
-                          {fn}
-                        </code>
-                      ))}
-                    </div>
-                  </div>
-                  {/* Usage tip */}
-                  <div className="text-[10px] text-brand-ink-muted mt-2 pt-2 border-t border-brand-border-light">
-                    <span className="font-medium">适用场景：</span>{skill.scenario}
-                  </div>
+                <div className="px-4 pb-4 border-t border-brand-border-light bg-brand-off-white">
+                  <SkillFullContent skill={skill} />
                 </div>
               )}
             </div>
@@ -785,6 +572,120 @@ function ExpandableSkillsTable() {
       </div>
     </section>
   );
+}
+
+/** Renders all sections of a skill's full SKILL.md content */
+function SkillFullContent({ skill }: { skill: FullSkillData }) {
+  return (
+    <div className="mt-3 space-y-4 max-h-[600px] overflow-y-auto">
+      {skill.sections.map((sec, i) => (
+        <SkillSectionBlock key={i} title={sec.title} content={sec.content} />
+      ))}
+    </div>
+  );
+}
+
+/** Renders a single section with markdown-like content */
+function SkillSectionBlock({ title, content }: { title: string; content: string }) {
+  const [sectionOpen, setSectionOpen] = useState(title === 'Overview');
+  const hasCodeBlock = content.includes('```');
+
+  // Extract code blocks and text segments
+  const segments: Array<{ type: 'text' | 'code'; value: string; language?: string }> = [];
+  if (hasCodeBlock) {
+    const parts = content.split(/(```[a-z]*\n[\s\S]*?```)/g);
+    for (const part of parts) {
+      if (part.startsWith('```')) {
+        const firstLineEnd = part.indexOf('\n');
+        const lang = part.slice(3, firstLineEnd).trim();
+        const code = part.slice(firstLineEnd + 1, part.length - 3).trim();
+        segments.push({ type: 'code', value: code, language: lang || 'python' });
+      } else if (part.trim()) {
+        segments.push({ type: 'text', value: part.trim() });
+      }
+    }
+  } else {
+    segments.push({ type: 'text', value: content });
+  }
+
+  return (
+    <div className="border border-brand-border-light rounded-lg overflow-hidden bg-white">
+      <button
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-brand-off-white transition-colors"
+        onClick={() => setSectionOpen(!sectionOpen)}
+      >
+        <span className="text-[10px] font-semibold text-brand-ink uppercase tracking-wider">{title}</span>
+        {sectionOpen
+          ? <ChevronUp size={12} className="text-brand-ink-muted ml-auto shrink-0" />
+          : <ChevronDown size={12} className="text-brand-ink-muted ml-auto shrink-0" />
+        }
+      </button>
+      {sectionOpen && (
+        <div className="px-3 pb-3 space-y-2">
+          {segments.map((seg, j) => {
+            if (seg.type === 'code') {
+              return (
+                <CodeBlock
+                  key={j}
+                  code={seg.value}
+                  language={seg.language || 'python'}
+                  collapsible={seg.value.split('\n').length > 15}
+                />
+              );
+            }
+            // Render text with inline code
+            const text = seg.value;
+            // Split by bullet points for list rendering
+            if (text.includes('\n- ') || text.includes('\n* ') || text.match(/^\d+\. /m)) {
+              const listItems = text.split('\n').filter(l => l.trim());
+              // Check if it's a numbered list
+              const isNumbered = listItems.length > 1 && listItems[0] && /^\d+\./.test(listItems[0]);
+              return (
+                <div key={j}>
+                  {isNumbered ? (
+                    <ol className="text-xs text-brand-ink-light space-y-1 list-decimal list-inside" style={{ lineHeight: 1.7 }}>
+                      {listItems.map((item, k) => {
+                        const cleaned = item.replace(/^\d+\.\s*/, '');
+                        return <li key={k} dangerouslySetInnerHTML={{ __html: cleanInlineMarkdown(cleaned) }} />;
+                      })}
+                    </ol>
+                  ) : (
+                    <ul className="text-xs text-brand-ink-light space-y-1 list-disc list-inside" style={{ lineHeight: 1.7 }}>
+                      {listItems.map((item, k) => {
+                        const cleaned = item.replace(/^[-*]\s*/, '');
+                        return <li key={k} dangerouslySetInnerHTML={{ __html: cleanInlineMarkdown(cleaned) }} />;
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            }
+            // Regular paragraph
+            return (
+              <p key={j} className="text-xs text-brand-ink-light" style={{ lineHeight: 1.7 }}
+                dangerouslySetInnerHTML={{ __html: cleanInlineMarkdown(text) }}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Convert inline markdown: **bold**, `code`, [links](url) to HTML */
+function cleanInlineMarkdown(text: string): string {
+  let out = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // Bold
+  out = out.replace(/\*\*(.+?)\*\*/g, '<strong class="text-brand-ink">$1</strong>');
+  // Inline code
+  out = out.replace(/`([^`]+)`/g, '<code class="text-[11px] px-1 py-0.5 rounded font-mono bg-brand-off-white text-brand-accent">$1</code>');
+  // Links
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-brand-accent hover:underline">$1</a>');
+  return out;
 }
 
 // ============================================================
@@ -805,7 +706,7 @@ const learningPhases: LearningPhase[] = [
   {
     step: '入门',
     description: '从数据加载与预处理开始，掌握QC过滤、标准化和可视化基础。使用PBMC3k数据集练习。',
-    detail: '这是单细胞分析的基石阶段。你将从10x Genomics的PBMC3k标准数据集开始，经历完整的预处理管线。OmicVerse提供三种计算模式：纯CPU适合快速入门，CPU-GPU混合可体验加速效果，纯GPU（RAPIDS 24.04+）处理百万级细胞。sc-best-practices建议使用宽松的MAD-based过滤策略（5 MADs），避免丢失稀有细胞亚群。双细胞检测应在每个样本内独立运行，不要合并后再检测。',
+    detail: '这是单细胞分析的基石阶段。你将从10x Genomics的PBMC3k标准数据集开始，经历完整的预处理管线。OmicVerse提供三种计算模式：纯CPU适合快速入门，CPU-GPU混合可体验加速效果，纯GPU处理百万级细胞。sc-best-practices建议使用宽松的MAD-based过滤策略（5 MADs），避免丢失稀有细胞亚群。双细胞检测应在每个样本内独立运行，不要合并后再检测。',
     bestPractices: 'MAD-based宽松过滤（5 MADs count/genes，3 MADs mito + 8%硬上限）| 双细胞检测逐样本运行，不合并 | HVG选择small dataset回退到Pearson/seurat方法 | 原始计数层必须在标准化前存储（ov.utils.store_layers）',
     modules: ['单细胞预处理', '数据IO'],
     skills: ['single-preprocessing', 'data-io-loading', 'datasets-loading'],
