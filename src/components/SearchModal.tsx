@@ -170,11 +170,11 @@ export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalPr
     if (isOpen && index.length === 0 && !loading) {
       setLoading(true);
       Promise.all([
-        fetch('/bioml-guide/data/tools.json').then(r => r.json()),
-        fetch('/bioml-guide/data/resources.json').then(r => r.json()),
-        fetch('/bioml-guide/data/roadmap.json').then(r => r.json()),
-        fetch('/bioml-guide/data/applications.json').then(r => r.json()),
-        fetch('/bioml-guide/data/math.json').then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/tools.json`).then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/resources.json`).then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/roadmap.json`).then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/applications.json`).then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/math.json`).then(r => r.json()),
       ])
         .then(([toolsData, resourcesData, roadmapData, appData, mathData]) => {
           const idx = buildIndex(

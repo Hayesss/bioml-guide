@@ -21,7 +21,7 @@ interface Stage {
 }
 
 export default function RoadmapPage() {
-  const { data: stages, loading, error } = useData<Stage[]>('roadmap');
+  const { data: stages, loading, error } = useData<Stage[]>('roadmap', true);
   const { data: topicsData } = useData<{topics: {key:string;name:string}[]}>('topics');
   const [openStage, setOpenStage] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);

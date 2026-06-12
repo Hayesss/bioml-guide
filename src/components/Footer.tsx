@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 const footerLinks = [
   { path: '/roadmap', label: '学习路径' },
   { path: '/ngs', label: '生信NGS' },
+  { path: '/single-cell', label: '单细胞' },
   { path: '/applications', label: '应用方向' },
   { path: '/resources', label: '资源库' },
   { path: '/tools', label: '工具' },

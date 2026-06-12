@@ -22,7 +22,7 @@ interface Application {
 }
 
 export default function ApplicationsPage() {
-  const { data: applications, loading, error } = useData<Application[]>('applications');
+  const { data: applications, loading, error } = useData<Application[]>('applications', true);
 
   if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
   if (error || !applications) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;

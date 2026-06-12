@@ -21,8 +21,8 @@ interface Application {
 }
 
 export default function HomePage() {
-  const { data: stages, loading, error } = useData<Stage[]>('roadmap');
-  const { data: applications } = useData<Application[]>('applications');
+  const { data: stages, loading, error } = useData<Stage[]>('roadmap', true);
+  const { data: applications } = useData<Application[]>('applications', true);
 
   if (loading) {
     return (

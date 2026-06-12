@@ -22,7 +22,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-brand-border" style={{ height: 56 }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-brand-border">
       <div className="max-w-[1100px] mx-auto px-6 flex items-center justify-between h-full">
         <Link
           to="/home"

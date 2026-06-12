@@ -18,7 +18,7 @@ interface MathTopic {
 }
 
 export default function MathPage() {
-  const { data: mathTopics, loading, error } = useData<MathTopic[]>('math');
+  const { data: mathTopics, loading, error } = useData<MathTopic[]>('math', true);
 
   if (loading) return <div className="p-8 text-sm text-brand-ink-muted">Loading...</div>;
   if (error || !mathTopics) return <div className="p-8 text-sm text-brand-error">{error || '加载数据失败'}</div>;

@@ -6,7 +6,10 @@ interface DataState<T> {
   loading: boolean;
 }
 
-export function useData<T>(filename: string): DataState<T> {
+// Simple request cache across component mounts
+const cache = new Map<string, unknown>();
+
+export function useData<T>(filename: string, autoUnwrap = false): DataState<T> {
   const [state, setState] = useState<DataState<T>>({
     data: null,
     error: null,
@@ -14,23 +17,33 @@ export function useData<T>(filename: string): DataState<T> {
   });
 
   useEffect(() => {
+    const cacheKey = `${filename}.json`;
+    const cached = cache.get(cacheKey);
+
+    if (cached) {
+      setState({ data: cached as T, error: null, loading: false });
+      return;
+    }
+
     let cancelled = false;
 
-    fetch(`/bioml-guide/data/${filename}.json`)
+    fetch(`${import.meta.env.BASE_URL}data/${filename}.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((json) => {
         if (cancelled) return;
-        const keys = Object.keys(json);
-        // If the JSON has a single key and its value is an array, return the array directly
-        if (keys.length === 1 && keys[0] !== undefined) {
-          setState({ data: json[keys[0]] as T, error: null, loading: false });
-        } else {
-          // Multi-key object (e.g. resources with categories, levels, costs, resources)
-          setState({ data: json as T, error: null, loading: false });
+        let result: unknown = json;
+        // Only auto-unwrap when explicitly requested
+        if (autoUnwrap) {
+          const keys = Object.keys(json);
+          if (keys.length === 1 && keys[0] !== undefined) {
+            result = json[keys[0]];
+          }
         }
+        cache.set(cacheKey, result);
+        setState({ data: result as T, error: null, loading: false });
       })
       .catch((err) => {
         if (cancelled) return;

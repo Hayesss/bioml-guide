@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, FlaskConical, Check, X } from 'lucide-react';
+import { ChevronLeft, ArrowRight, FlaskConical } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
-
-interface QuizQuestion {
-  q: string;
-  options: string[];
-  answer: number;
-  explanation: string;
-}
+import QuizBase from '../components/QuizBase';
+import type { QuizQuestion } from '../components/QuizBase';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorDisplay from '../components/ErrorDisplay';
 
 interface TopicSection {
   type: string;
@@ -71,7 +68,7 @@ export default function TopicLearnPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/bioml-guide/data/topics.json')
+    fetch(`${import.meta.env.BASE_URL}data/topics.json`)
       .then(r => r.json())
       .then(data => {
         setTopicsData(data);
@@ -80,33 +77,13 @@ export default function TopicLearnPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-sm text-brand-ink-muted">正在加载...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
-  if (!topicsData || !topicKey) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-sm text-brand-ink-muted">专题未找到</p>
-        <Link to="/roadmap" className="text-sm text-brand-accent hover:underline">← 返回学习路径</Link>
-      </div>
-    );
-  }
+  if (!topicsData || !topicKey) return <ErrorDisplay message="专题数据加载失败" />;
 
   const topic = topicsData.topics.find(t => t.key === topicKey);
 
-  if (!topic) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-sm text-brand-ink-muted">专题「{topicKey}」不存在</p>
-        <Link to="/roadmap" className="text-sm text-brand-accent hover:underline">← 返回学习路径</Link>
-      </div>
-    );
-  }
+  if (!topic) return <ErrorDisplay message={`专题「${topicKey}」不存在`} />;
 
   const currentIndex = topicsData.topicOrder.indexOf(topicKey);
   const prevKey = currentIndex > 0 ? topicsData.topicOrder[currentIndex - 1] : null;
@@ -250,7 +227,7 @@ export default function TopicLearnPage() {
                 </div>
               )}
               {section.questions && (
-                <SelfCheck questions={section.questions} />
+                <QuizBase questions={section.questions as QuizQuestion[]} variant="compact" />
               )}
             </div>
           </div>
@@ -369,105 +346,3 @@ function ModuleChips({ label, items, muted = false }: { label: string; items: st
   );
 }
 
-/** Inline self-check quiz (compact version of Quiz component) */
-function SelfCheck({ questions }: { questions: QuizQuestion[] }) {
-  const [current, setCurrent] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
-
-  const q = questions[current];
-  if (!q) return null;
-  const isCorrect = selected === q.answer;
-
-  const handleSubmit = () => {
-    if (selected === null) return;
-    setSubmitted(true);
-    if (isCorrect) setScore(s => s + 1);
-  };
-
-  const handleNext = () => {
-    if (current < questions.length - 1) {
-      setCurrent(c => c + 1);
-      setSelected(null);
-      setSubmitted(false);
-    } else {
-      setFinished(true);
-    }
-  };
-
-  const handleRestart = () => {
-    setCurrent(0);
-    setSelected(null);
-    setSubmitted(false);
-    setScore(0);
-    setFinished(false);
-  };
-
-  if (finished) {
-    const pct = Math.round((score / questions.length) * 100);
-    return (
-      <div className="text-center py-3">
-        <div className="text-3xl mb-2">{pct >= 80 ? '★' : pct >= 60 ? '●' : '○'}</div>
-        <p className="text-sm font-medium text-brand-ink mb-1">
-          {pct >= 80 ? '掌握得很好！' : pct >= 60 ? '还不错，继续加油' : '建议再看一遍上面的内容'}
-        </p>
-        <p className="text-xs text-brand-ink-muted mb-2">正确 {score}/{questions.length} ({pct}%)</p>
-        <button onClick={handleRestart} className="text-xs font-medium text-brand-accent hover:underline">
-          再做一遍
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-brand-ink-muted">
-          第 {current + 1} / {questions.length} 题
-        </span>
-      </div>
-      <p className="text-sm font-medium mb-3 text-brand-ink">{q.q}</p>
-      <div className="space-y-2 mb-3">
-        {q.options.map((opt, i) => {
-          let cls = 'border-brand-border bg-white text-brand-ink-light';
-          if (submitted) {
-            if (i === q.answer) cls = 'border-brand-dl bg-brand-dl-light text-brand-dl';
-            else if (i === selected && !isCorrect) cls = 'border-brand-error bg-brand-error-light text-brand-error';
-          } else if (i === selected) {
-            cls = 'border-brand-accent bg-brand-accent-light text-brand-accent';
-          }
-          return (
-            <button
-              key={i}
-              disabled={submitted}
-              onClick={() => setSelected(i)}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-xs transition-colors ${cls}`}
-            >
-              <span className="w-5 h-5 rounded-full border flex items-center justify-center text-xs font-mono shrink-0">
-                {submitted && i === q.answer ? <Check size={11} className="text-brand-dl" /> :
-                 submitted && i === selected && !isCorrect ? <X size={11} className="text-brand-error" /> :
-                 String.fromCharCode(65 + i)}
-              </span>
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      {submitted && (
-        <div className={`rounded-lg p-2.5 mb-3 text-xs ${isCorrect ? 'bg-brand-dl-light text-brand-dl' : 'bg-brand-error-light'}`}
-             style={{ color: isCorrect ? '#2D5A3D' : '#8B4513' }}>
-          <span className="font-medium">{isCorrect ? '✓ 正确！' : '✗ 错误'}</span> {q.explanation}
-        </div>
-      )}
-      <button
-        onClick={submitted ? handleNext : handleSubmit}
-        disabled={selected === null}
-        className={`w-full py-2 rounded-lg text-xs font-medium transition-colors ${selected === null ? 'bg-brand-border-light text-brand-ink-muted cursor-not-allowed' : 'bg-brand-accent text-white'}`}
-      >
-        {submitted ? (current < questions.length - 1 ? '下一题' : '查看结果') : '提交答案'}
-      </button>
-    </div>
-  );
-}

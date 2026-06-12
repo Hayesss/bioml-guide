@@ -17,6 +17,7 @@ import TopicLearnPage from './pages/TopicLearnPage';
 import IntroPage from './pages/IntroPage';
 import BioinfoNgsPage from './pages/BioinfoNgsPage';
 import SingleCellPage from './pages/SingleCellPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function App() {
   const toggleSearch = useCallback(() => setSearchOpen(prev => !prev), []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar onSearch={openSearch} />
       <SearchModal isOpen={searchOpen} onClose={closeSearch} onToggle={toggleSearch} />
       <div className="flex-1">
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/math" element={<MathPage />} />
             <Route path="/cheatsheet" element={<CheatSheetPage />} />
             <Route path="/learn/:topicKey" element={<TopicLearnPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </ErrorBoundary>
         </Layout>

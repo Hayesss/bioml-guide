@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 interface CodeBlockProps {
   code: string;
@@ -9,28 +10,9 @@ interface CodeBlockProps {
   collapsible?: boolean;
 }
 
-/** 干掉没有高亮的原始代码块，现在用Prism做语法高亮 */
 export default function CodeBlock({ code, label, language = 'python', collapsible = false }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const [open, setOpen] = useState(!collapsible);
-
-  const handleCopy = () => {
-    try {
-      navigator.clipboard.writeText(code).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    } catch {
-      const el = document.createElement('textarea');
-      el.value = code;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   return (
     <div className="border rounded-lg overflow-hidden border-brand-border-light">
@@ -60,7 +42,7 @@ export default function CodeBlock({ code, label, language = 'python', collapsibl
           )}
         </div>
         <button
-          onClick={handleCopy}
+          onClick={() => copy(code)}
           className="p-1 rounded hover:bg-gray-100 transition-colors"
           title="Copy code"
         >
