@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ArrowRight, Microscope, Database, GitBranch, Network, Dna, BoxSelect, Workflow, BarChart3, Hash, ArrowLeftRight, Sparkles } from 'lucide-react';
 
 interface SkillRef {
@@ -330,33 +331,40 @@ export default function SingleCellPage() {
         <div className="flex items-center gap-2 mb-4">
           <Sparkles size={17} className="text-brand-accent" />
           <h2 className="text-lg font-bold text-brand-ink">分析流程总览</h2>
+          <span className="text-[11px] text-brand-ink-extra-muted ml-2">点击步骤跳转到对应专题教程</span>
         </div>
         <div className="border rounded-lg p-5 border-brand-border bg-brand-off-white">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {[
-              '数据加载',
-              '质控QC',
-              '标准化',
-              'HVG选择',
-              'PCA降维',
-              '聚类',
-              '批次校正',
-              '注释',
-              '轨迹推断',
-              'RNA速度',
-              '细胞通讯',
-              'GRN',
-              '下游分析',
-              '多组学整合',
-              '空间映射'
-            ].map((step, i) => (
-              <span key={step} className="flex items-center gap-1.5">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white bg-[#2F6B4F]">
+              { step: '数据加载', topic: 'single-preprocessing' },
+              { step: '质控QC', topic: 'single-preprocessing' },
+              { step: '标准化', topic: 'single-preprocessing' },
+              { step: 'HVG选择', topic: 'single-preprocessing' },
+              { step: 'PCA降维', topic: 'single-preprocessing' },
+              { step: '聚类', topic: 'single-clustering' },
+              { step: '批次校正', topic: 'single-clustering' },
+              { step: '注释', topic: 'single-annotation' },
+              { step: '轨迹推断', topic: 'single-trajectory' },
+              { step: 'RNA速度', topic: 'single-trajectory' },
+              { step: '细胞通讯', topic: 'single-communication' },
+              { step: 'GRN', topic: 'single-grn' },
+              { step: '下游分析', topic: 'single-downstream' },
+              { step: '多组学整合', topic: 'single-multiomics' },
+              { step: '空间映射', topic: 'single-spatial' }
+            ].map((item, i) => (
+              <Link
+                key={item.step}
+                to={`/learn/${item.topic}`}
+                className="flex items-center gap-1.5 no-underline hover:scale-105 transition-transform"
+              >
+                <span className="flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white bg-[#2F6B4F] hover:bg-[#1E3A5F] transition-colors">
                   {i + 1}
                 </span>
-                <span className="text-brand-ink-light">{step}</span>
+                <span className="text-brand-ink-light hover:text-brand-accent hover:underline transition-colors">
+                  {item.step}
+                </span>
                 {i < 14 && <span className="text-brand-ink-extra-muted mx-0.5">→</span>}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

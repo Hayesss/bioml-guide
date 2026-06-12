@@ -104,7 +104,8 @@
     "single-communication",
     "single-grn",
     "single-downstream",
-    "single-multiomics"
+    "single-multiomics",
+    "single-spatial"
   ],
   "topics": [
     {
@@ -6877,6 +6878,36 @@
         },
         {
           "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 质控指南",
+          "content": "<p><strong>核心原则：宽松过滤优于严格过滤。</strong>过度质控可能丢失稀有细胞亚群。推荐使用MAD（中位数绝对偏差）进行自适应阈值设定：</p><ul><li><strong>Count depth & 基因数：</strong>5 MADs，相对宽松的过滤策略</li><li><strong>线粒体比例：</strong>3 MADs + 硬上限8%（但需考虑生物学背景——高线粒体可能是活跃呼吸而非凋亡）</li><li><strong>双细胞检测：</strong>推荐 scDblFinder（R，准确率最高）或 Scrublet（Python）。<span style='color:#C0392B;'>禁止在合并多批次数据后运行双细胞检测！</span>应逐样本检测</li><li><strong>环境RNA校正：</strong>SoupX（R包）通过空液滴估计背景表达谱</li></ul><p>来源：<a href='https://www.sc-best-practices.org/preprocessing_visualization/quality_control.html' target='_blank'>sc-best-practices Chapter 8: Quality Control</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "标准化与HVG选择策略对比",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>适用场景</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>优点</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>缺点</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Shift-log</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>标准scRNA-seq</td><td style='padding:6px;border:1px solid #E0E0E0;'>简单快速，广泛使用</td><td style='padding:6px;border:1px solid #E0E0E0;'>不能消除深度差异</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Scran</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>UMI数据，需去卷积size factor</td><td style='padding:6px;border:1px solid #E0E0E0;'>生物学更合理的归一化</td><td style='padding:6px;border:1px solid #E0E0E0;'>需要合理聚类先验</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>SCTransform</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>Seurat流程，复杂批次</td><td style='padding:6px;border:1px solid #E0E0E0;'>正则化负二项回归，方差稳定</td><td style='padding:6px;border:1px solid #E0E0E0;'>计算量大，R语言依赖</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Pearson残差</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>OmicVerse默认，大数据集</td><td style='padding:6px;border:1px solid #E0E0E0;'>无需LOESS，小批次稳定</td><td style='padding:6px;border:1px solid #E0E0E0;'>对深度测序不敏感</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "降维方法选择建议",
+          "content": "<p><strong>PCA（必须步骤）：</strong>作为线性降维的基准，保留30-50个PC足够捕获主要生物变异。sc-best-practices建议使用前30个PC进行KNN图构建。</p><p><strong>UMAP vs tSNE：</strong>UMAP更好地保留全局结构，tSNE更强调局部邻域。UMAP是当前单细胞领域的标准选择。注意：<span style='color:#C0392B;'>UMAP上的距离需要谨慎解读——二维空间中的簇间距离不一定反映真实的生物学距离。</span></p><p><strong>MDE（最小失真嵌入）：</strong>OmicVerse提供<code>ov.utils.mde()</code>作为UMAP的替代方案，在某些情况下提供更好的全局结构保留。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "推荐工具清单 — 预处理",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>用途</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>语言</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse集成</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Scrublet</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>双细胞检测</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.pp.qc(..., doublets_method='scrublet')</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>scDblFinder</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>双细胞检测（最高准确率）</td><td style='padding:6px;border:1px solid #E0E0E0;'>R</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过anndata2ri调用</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>SoupX</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>环境RNA校正</td><td style='padding:6px;border:1px solid #E0E0E0;'>R</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过anndata2ri调用</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>scanpy</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>单细胞分析框架</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'>omiverse基于scanpy构建</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>RAPIDS</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>GPU加速</td><td style='padding:6px;border:1px solid #E0E0E0;'>Python</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.pp.neighbors(..., method='cagra')</code></td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>对所有样本使用统一QC阈值。<br/><strong>解决：</strong>QC阈值应针对每个样本单独评估。如果不同样本的分布差异显著，应使用样本特异性阈值。</li><li><strong>陷阱：</strong>在合并数据后运行双细胞检测。<br/><strong>解决：</strong>应在每个样本/批次内独立运行双细胞检测。</li><li><strong>陷阱：</strong>HVG选择使用seurat_v3在小批次（<500细胞）上失败。<br/><strong>解决：</strong>回退到Pearson残差或cell_ranger方法。<code>try: seurat_v3 except: seurat</code></li><li><strong>陷阱：</strong>批次列存在NaN值导致批次校正崩溃。<br/><strong>解决：</strong>始终在批次操作前验证和填充批次列：<code>adata.obs['batch'] = adata.obs['batch'].fillna('unknown')</code></li></ol>"
+        },
+        {
+          "type": "concept",
           "icon": "技能",
           "title": "关联 Skill：single-preprocessing",
           "content": "<p>此模块对应 AI Skill <code>/single-preprocessing</code>，在 Claude Code 中调用可自动生成预处理代码。</p><p><strong>Skill 功能：</strong>单细胞QC、标准化、HVG检测、PCA、邻居图、UMAP/tSNE嵌入管线</p><p><strong>适用场景：</strong>任何单细胞分析的第一步，支持CPU/GPU模式切换。基于PBMC3k示例数据。</p><p><strong>调用方式：</strong><code>/single-preprocessing</code> — Skill会引导你完成完整的预处理流程，包括数据下载、QC参数调优和可视化。</p>"
@@ -6955,6 +6986,24 @@
         },
         {
           "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 聚类指南",
+          "content": "<p><strong>Leiden 是明确推荐方案。</strong>Louvain 算法已不再维护，Leiden 在所有单细胞基准测试中表现更优。</p><ul><li><strong>分辨率策略：</strong>从低到高探索 — 0.25（主要类型）、0.5（亚型）、1.0（精细状态）。使用 <code>key_added</code> 参数保存多分辨率结果</li><li><strong>n_iterations: -1 vs 2：</strong>-1 运行至收敛，理论上最优但显著较慢；<strong>2（推荐）</strong>在聚类质量和计算效率间取得最佳平衡</li><li><strong>GPU加速：</strong>百万级细胞图上，<code>rapids-singlecell</code> 的 GPU Leiden 提供50-100倍加速</li><li><strong>子聚类策略：</strong>像\"缩放\"——先在低分辨率全局探索，再对感兴趣的子集局部高分辨率探查。但注意：子聚类可能产生仅由噪声驱动的模式</li></ul><p>来源：<a href='https://www.sc-best-practices.org/cellular_structure/clustering.html' target='_blank'>sc-best-practices Chapter 12: Clustering</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "批次校正方法选择指南",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>类型</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>适用数据</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>推荐场景</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Harmony</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>PCA空间迭代</td><td style='padding:6px;border:1px solid #E0E0E0;'>小-中型数据集</td><td style='padding:6px;border:1px solid #E0E0E0;'>快速、稳定，默认首选</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>scVI</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>深度生成模型</td><td style='padding:6px;border:1px solid #E0E0E0;'>复杂非线性批次</td><td style='padding:6px;border:1px solid #E0E0E0;'>大规模图谱，需要GPU</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>BBKNN</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>图连接控制</td><td style='padding:6px;border:1px solid #E0E0E0;'>大规模数据</td><td style='padding:6px;border:1px solid #E0E0E0;'>保留更多生物异质性</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Combat</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>线性模型</td><td style='padding:6px;border:1px solid #E0E0E0;'>简单批次效应</td><td style='padding:6px;border:1px solid #E0E0E0;'>已知批次变量，快速校正</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Scanorama</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>全景图拼接</td><td style='padding:6px;border:1px solid #E0E0E0;'>跨平台/跨物种</td><td style='padding:6px;border:1px solid #E0E0E0;'>极端异质性场景</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>批次列不存在或有NaN值导致Harmony/scVI崩溃。<br/><strong>解决：</strong>始终预先验证 <code>adata.obs['batch'].fillna('unknown').astype('category')</code></li><li><strong>陷阱：</strong>仅凭UMAP判断聚类质量。<br/><strong>解决：</strong>UMAP可视化有误导性——2D距离不等于真实距离。结合silhouette score、标记基因验证和树状图判断。</li><li><strong>陷阱：</strong>过度校正导致生物信号被消除。<br/><strong>解决：</strong>校正后检查已知细胞类型标记是否仍能区分，过度混合可能是过校正的信号。</li><li><strong>陷阱：</strong>对批次内细胞数差异极大的数据使用BBKNN。<br/><strong>解决：</strong>BBKNN的trim参数（默认邻居数的3倍）可能导致小批次被完全忽略。</li></ol>"
+        },
+        {
+          "type": "concept",
           "icon": "技能",
           "title": "关联 Skill：single-clustering",
           "content": "<p>此模块对应 AI Skill <code>/single-clustering</code>。</p><p><strong>Skill 功能：</strong>单细胞聚类（Leiden/Louvain/scICE/GMM）、批次校正（Harmony/scVI/BBKNN/Combat）、主题建模和cNMF</p><p><strong>调用方式：</strong><code>/single-clustering</code> — 自动推荐聚类算法和批次校正方法，生成含防御性检查的健壮代码。</p>"
@@ -7024,6 +7073,24 @@
               "explanation": "PopV设计用于群体级别的细胞注释，整合10种算法（包括SCVI、CellTypist、OnClass等），适合需要与多个参考数据集对齐的大规模图谱项目。"
             }
           ]
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 注释策略",
+          "content": "<p><strong>三层注释策略：</strong></p><ul><li><strong>手动注释（金标准）：</strong>基于已知标记基因验证。即使使用自动方法，最终仍应人工检查标记基因表达——\"expression of known marker genes is still the most accepted support for a cell type annotation\"</li><li><strong>自动注释（快速初筛）：</strong>marker-based方法（Garnett、CellAssign）和分类器方法（CellTypist）。质量取决于参考数据质量及参考与查询数据的匹配度</li><li><strong>参考图谱映射（大规模）：</strong>scArches将查询数据映射到已注释参考图谱，提供不确定性评分用于标记可能的新细胞类型</li></ul><p><strong>质量控制要点：</strong>（1）验证自动注释与标记基因表达一致性；（2）检查树状图聚类模式；（3）利用不确定性评分过滤低置信度；（4）交叉验证多种方法</p><p>来源：<a href='https://www.sc-best-practices.org/cellular_structure/annotation.html' target='_blank'>sc-best-practices Chapter 13: Annotation</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "注释工具对比 — OmicVerse生态",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>速度</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse API</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>SCSA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>标记基因数据库查询</td><td style='padding:6px;border:1px solid #E0E0E0;'>快</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.pySCSA()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>CellTypist</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>逻辑回归分类器</td><td style='padding:6px;border:1px solid #E0E0E0;'>极快</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过PopV调用</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>GPTAnno</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>大语言模型推理</td><td style='padding:6px;border:1px solid #E0E0E0;'>中等</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.gptcelltype()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>MetaTiME</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>TME预训练模型</td><td style='padding:6px;border:1px solid #E0E0E0;'>中等</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.MetaTiME()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>CellVote</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>多源共识投票</td><td style='padding:6px;border:1px solid #E0E0E0;'>慢</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.CellVote()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>PopV</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>10种算法共识</td><td style='padding:6px;border:1px solid #E0E0E0;'>慢</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过popv库调用</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>直接信任自动注释结果而不验证。<br/><strong>解决：</strong>始终用已知标记基因（如CD3D=T细胞、CD79A=B细胞）的UMAP/点图交叉验证。</li><li><strong>陷阱：</strong>差异基因的p值会被夸大（因为聚类和检验基于同一数据）。<br/><strong>解决：</strong>对关键结论使用独立的验证数据集或更严格的统计阈值。</li><li><strong>陷阱：</strong>参考数据与查询数据不匹配（如不同组织、物种、平台）。<br/><strong>解决：</strong>优先使用同组织、同平台的参考数据；利用不确定性评分过滤低置信度注释。</li></ol>"
         },
         {
           "type": "concept",
@@ -7099,6 +7166,24 @@
         },
         {
           "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 轨迹推断指南",
+          "content": "<p><strong>三种轨迹推断范式：</strong></p><ul><li><strong>伪时间排序（Pseudotime）：</strong>将细胞沿连续发育路径排序。Palantir通过扩散映射计算伪时间和分化潜能，是当前推荐方法</li><li><strong>RNA速度：</strong>基于未剪接/剪接mRNA比率推断转录动态方向。<strong>scVelo随机模型</strong>是标准选择，dynamo支持代谢标记数据</li><li><strong>谱系追踪（Lineage Tracing）：</strong>通过遗传条形码追踪真实细胞谱系关系</li></ul><p><strong>关键建议：</strong>（1）伪时间分析的根细胞选择至关重要——应基于生物先验知识指定起始群体；（2）RNA速度需要专门的测序文库准备（保留内含子reads）；（3）不同方法可能给出不同轨迹，建议使用多种方法交叉验证</p><p>来源：<a href='https://www.sc-best-practices.org/trajectory_inference/pseudotemporal_ordering.html' target='_blank'>sc-best-practices Chapter 15-17: Trajectory Inference</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "轨迹与速度方法对比",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>输入需求</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>PAGA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>图抽象</td><td style='padding:6px;border:1px solid #E0E0E0;'>聚类 + KNN图</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.paga()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Palantir</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>扩散映射伪时间</td><td style='padding:6px;border:1px solid #E0E0E0;'>根细胞指定</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.palantir()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>VIA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>图自编码器</td><td style='padding:6px;border:1px solid #E0E0E0;'>表达矩阵</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.via()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>scVelo</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>随机/动态模型</td><td style='padding:6px;border:1px solid #E0E0E0;'>未剪接+剪接计数</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.Velo(backend='scvelo')</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>dynamo</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>代谢标记兼容</td><td style='padding:6px;border:1px solid #E0E0E0;'>可选代谢标记</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.Velo(backend='dynamo')</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>CellFateGenie</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>伪时间基因发现</td><td style='padding:6px;border:1px solid #E0E0E0;'>伪时间+表达</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.Fate.cellfategenie()</code></td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>RNA速度分析没有未剪接/剪接计数层。<br/><strong>解决：</strong>确保使用包含内含子reads的比对流程（如STAR --soloFeatures=GeneFull）生成计数矩阵。</li><li><strong>陷阱：</strong>伪时间根细胞随机指定。<br/><strong>解决：</strong>根细胞应基于生物学先验知识（如干细胞群体、最早时间点）。错误根细胞会导致完全错误的发育方向。</li><li><strong>陷阱：</strong>将UMAP上的距离解读为发育距离。<br/><strong>解决：</strong>UMAP保留局部关系但不能反映全局发育距离，应使用扩散图或PHATE进行轨迹可视化。</li></ol>"
+        },
+        {
+          "type": "concept",
           "icon": "技能",
           "title": "关联 Skills：single-trajectory / single-cellfate-analysis",
           "content": "<p><strong>Skill 功能：</strong><code>/single-trajectory</code> — PAGA/Palantir/VIA轨迹 + scVelo/dynamo RNA速度；<code>/single-cellfate-analysis</code> — CellFateGenie命运基因发现</p><p><strong>调用方式：</strong><code>/single-trajectory</code> 进行轨迹和速度分析，<code>/single-cellfate-analysis</code> 发现命运决定基因。</p>"
@@ -7151,6 +7236,18 @@
               "explanation": "CellPhoneDB通过随机打乱细胞类型标签进行排列检验，测试在真实细胞类型分组下，配体和受体的共表达是否显著高于随机情况。"
             }
           ]
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 细胞通讯分析",
+          "content": "<p><strong>配体-受体分析的三个层次：</strong></p><ul><li><strong>表达水平：</strong>检查配体和受体是否在相应细胞群中表达</li><li><strong>统计显著性：</strong>CellPhoneDB通过排列检验评估特定配体-受体对的富集是否显著高于随机</li><li><strong>多亚基复合物：</strong>CellPhoneDB v5考虑多亚基配体-受体复合物，更真实反映蛋白质相互作用</li></ul><p><strong>关键建议：</strong>（1）CellPhoneDB需要Linux环境运行；（2）细胞类型注释的粒度影响通讯分析结果——过粗的分组可能掩盖稀有细胞群的信号，过细可能产生噪声；（3）通讯强度不等于功能重要性——需要实验验证</p><p>来源：<a href='https://www.sc-best-practices.org/mechanism_modeling/cell_cell_communication.html' target='_blank'>sc-best-practices Chapter 23: Cell-Cell Communication</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "细胞通讯工具对比",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>数据库</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>CellPhoneDB v5</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>curated多亚基</td><td style='padding:6px;border:1px solid #E0E0E0;'>排列检验</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.cellphonedb()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>CellChatViz</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>CellPhoneDB兼容</td><td style='padding:6px;border:1px solid #E0E0E0;'>可视化增强</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.pl.ccc_network_plot()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>COMMOT</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>空间约束</td><td style='padding:6px;border:1px solid #E0E0E0;'>最优传输</td><td style='padding:6px;border:1px solid #E0E0E0;'>外部调用</td></tr></tbody></table>"
         },
         {
           "type": "concept",
@@ -7209,6 +7306,18 @@
         },
         {
           "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 基因调控网络分析",
+          "content": "<p><strong>SCENIC三步流程是单细胞GRN分析的金标准：</strong></p><ul><li><strong>Step 1 — 共表达推断：</strong>GRNBoost2/RegDiffusion基于基因共表达模式推断TF-靶基因关系。数据必须是原始计数（不可用标准化数据）</li><li><strong>Step 2 — cisTarget修剪：</strong>使用motif数据库过滤——仅保留TF在靶基因附近有DNA结合motif的调控关系。这一步是区分\"相关\"和\"调控\"的关键</li><li><strong>Step 3 — AUCell评分：</strong>在每个细胞中计算regulon活性。AUCell对稀疏性和dropout具有鲁棒性</li></ul><p><strong>关键注意事项：</strong>（1）SCENIC计算量大——大数据集建议先做MetaCell或随机子采样；（2）cisTarget数据库需要单独下载（几百MB到GB级别）；（3）motif注释依赖于物种——确保使用正确的数据库（hg38 vs mm10）</p><p>来源：<a href='https://www.sc-best-practices.org/mechanism_modeling/gene_regulatory_networks.html' target='_blank'>sc-best-practices Chapter 22: Gene Regulatory Networks</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>使用标准化而非原始计数进行GRNBoost2推断。<br/><strong>解决：</strong>GRN推断必须基于原始整数计数（raw counts layer），标准化会破坏共表达结构。</li><li><strong>陷阱：</strong>motif数据库物种不匹配。<br/><strong>解决：</strong>确保下载正确的基因组版本数据库（如 hg38__refseq-r80__*.mc9nr.feather 用于人类）。</li><li><strong>陷阱：</strong>对超大样本不进行子采样导致计算超时。<br/><strong>解决：</strong>对整个数据集取10,000-30,000个细胞的随机子集进行GRN推断，或使用MetaCell降采样。</li></ol>"
+        },
+        {
+          "type": "concept",
           "icon": "技能",
           "title": "关联 Skill：single-scenic-grn",
           "content": "<p><strong>Skill 功能：</strong>SCENIC基因调控网络：RegDiffusion GRN推断、cisTarget regulon修剪、AUCell评分、RSS、regulon嵌入</p><p><strong>调用方式：</strong><code>/single-scenic-grn</code> — 需要pySCENIC和相关数据库文件。</p>"
@@ -7261,6 +7370,18 @@
               "explanation": "单细胞数据高度稀疏（大量dropout），直接在单细胞水平做差异表达统计功效低。MetaCell将相似细胞合并为\"元细胞\"，增加检测基因数，提高差异分析的可靠性。"
             }
           ]
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "下游分析最佳实践",
+          "content": "<p><strong>功能注释的三个维度：</strong></p><ul><li><strong>通路活性（AUCell）：</strong>评估每个细胞中特定基因集的活性。优势在于单细胞分辨率，能发现功能异质性</li><li><strong>差异表达（MetaCell DEG）：</strong>在元细胞级别进行差异分析减少稀疏性影响。推荐使用pseudobulk方法（合并同一样本同类型的细胞）进行样本级别的比较</li><li><strong>药物响应（scDrug）：</strong>将药物靶标基因映射到细胞群，预测药物敏感性。结果需要结合药物数据库（GDSC/CTRP）解读</li></ul><p><strong>关键建议：</strong>（1）通路富集优先使用AUCell而非传统GSEA——AUCell更好地处理单细胞稀疏性；（2）差异表达推荐pseudobulk方法（需要样本重复），优于单细胞级别的wilcoxon检验；（3）NOCD社区检测可以发现跨细胞类型的功能模块</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "工具推荐 — 下游分析",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>用途</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>优势</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>AUCell</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>基因集活性评分</td><td style='padding:6px;border:1px solid #E0E0E0;'>单细胞分辨率</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.aucell_pathway()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>pyDESeq2</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>差异表达</td><td style='padding:6px;border:1px solid #E0E0E0;'>pseudobulk DE</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过bulk-deseq2-analysis skill</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>GSEApy</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>基因集富集</td><td style='padding:6px;border:1px solid #E0E0E0;'>多数据库支持</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过gsea-enrichment skill</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>scDrug</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>药物响应预测</td><td style='padding:6px;border:1px solid #E0E0E0;'>细胞类型药物映射</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.scdrug()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>NOCD</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>社区检测</td><td style='padding:6px;border:1px solid #E0E0E0;'>重叠功能模块</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.nocd()</code></td></tr></tbody></table>"
         },
         {
           "type": "concept",
@@ -7326,9 +7447,94 @@
         },
         {
           "type": "concept",
+          "icon": "最佳实践",
+          "title": "sc-best-practices 多组学整合指南",
+          "content": "<p><strong>多组学整合的两类场景：</strong></p><ul><li><strong>配对整合（同一细胞）：</strong>10x Multiome同时测RNA+ATAC。MOFA通过因子分析发现跨组学的共享变异因素。优点是\"paired\"信息提供金标准对齐</li><li><strong>非配对整合（不同细胞）：</strong>GLUE通过知识图（基因-峰关联）学习跨模态对齐，不需要细胞配对。适合已有独立scRNA和scATAC数据集</li></ul><p><strong>关键建议：</strong>（1）配对数据永远是首选——如果有可能，使用Multiome技术同时获取多组学数据；（2）非配对整合的不确定性高于配对数据，应保守解读跨模态标签迁移结果；（3）StaVIA将轨迹推断扩展到多模态数据，但计算成本显著增加</p><p>来源：<a href='https://www.sc-best-practices.org/multimodal_integration/paired_integration.html' target='_blank'>sc-best-practices Chapters 44-45: Multimodal Integration</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "多组学整合工具对比",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>数据类型</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>MOFA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>配对多组学</td><td style='padding:6px;border:1px solid #E0E0E0;'>贝叶斯因子分析</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.mofa()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>GLUE</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>非配对scRNA+scATAC</td><td style='padding:6px;border:1px solid #E0E0E0;'>图对齐+知识引导</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.glue()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>SIMBA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>多模态批次校正</td><td style='padding:6px;border:1px solid #E0E0E0;'>软对齐</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.simba()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>TOSICA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>标签迁移</td><td style='padding:6px;border:1px solid #E0E0E0;'>Transformer</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.tosica()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>StaVIA</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>多模态轨迹</td><td style='padding:6px;border:1px solid #E0E0E0;'>变分自编码器</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.stavia()</code></td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
           "icon": "技能",
           "title": "关联 Skill：single-multiomics",
           "content": "<p><strong>Skill 功能：</strong>多组学整合：MOFA因子分析、GLUE非配对对齐、SIMBA批次校正、TOSICA标签迁移、StaVIA轨迹</p><p><strong>调用方式：</strong><code>/single-multiomics</code> — 支持配对和非配对的scRNA+scATAC整合分析。</p>"
+        }
+      ]
+    },
+    {
+      "key": "single-spatial",
+      "name": "单细胞到空间转录组映射",
+      "stage": 6,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "single-annotation",
+        "single-multiomics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Single2Spatial像将卫星照片上的房屋标注投射到街道地图上：</strong>单细胞数据提供了细胞的\"身份信息\"（卫星照片），空间转录组提供了\"位置信息\"（街道地图），通过深度森林模型学习两者的映射关系，实现单细胞分辨率的空间定位。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "单细胞到空间映射原理",
+          "content": "<p><strong>Single2Spatial</strong>是OmicVerse提供的单细胞到空间转录组映射工作流。核心思路：利用深度森林（Deep Forest）模型学习单细胞参考图谱中基因表达与细胞类型的映射关系，然后将该模型应用于空间转录组数据，预测每个spot的细胞类型组成。</p><p>与Tangram和cell2location等方法不同，Single2Spatial不需要复杂的概率模型，而是使用基于树的集成学习方法，在处理大规模数据时具有计算效率优势。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "空间映射的应用场景",
+          "content": "<p>空间映射的核心价值在于将单细胞分辨率的信息投射到组织空间上下文中：</p><ul><li><strong>肿瘤微环境：</strong>定位免疫细胞、基质细胞在肿瘤组织中的空间分布</li><li><strong>发育生物学：</strong>将发育轨迹映射到组织切片上，观察细胞状态的空间模式</li><li><strong>神经科学：</strong>定位神经元亚型在脑区中的分布</li></ul><p>支持的输入格式包括10x Visium、Stereo-seq、Slide-seq等主流空间平台。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Single2Spatial映射流程",
+          "code": "import omicverse as ov\n\n# 1. 准备参考单细胞数据和空间数据\nadata_sc = ov.read('sc_reference.h5ad')  # 已注释的单细胞参考\nadata_sp = ov.read('spatial_sample.h5ad')  # 空间转录组\n\n# 2. 初始化映射器\nmapper = ov.single.Single2Spatial(\n    adata_sc=adata_sc,\n    adata_sp=adata_sp)\n\n# 3. 训练深度森林模型\nmapper.train(\n    n_estimators=100,\n    max_depth=15,\n    celltype_key='celltype')\n\n# 4. 预测空间spot的细胞组成\npredictions = mapper.predict(\n    adata_sp,\n    celltype_key='celltype')\n\n# 5. 评估预测准确性\nmapper.spot_assessment(\n    predictions,\n    ground_truth_key='celltype')\n\n# 6. 可视化标记基因空间分布\nmapper.plot_marker_genes(\n    gene_list=['MALAT1', 'CD3D', 'CD79A', 'COL1A1'])"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "空间映射最佳实践",
+          "content": "<p><strong>影响映射质量的关键因素：</strong></p><ul><li><strong>参考数据质量：</strong>参考单细胞图谱的细胞类型注释必须准确。低质量的注释会在映射中被放大</li><li><strong>基因覆盖：</strong>确保空间数据和单细胞数据共享足够多的基因。不同平台的基因panel差异可能导致映射失败</li><li><strong>组织匹配：</strong>参考数据应与空间数据来自相似的组织来源。跨组织映射的结果需要谨慎解读</li></ul><p>来源：<a href='https://www.sc-best-practices.org/spatial_omics/spatial_deconvolution.html' target='_blank'>sc-best-practices Chapter 32: Spatial Deconvolution</a></p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "空间映射工具对比",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>工具</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>方法</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>速度</th><th style='padding:6px;border:1px solid #E0E0E0;text-align:left;'>OmicVerse</th></tr></thead><tbody><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Single2Spatial</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>深度森林</td><td style='padding:6px;border:1px solid #E0E0E0;'>快</td><td style='padding:6px;border:1px solid #E0E0E0;'><code>ov.single.Single2Spatial()</code></td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>Tangram</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>深度学习对齐</td><td style='padding:6px;border:1px solid #E0E0E0;'>慢(GPU)</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过spatial-tutorials skill</td></tr><tr><td style='padding:6px;border:1px solid #E0E0E0;'><strong>cell2location</strong></td><td style='padding:6px;border:1px solid #E0E0E0;'>贝叶斯模型</td><td style='padding:6px;border:1px solid #E0E0E0;'>极慢</td><td style='padding:6px;border:1px solid #E0E0E0;'>通过spatial-tutorials skill</td></tr></tbody></table>"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Single2Spatial与Tangram的主要区别是什么？",
+              "options": [
+                "完全相同",
+                "Single2Spatial使用深度森林（集成学习），Tangram使用深度学习对齐",
+                "Single2Spatial不支持空间数据",
+                "Tangram不需要GPU"
+              ],
+              "answer": 1,
+              "explanation": "Single2Spatial使用深度森林（Deep Forest）——一种基于树的集成学习方法，不需要GPU训练。Tangram使用神经网络进行空间对齐，通常需要GPU加速。"
+            }
+          ]
+        },
+        {
+          "type": "concept",
+          "icon": "技能",
+          "title": "关联 Skill：single-to-spatial-mapping / spatial-tutorials",
+          "content": "<p><strong>Skill 功能：</strong><code>/single-to-spatial-mapping</code> — Single2Spatial深度森林映射；<code>/spatial-tutorials</code> — 空间转录组全景教程（Visium/HD/Stereo-seq/Slide-seq预处理、去卷积、聚类、整合）</p><p><strong>调用方式：</strong>单细胞到空间映射用 <code>/single-to-spatial-mapping</code>，空间数据预处理和分析用 <code>/spatial-tutorials</code>。</p>"
         }
       ]
     }
