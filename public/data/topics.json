@@ -7913,6 +7913,287 @@
             }
           ]
         }
+      ],
+      "workflowModules": [
+        {
+          "module_id": "fm_model_selection",
+          "module_name": "模型选择与环境配置",
+          "omics_type": "single-cell",
+          "module_type": "core",
+          "biological_question": "面对22个基础模型，如何根据任务类型（注释/扰动/去噪/跨物种）选择最佳模型并配置环境？",
+          "inputs": [
+            "预处理 AnnData",
+            "GPU/CPU 硬件配置",
+            "任务类型 (annotation/embedding/perturbation)"
+          ],
+          "outputs": [
+            "模型选择决策",
+            "Conda/Docker环境",
+            "预训练权重缓存"
+          ],
+          "tools": [
+            "ov.fm",
+            "scanpy",
+            "pytorch",
+            "huggingface-hub"
+          ],
+          "key_parameters": [
+            "model_name='scGPT'",
+            "device='cuda'",
+            "cache_dir='~/.cache/omicverse'"
+          ],
+          "qc_metrics": [
+            "GPU内存占用",
+            "模型加载时间",
+            "嵌入维度验证"
+          ],
+          "decision_rules": [
+            "注释任务→scGPT/CellPLM",
+            "基因关系→GeneFormer",
+            "跨物种→UCE",
+            "去噪/整合→scFoundation"
+          ],
+          "failure_modes": [
+            "CUDA版本不兼容",
+            "权重下载失败（网络）",
+            "内存不足"
+          ],
+          "upstream_modules": [
+            "single-preprocessing"
+          ],
+          "downstream_modules": [
+            "fm_embed",
+            "fm_annotate"
+          ],
+          "cross_omics_interfaces": [
+            "scRNA-seq AnnData标准接口",
+            "ov.fm 统一API"
+          ],
+          "ml_dl_connection": "Transformer架构：GPT式自回归(scGPT) / BERT式编码器(GeneFormer) / 对比学习(UCE)",
+          "citations": [
+            "scGPT_Cui2024",
+            "GeneFormer_Theodoris2023",
+            "UCE_Rosen2023"
+          ]
+        },
+        {
+          "module_id": "fm_embed",
+          "module_name": "细胞嵌入提取",
+          "omics_type": "single-cell",
+          "module_type": "core",
+          "biological_question": "如何使用预训练基础模型将基因表达矩阵转换为富含生物学信息的低维嵌入向量？",
+          "inputs": [
+            "标准化 AnnData",
+            "预训练模型权重",
+            "基因名映射（跨物种需转换）"
+          ],
+          "outputs": [
+            "adata.obsm['X_scGPT']",
+            "adata.obsm['X_GeneFormer']",
+            "adata.obsm['X_UCE']"
+          ],
+          "tools": [
+            "ov.fm.embed()",
+            "scanpy",
+            "umap-learn"
+          ],
+          "key_parameters": [
+            "batch_size=64",
+            "n_emb=512/1024",
+            "species='human'"
+          ],
+          "qc_metrics": [
+            "嵌入维度",
+            "嵌入质量（silhouette score）",
+            "批次混合程度"
+          ],
+          "decision_rules": [
+            "scGPT嵌入→通用下游分析",
+            "GeneFormer嵌入→基因调控任务",
+            "UCE嵌入→跨物种整合"
+          ],
+          "failure_modes": [
+            "基因名不匹配（跨物种）",
+            "GPU OOM",
+            "嵌入NaN值"
+          ],
+          "upstream_modules": [
+            "fm_model_selection"
+          ],
+          "downstream_modules": [
+            "fm_annotate",
+            "fm_perturbation"
+          ],
+          "cross_omics_interfaces": [
+            "可接入scanpy聚类/可视化管线",
+            "兼容scVI等整合方法"
+          ],
+          "ml_dl_connection": "嵌入层是Transformer的hidden states，捕获了基因间的上下文调控关系",
+          "citations": [
+            "scGPT_Cui2024"
+          ]
+        },
+        {
+          "module_id": "fm_annotate",
+          "module_name": "零样本细胞注释",
+          "omics_type": "single-cell",
+          "module_type": "core",
+          "biological_question": "如何利用预训练基础模型在没有任何训练数据的情况下进行细胞类型注释？",
+          "inputs": [
+            "细胞嵌入 (obsm)",
+            "组织/物种信息",
+            "候选细胞类型列表（可选）"
+          ],
+          "outputs": [
+            "adata.obs['scGPT_celltype']",
+            "注释置信度分数",
+            "低置信度细胞标记"
+          ],
+          "tools": [
+            "ov.fm.annotate()",
+            "scGPT",
+            "CellPLM"
+          ],
+          "key_parameters": [
+            "tissue='blood'",
+            "species='human'",
+            "confidence_threshold=0.5"
+          ],
+          "qc_metrics": [
+            "注释一致性（ARI vs 已知标签）",
+            "低置信度细胞比例<10%",
+            "标记基因验证"
+          ],
+          "decision_rules": [
+            "高置信度→直接使用",
+            "低置信度→标记基因人工验证",
+            "极低→回退到传统注释方法"
+          ],
+          "failure_modes": [
+            "组织/物种信息错误",
+            "罕见细胞类型无法识别",
+            "模型对特定组织过拟合"
+          ],
+          "upstream_modules": [
+            "fm_embed"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "可对比传统注释结果（SCSA/CellVote）",
+            "不确定性评分可导入可视化"
+          ],
+          "ml_dl_connection": "零样本学习：模型在预训练中学习到的细胞类型概念可直接泛化到新数据",
+          "citations": [
+            "scGPT_Cui2024",
+            "CellPLM_2023"
+          ]
+        },
+        {
+          "module_id": "fm_perturbation",
+          "module_name": "基因扰动预测",
+          "omics_type": "single-cell",
+          "module_type": "advanced",
+          "biological_question": "如何利用scGPT的条件生成能力预测特定基因敲除/过表达后的转录组变化？",
+          "inputs": [
+            "基础细胞状态嵌入",
+            "目标基因列表 ['TP53','MYC']",
+            "细胞类型上下文"
+          ],
+          "outputs": [
+            "扰动后基因表达预测",
+            "差异表达基因",
+            "扰动量级评分"
+          ],
+          "tools": [
+            "ov.fm.predict_perturbation()",
+            "scGPT"
+          ],
+          "key_parameters": [
+            "target_genes=['TP53']",
+            "cell_type='T cells'",
+            "n_samples=100"
+          ],
+          "qc_metrics": [
+            "预测vs实验一致性",
+            "扰动效应显著性",
+            "生成多样性（避免模式坍塌）"
+          ],
+          "decision_rules": [
+            "in-silico初筛→实验验证",
+            "效应量>2fold→优先验证",
+            "一致性低→不支持生物学结论"
+          ],
+          "failure_modes": [
+            "扰动效应被高估",
+            "细胞类型特异性未考虑",
+            "组合扰动预测不可靠"
+          ],
+          "upstream_modules": [
+            "fm_embed"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "可与CRISPR筛选数据对比",
+            "可与药物响应数据整合"
+          ],
+          "ml_dl_connection": "条件自回归生成：P(expr_perturbed | expr_wildtype, gene_perturbation_set)，in-silico CRISPR筛选",
+          "citations": [
+            "scGPT_Cui2024"
+          ]
+        },
+        {
+          "module_id": "fm_cross_species",
+          "module_name": "跨物种细胞映射",
+          "omics_type": "single-cell",
+          "module_type": "advanced",
+          "biological_question": "如何利用UCE将人类参考图谱映射到非模式生物的单细胞数据？",
+          "inputs": [
+            "人类参考 AnnData（含注释）",
+            "目标物种 AnnData（如小鼠/斑马鱼）",
+            "物种名称"
+          ],
+          "outputs": [
+            "统一嵌入空间 (UCE space)",
+            "跨物种细胞类型映射表",
+            "保守性/差异性评分"
+          ],
+          "tools": [
+            "ov.fm.embed('UCE')",
+            "ov.fm.map_species()"
+          ],
+          "key_parameters": [
+            "species_source='human'",
+            "species_target='mouse'",
+            "protein_emb='ESM-2'"
+          ],
+          "qc_metrics": [
+            "跨物种细胞类型对齐准确率",
+            "保守性评分分布",
+            "批次/物种混合程度"
+          ],
+          "decision_rules": [
+            "高度保守细胞类型→可直接映射",
+            "物种特异性→单独分析",
+            "对齐失败→检查基因名映射"
+          ],
+          "failure_modes": [
+            "基因名映射错误",
+            "进化距离过大导致对齐失败",
+            "蛋白质嵌入模型版本不匹配"
+          ],
+          "upstream_modules": [
+            "fm_embed"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "蛋白质语言模型(ESM)嵌入",
+            "同源基因数据库"
+          ],
+          "ml_dl_connection": "蛋白质语言模型嵌入初始化基因权重→不同物种的同源基因获得语义相近的初始表示",
+          "citations": [
+            "UCE_Rosen2023"
+          ]
+        }
       ]
     }
   ]

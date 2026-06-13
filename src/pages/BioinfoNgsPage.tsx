@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch } from 'lucide-react';
 import { useData } from '../hooks/useData';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -74,11 +74,12 @@ const omicsTabs: OmicsTab[] = [
     id: 'single-cell',
     label: '单细胞组学',
     icon: <Microscope size={15} />,
-    description: '单细胞转录组全流程分析：预处理、聚类、注释、轨迹、通讯、GRN、多组学整合',
+    description: '单细胞转录组全流程分析 + 基础模型（scGPT/GeneFormer/UCE等）',
     topicKeys: [
       'single-preprocessing', 'single-clustering', 'single-annotation',
       'single-trajectory', 'single-communication', 'single-grn',
-      'single-downstream', 'single-multiomics', 'single-spatial'
+      'single-downstream', 'single-multiomics', 'single-spatial',
+      'foundation-models'
     ],
   },
   {
@@ -246,41 +247,6 @@ export default function BioinfoNgsPage() {
         </section>
       )}
 
-      {/* Foundation Models — standalone section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Sparkles size={17} className="text-brand-accent" />
-            <h2 className="text-lg font-bold text-brand-ink">单细胞基础模型</h2>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Link
-            to="/foundation-models"
-            className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
-          >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-brand-accent">
-                  <Sparkles size={13} />
-                </span>
-                <h3 className="text-sm font-semibold text-brand-ink">单细胞基础模型 (Foundation Models)</h3>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">
-                专题
-              </span>
-            </div>
-            <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
-              基于 OmicVerse ov.fm 统一API，覆盖22个单细胞基础模型（scGPT、GeneFormer、scFoundation、
-              UCE、CellPLM等）。零样本注释、基因扰动预测、跨物种映射、表达去噪。
-            </p>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-brand-dl">
-              进入专题
-              <ArrowRight size={13} />
-            </div>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }
