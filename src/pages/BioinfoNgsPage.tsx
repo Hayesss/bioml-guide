@@ -246,26 +246,6 @@ export default function BioinfoNgsPage() {
         </section>
       )}
 
-      {/* Single-cell full page link — visible on single-cell tab */}
-      {activeTab === 'single-cell' && (
-        <section className="border rounded-lg p-5 border-brand-border bg-brand-accent-light">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-brand-ink mb-1">单细胞组学完整专题</h2>
-              <p className="text-xs text-brand-ink-light" style={{ lineHeight: 1.6 }}>
-                包含9个学习专题的完整内容、11个AI Skill参考和Skills快速参考表。支持可展开的详细文档内容。
-              </p>
-            </div>
-            <Link
-              to="/single-cell"
-              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand-accent text-white no-underline hover:opacity-90 transition-opacity"
-            >
-              进入完整专题 <ArrowRight size={14} />
-            </Link>
-          </div>
-        </section>
-      )}
-
       {/* Foundation Models — standalone section */}
       <section>
         <div className="flex items-center justify-between mb-4">
