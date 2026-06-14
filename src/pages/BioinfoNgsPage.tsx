@@ -100,12 +100,15 @@ const omicsTabs: OmicsTab[] = [
     id: 'algorithms',
     label: '共用算法',
     icon: <Calculator size={15} />,
-    description: '跨组学共用算法：PCA/UMAP、NMF/SVD、聚类、多重检验、富集分析、正则化回归 —— 所有组学通用的方法论',
+    description: '跨组学共用算法：降维(PCA/t-SNE/UMAP/MDS)、矩阵分解(NMF/SVD/ICA)、聚类(K-means/DBSCAN/GMM/谱聚类/层次/Leiden)、统计检验(Wilcoxon/Bootstrap/多重校正)、富集分析(GSEA)、正则化(Lasso/Ridge)、网络(WGCNA)、关联(CCA)',
     topicKeys: [
-      'common-pca', 'common-umap-tsne', 'common-nmf',
-      'common-hierarchical-clustering', 'common-leiden-louvain',
-      'common-multiple-testing', 'common-gsea-enrichment',
-      'common-svd', 'common-lasso-ridge'
+      'common-pca', 'common-umap-tsne', 'common-mds',
+      'common-nmf', 'common-svd', 'common-ica',
+      'common-kmeans', 'common-dbscan', 'common-gmm',
+      'common-hierarchical-clustering', 'common-leiden-louvain', 'common-spectral-clustering',
+      'common-wilcoxon', 'common-bootstrap', 'common-multiple-testing',
+      'common-gsea-enrichment',
+      'common-lasso-ridge', 'common-wgcna', 'common-cca'
     ],
   },
 ];

@@ -113,6 +113,16 @@
     "single-spatial",
     "foundation-models",
     "common-lasso-ridge",
+    "common-spectral-clustering",
+    "common-mds",
+    "common-cca",
+    "common-wgcna",
+    "common-bootstrap",
+    "common-wilcoxon",
+    "common-ica",
+    "common-gmm",
+    "common-dbscan",
+    "common-kmeans",
     "common-svd",
     "common-gsea-enrichment",
     "common-multiple-testing",
@@ -9322,6 +9332,327 @@
               "explanation": "L1正则化的selection bias——在一组相关的基因中，Lasso倾向于随机选一个而丢弃其他。Elastic Net(L1+L2混合)既能选到整组共调控基因，又保持了稀疏性。"
             }
           ]
+        }
+      ]
+    },
+    {
+      "key": "common-kmeans",
+      "name": "K-means / K-medoids 聚类",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "nextTopic": "common-dbscan",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>K-means像班主任按身高把学生分到K个队列：</strong>先随机选K个\"标杆\"（centroid），每个学生站到离自己最近的标杆那队，然后重新计算每队的平均身高作为新标杆，反复调整直到队伍不再变化。简单粗暴但有效——缺点是你得提前告诉班主任要分几个队（K是多少）。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "算法原理与K选择",
+          "content": "<p>K-means优化目标：最小化簇内平方和（Within-Cluster Sum of Squares, WCSS）。算法保证收敛到局部最优（非全局）。<strong>K-medoids/PAM：</strong>用实际数据点作为centroid（而非平均值），对异常值更鲁棒，但计算更慢。<strong>选择K的方法：</strong>elbow method（WCSS vs K的拐点）、silhouette score（簇内紧凑度 vs 簇间分离度）、gap statistic（与随机参照对比）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "K-means 跨组学应用",
+          "content": "<table><tr><td><strong>Bulk RNA-seq：</strong>样本聚类——将100个肿瘤样本按表达谱分为K个分子亚型（如Luminal A/B, Basal, HER2）</td></tr><tr><td><strong>蛋白质组学：</strong>蛋白质表达谱的聚类发现功能模块</td></tr><tr><td><strong>DNA甲基化：</strong>CpG位点的甲基化模式聚类发现调控区域</td></tr><tr><td><strong>单细胞：</strong>虽然Leiden是主流，但K-means用于快速粗聚类和初始化GMM</td></tr><tr><td><strong>微生物组：</strong>OTU/ASV的样本聚类</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "K-means 跨组学实战",
+          "code": "from sklearn.cluster import KMeans\nfrom sklearn.metrics import silhouette_score\nimport numpy as np\n\n# === 1. Bulk RNA-seq: 分子亚型 ===\nexpr_pca = PCA(n_components=50).fit_transform(expr.T)\n# Elbow method 选K\nwcss = []\nfor k in range(1, 15):\n    km = KMeans(n_clusters=k, n_init=20, random_state=42)\n    km.fit(expr_pca)\n    wcss.append(km.inertia_)\n# 画elbow找拐点\n\n# Silhouette验证\nkmeans = KMeans(n_clusters=4, n_init=20, random_state=42)\nlabels = kmeans.fit_predict(expr_pca)\nprint(f'Silhouette: {silhouette_score(expr_pca, labels):.3f}')\n\n# === 2. K-medoids (PAM): 对异常值鲁棒 ===\nfrom sklearn_extra.cluster import KMedoids\nkmed = KMedoids(n_clusters=4, metric='correlation')\nkmed.fit(expr.T)\n\n# === 3. Gap statistic (自动选K) ===\nfrom gap_statistic import OptimalK\noptimalK = OptimalK(parallel_backend='joblib')\nn_clusters = optimalK(expr_pca, cluster_array=np.arange(1, 15))"
+        }
+      ]
+    },
+    {
+      "key": "common-dbscan",
+      "name": "DBSCAN / HDBSCAN 密度聚类",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-kmeans"
+      ],
+      "nextTopic": "common-gmm",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>DBSCAN像夜空中按密度找星座：</strong>恒星密集的区域是星座（簇），稀疏的区域是夜空背景（噪声）。不需要提前告知有多少个星座——算法自动根据\"密度\"区分簇和噪声。这对发现\"稀有星座\"（稀有细胞类型）特别有用——K-means很可能把它们归到邻近的大簇里。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "DBSCAN vs HDBSCAN",
+          "content": "<p><strong>DBSCAN</strong>两个核心参数：<strong>eps</strong>（邻域半径）和<strong>minPts</strong>（成为核心点所需的最小邻居数）。密度可达（density-reachable）的点形成簇，不在任何簇中的点为噪声（-1）。<strong>HDBSCAN</strong>是DBSCAN的\"自适应版\"——不需要手动设eps，而是构建密度层次树，从中提取最稳定的簇。在处理不均匀密度的数据时显著优于DBSCAN。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "密度聚类跨组学应用",
+          "content": "<table><tr><td><strong>scRNA-seq：</strong>发现稀有细胞亚群——DBSCAN/HDBSCAN对稀疏的稀有群体敏感，Leiden可能将它们合并到相邻大簇</td></tr><tr><td><strong>CyTOF/流式：</strong>HDBSCAN是FlowSOM之后的常用聚类方法</td></tr><tr><td><strong>空间转录组：</strong>基于空间坐标+表达联合聚类的密度聚类</td></tr><tr><td><strong>蛋白质结构：</strong>DBSCAN聚类相似的蛋白质构象</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "DBSCAN/HDBSCAN 稀有细胞发现",
+          "code": "from sklearn.cluster import DBSCAN\nimport hdbscan\n\n# === DBSCAN: 发现稀有亚群 ===\n# eps: 可通过k-distance图选择（拐点）\ndb = DBSCAN(eps=0.5, min_samples=10)\nlabels = db.fit_predict(adata.obsm['X_pca'])\n# label=-1 为噪声/稀有细胞\nn_rare = (labels == -1).sum()\nprint(f'Rare/Noise cells: {n_rare} ({n_rare/len(labels):.1%})')\n\n# === HDBSCAN: 自适应密度 (推荐) ===\nclusterer = hdbscan.HDBSCAN(\n    min_cluster_size=10,\n    min_samples=5,\n    cluster_selection_epsilon=0.5)\nhdb_labels = clusterer.fit_predict(adata.obsm['X_pca'])\nprint(f'Clusters found: {len(set(hdb_labels)) - (1 if -1 in hdb_labels else 0)}')\n# 可视化\nadata.obs['hdbscan'] = hdb_labels.astype(str)\nsc.pl.umap(adata, color=['hdbscan', 'celltype'])"
+        }
+      ]
+    },
+    {
+      "key": "common-gmm",
+      "name": "GMM 高斯混合模型",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-kmeans"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>GMM像把数据看作几个\"高斯山丘\"的叠加：</strong>每个山丘代表一个细胞类型，山丘的高度（概率密度）表示细胞属于这个类型的可能性。关键是——GMM给你\"软分配\"：一个细胞70%可能是T细胞，25%可能是NK细胞，5%可能是其他。而K-means只会说\"你就是T细胞\"。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "GMM 跨组学应用",
+          "content": "<table><tr><td><strong>单细胞：</strong>概率软分配——细胞可能处于过渡态，GMM比硬聚类更好地建模连续的分化过程</td></tr><tr><td><strong>CNV检测：</strong>GMM建模read depth的混合分布，区分正常二倍体和CNV区域</td></tr><tr><td><strong>DNA甲基化：</strong>单个CpG的beta值通常呈双峰分布（甲基化/未甲基化），GMM自动分两群</td></tr><tr><td><strong>突变检测：</strong>GMM建模variant allele frequency的混合分布，区分杂合/纯合/体细胞</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GMM 概率聚类 + BIC选K",
+          "code": "from sklearn.mixture import GaussianMixture\nimport numpy as np\n\n# === BIC/AIC 自动选K ===\nn_components = np.arange(1, 20)\nbic = []\nfor n in n_components:\n    gmm = GaussianMixture(n=n, covariance_type='full',\n                          random_state=42)\n    gmm.fit(adata.obsm['X_pca'][:, :30])\n    bic.append(gmm.bic(adata.obsm['X_pca'][:, :30]))\nbest_k = n_components[np.argmin(bic)]\nprint(f'Best K by BIC: {best_k}')\n\n# === 概率软分配 ===\ngmm = GaussianMixture(n_components=best_k, random_state=42)\ngmm.fit(adata.obsm['X_pca'][:, :30])\nprobs = gmm.predict_proba(adata.obsm['X_pca'][:, :30])\n# probs[i, j] = 细胞i属于簇j的概率\nuncertain = np.max(probs, axis=1) < 0.7  # 低置信度细胞\nprint(f'Uncertain cells: {uncertain.sum()}')"
+        }
+      ]
+    },
+    {
+      "key": "common-ica",
+      "name": "ICA 独立成分分析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>ICA像在嘈杂的鸡尾酒会上分离每个人的声音：</strong>房间里有10个人同时说话（10个基因调控通路），你在不同位置放了100个麦克风（100个样本/细胞）。ICA能从混合录音中分离出每个独立的声音源——每个IC是一个独立的调控通路或生物过程。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "ICA 跨组学应用",
+          "content": "<table><tr><td><strong>基因表达：</strong>ICA发现的独立components比PCA的PC更具生物学可解释性——每个IC常对应一个已知的生物学通路</td></tr><tr><td><strong>Hi-C：</strong>ICA用于发现3D基因组中的独立折叠模块</td></tr><tr><td><strong>fMRI脑成像：</strong>ICA分离独立的脑功能网络（默认模式网络、视觉网络等）——这是ICA最经典的应用</td></tr><tr><td><strong>代谢组学：</strong>ICA分离独立的代谢通路信号</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "ICA 基因表达去卷积",
+          "code": "from sklearn.decomposition import FastICA\n\n# 从混合表达中分离独立通路\nica = FastICA(n_components=20, random_state=42)\n# S: 独立成分 (样本在IC空间的坐标)\n# A: 混合矩阵 (基因对IC的贡献)\nS = ica.fit_transform(expr.T)  # (samples, 20)\nA = ica.mixing_  # (genes, 20)\n\n# 对每个IC，找top contributing genes\nfor ic_idx in range(5):\n    top_genes_idx = np.argsort(np.abs(A[:, ic_idx]))[-20:]\n    top_genes = expr.index[top_genes_idx]\n    print(f'IC{ic_idx+1} top genes: {top_genes[:5].tolist()}')\n\n# ICA vs PCA: ICA最大化统计独立性（非高斯性），\n# PCA最大化方差。ICA的components通常更\"sharp\""
+        }
+      ]
+    },
+    {
+      "key": "common-wilcoxon",
+      "name": "Wilcoxon / Mann-Whitney 非参数检验",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [
+        "stage-1-math-statistics-basics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Wilcoxon像比较两个班的\"名次分布\"而非\"平均分\"：</strong>t检验假设成绩呈正态分布比较平均分，Wilcoxon只看排名——A班的第1名 vs B班的第1名，A班的第2名 vs B班的第2名...完全不假设数据来自正态分布。在基因表达中，很多基因不服从正态分布，所以Wilcoxon比t检验更安全。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Wilcoxon 跨组学应用",
+          "content": "<table><tr><td><strong>scRNA-seq DEG：</strong>Seurat/Scanpy默认使用Wilcoxon——单细胞数据高度非正态（大量0值），Wilcoxon天然适配</td></tr><tr><td><strong>微生物组：</strong>OTU丰度极不均匀（少数高丰度+大量0），Wilcoxon检验组间差异</td></tr><tr><td><strong>代谢组学：</strong>代谢物浓度通常非正态，Wilcoxon比t检验更合适</td></tr><tr><td><strong>药物筛选：</strong>比较对照组vs处理组的细胞活力——数据常不满足正态假设</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Wilcoxon 跨组学实战",
+          "code": "from scipy.stats import mannwhitneyu, wilcoxon\nfrom scipy.stats import ranksums\n\n# === 单细胞DEG: 每个基因的Wilcoxon ===\n# group1: treatment细胞某基因的表达\n# group2: control细胞同一基因的表达\nstat, pval = mannwhitneyu(\n    adata[adata.obs['condition']=='treated', gene].X.toarray().flatten(),\n    adata[adata.obs['condition']=='control', gene].X.toarray().flatten(),\n    alternative='two-sided')\n\n# === 配对Wilcoxon (paired samples) ===\n# 同一患者治疗前后\nbefore = adata[:, 'TP53'].X[adata.obs['time']=='pre'].toarray().flatten()\nafter = adata[:, 'TP53'].X[adata.obs['time']=='post'].toarray().flatten()\nstat_paired, p_paired = wilcoxon(before, after)\n\n# === 微生物组: 多组比较 ===\nfrom scipy.stats import kruskal\n# H0: 所有组的OTU丰度分布相同\ngroups = [otu_table[meta['group']==g] for g in ['A','B','C']]\nH, p_kruskal = kruskal(*groups)"
+        }
+      ]
+    },
+    {
+      "key": "common-bootstrap",
+      "name": "Bootstrap 自助抽样与置信区间",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "stage-1-math-statistics-basics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Bootstrap像\"有放回地重抽样\"估计统计量的分布：</strong>你想知道全班平均身高的置信区间，但只有30个学生的数据。Bootstrap的做法：从30人中随机抽30人（有放回，可能重复抽到同一人），计算平均身高，重复1000次。这1000个平均值构成的分布就是你想要的——不需要假设数据来自正态分布。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Bootstrap 跨组学应用",
+          "content": "<table><tr><td><strong>系统发育树：</strong>Bootstrap评估进化分支的可靠性——随机重抽样序列位置，统计每个分支出现的频率（bootstrap support>70%认为可靠）</td></tr><tr><td><strong>共表达网络（WGCNA）：</strong>Bootstrap评估模块成员关系的稳定性</td></tr><tr><td><strong>差异表达：</strong>Bootstrap估计log2FC的置信区间</td></tr><tr><td><strong>富集分析：</strong>Bootstrap评估富集结果的稳健性</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Bootstrap: 置信区间 + 系统发育",
+          "code": "import numpy as np\nfrom sklearn.utils import resample\n\n# === Bootstrap 置信区间 ===\ndata = np.random.lognormal(2, 0.5, 50)\nn_bootstrap = 10000\nmeans = np.zeros(n_bootstrap)\nfor i in range(n_bootstrap):\n    sample = np.random.choice(data, size=len(data), replace=True)\n    means[i] = np.mean(sample)\n\nci_lower, ci_upper = np.percentile(means, [2.5, 97.5])\nprint(f'Mean 95% CI: [{ci_lower:.2f}, {ci_upper:.2f}]')\n\n# === 差异表达 log2FC Bootstrap ===\nfc_boot = np.zeros(1000)\nfor i in range(1000):\n    # 随机重抽样treatment和control\n    t_boot = np.random.choice(treat_expr, size=len(treat_expr), replace=True)\n    c_boot = np.random.choice(ctrl_expr, size=len(ctrl_expr), replace=True)\n    fc_boot[i] = np.log2(np.mean(t_boot) / np.mean(c_boot))\n\n# 如果CI不跨0，log2FC显著\nci = np.percentile(fc_boot, [2.5, 97.5])\nsig = not (ci[0] < 0 < ci[1])\nprint(f'log2FC 95% CI: [{ci[0]:.3f}, {ci[1]:.3f}], sig={sig}')"
+        }
+      ]
+    },
+    {
+      "key": "common-wgcna",
+      "name": "WGCNA 加权基因共表达网络",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-hierarchical-clustering"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>WGCNA像分析社交网络找\"朋友圈\"：</strong>如果两个人在同一场合出现的频率高度相关（基因共表达），他们可能属于同一个朋友圈（共表达模块）。但不是看\"是或否\"的绝对阈值——而是用soft-thresholding：如果两个人\"经常\"一起出现就给更高的权重，偶尔一起出现给低权重。这样更稳定、更符合生物网络的连续性。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "WGCNA 核心流程",
+          "content": "<p><strong>五步核心流程：</strong>（1）选择合适的soft-thresholding power β（使网络接近scale-free topology）；（2）计算相关性矩阵→邻接矩阵（a_ij = |cor(i,j)|^β）→拓扑重叠矩阵（TOM）；（3）基于TOM做层次聚类→动态树切割→共表达模块；（4）模块特征基因（eigengene）=模块内所有基因的PC1；（5）模块-性状关联：eigengene与临床表型/实验条件做相关性分析。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "WGCNA 跨组学应用",
+          "content": "<table><tr><td><strong>Bulk RNA-seq：</strong>标准WGCNA——从20000基因中发现10-30个共表达模块，关联临床指标（如肿瘤分级、生存期）</td></tr><tr><td><strong>蛋白质组学：</strong>共丰度网络——蛋白质复合物的成员倾向于共调控</td></tr><tr><td><strong>代谢组学：</strong>代谢物共丰度网络发现代谢通路模块</td></tr><tr><td><strong>微生物组：</strong>共发生网络——微生物种群间的互作关系</td></tr><tr><td><strong>甲基化组：</strong>共甲基化模块——共调控的CpG位点</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "WGCNA 跨组学实战",
+          "code": "import omicverse as ov\nimport pandas as pd\n\n# === 1. 标准WGCNA (Bulk RNA-seq) ===\n# expr: (genes × samples), meta: 临床指标\n# 选择soft-threshold power\nov.bulk.wgcna_soft_threshold(\n    expr, powers=range(1, 21))\n# 网络构建 + 模块检测\nmodules = ov.bulk.wgcna(\n    expr, power=6, min_module_size=30,\n    merge_cut_height=0.25)\n# 模块-性状关联\nov.bulk.wgcna_trait_correlation(\n    modules, meta[['grade','survival']])\n\n# === 2. Hub gene 识别 ===\n# Module Membership (MM): gene vs module eigengene\n# Gene Significance (GS): gene vs trait\nhub_genes = ov.bulk.wgcna_hub_genes(\n    modules, module='blue', top_n=20)"
+        }
+      ]
+    },
+    {
+      "key": "common-cca",
+      "name": "CCA 典型相关分析",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>CCA像同时翻译两种语言——找最大的\"共同含义\"：</strong>你有两本书——一本英文（RNA-seq表达）一本法文（ATAC-seq峰开放度）。CCA不是分别总结每本书（那是PCA），而是找两本书中含义最\"对齐\"的段落——哪组英文段落和哪组法文段落在说同一件事？这组英文+法文就是一对canonical variates。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "CCA 跨组学应用",
+          "content": "<table><tr><td><strong>scRNA+scATAC整合：</strong>Seurat v3的跨模态整合就是用CCA——找到基因表达和peak开放度的共同变异方向</td></tr><tr><td><strong>多组学关联：</strong>RNA-seq(20000 genes) + 代谢组(500 metabolites) → CCA找关联模块</td></tr><tr><td><strong>微生物组-代谢组关联：</strong>哪些菌群的丰度变化与哪些代谢物的浓度变化耦合？</td></tr><tr><td><strong>影像基因组学：</strong>MRI影像特征与基因表达谱的CCA关联</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "CCA 跨组学关联 + Seurat整合",
+          "code": "from sklearn.cross_decomposition import CCA\nimport numpy as np\n\n# === CCA: RNA + ATAC 关联 ===\n# X: (cells, HVGs) RNA表达\n# Y: (cells, peaks) ATAC开放度\ncca = CCA(n_components=20)\nX_c, Y_c = cca.fit_transform(X_rna, Y_atac)\n# X_c[:,0]和Y_c[:,0]是最大化相关的第一对canonical variates\ncorr = np.corrcoef(X_c[:,0], Y_c[:,0])[0,1]\nprint(f'CC1 correlation: {corr:.3f}')\n\n# === Seurat-style CCA整合 ===\n# 1. CCA降维\n# 2. L2-normalize canonical vectors\n# 3. Find mutual nearest neighbors (MNN)\n# 4. Anchor-based integration\n# OmicVerse: ov.single.glue() 提供了类似的图对齐方法\nov.single.glue(adata_rna, adata_atac,\n    annotation_key='celltype')"
+        }
+      ]
+    },
+    {
+      "key": "common-mds",
+      "name": "MDS / NMDS 多维尺度分析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>MDS像根据地铁路线图还原城市地理：</strong>地铁图只有站点间距离（分钟数），没有经纬度。MDS的任务是——给定所有站点两两之间的距离，反推出它们在2D平面上的相对位置。在生物学中，你可能有样本之间的Bray-Curtis距离或基因之间的相关性距离——MDS把它们\"画\"在2D图上。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "MDS/NMDS 跨组学应用",
+          "content": "<table><tr><td><strong>微生物组：</strong>NMDS(Bray-Curtis距离)是标准可视化方法——PCoA和NMDS是最常用的beta多样性可视化</td></tr><tr><td><strong>Bulk RNA-seq：</strong>样本×样本的Spearman距离→MDS图，替代PCA（PCA用原始数据，MDS可以输入任意距离）</td></tr><tr><td><strong>生态学：</strong>物种组成的NMDS排序——经典应用</td></tr><tr><td><strong>蛋白质结构：</strong>RMSD距离矩阵→MDS可视化构象空间</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "MDS/NMDS 距离可视化",
+          "code": "from sklearn.manifold import MDS\nfrom scipy.spatial.distance import pdist, squareform\nfrom skbio.stats.ordination import pcoa\nimport numpy as np\n\n# === Metric MDS (PCoA) ===\n# 输入: 样本×样本距离矩阵\nbc_dist = pdist(otu_table, metric='braycurtis')\nbc_square = squareform(bc_dist)\nmds = MDS(n_components=2, dissimilarity='precomputed',\n          random_state=42)\ncoords = mds.fit_transform(bc_square)\n\n# === NMDS (非度量): 只保留相对顺序 ===\n# NMDS: stress函数最小化距离排序 vs 原始排序\n# 适合非欧几里得距离（如Bray-Curtis）\nfrom sklearn.manifold import MDS\nnmds = MDS(n_components=2, metric=False,\n           dissimilarity='precomputed',\n           max_iter=300, random_state=42)\nnmds_coords = nmds.fit_transform(bc_square)\nprint(f'NMDS stress: {nmds.stress_:.3f}')"
+        }
+      ]
+    },
+    {
+      "key": "common-spectral-clustering",
+      "name": "谱聚类",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "stage-3-math-graph-spectral",
+        "common-kmeans"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>谱聚类像通过\"图Laplacian\"的特征向量自动揭示社区：</strong>想象一个舞会——你只知道谁和谁跳了舞（相似度），不知道每个人属于哪个社交圈。谱聚类不直接在\"跳舞\"的数据上做K-means，而是先构造相似度图的Laplacian矩阵，对其最小的几个特征向量（\"谱\"）做K-means——这些特征向量天然编码了图的社区结构。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "谱聚类跨组学应用",
+          "content": "<table><tr><td><strong>单细胞（替代Leiden）：</strong>谱聚类天然处理非线性可分的细胞群——当细胞类型在PCA空间是非凸形状时，K-means失败但谱聚类工作</td></tr><tr><td><strong>Hi-C：</strong>谱聚类用于发现3D基因组中的空间域——每个域的接触模式不同</td></tr><tr><td><strong>蛋白质构象聚类：</strong>接触矩阵的谱分解发现蛋白质折叠中间态</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "谱聚类: 非线性分群 + Hi-C域",
+          "code": "from sklearn.cluster import SpectralClustering\n\n# === 单细胞: 非线性细胞群 ===\nsc = SpectralClustering(\n    n_clusters=8, affinity='nearest_neighbors',\n    n_neighbors=10, random_state=42)\nlabels = sc.fit_predict(adata.obsm['X_pca'][:, :30])\n\n# === 自定义affinity矩阵 (基于KNN图) ===\nfrom sklearn.neighbors import kneighbors_graph\nA = kneighbors_graph(adata.obsm['X_pca'][:, :30],\n                      n_neighbors=10, mode='connectivity')\nsc_custom = SpectralClustering(\n    n_clusters=8, affinity='precomputed')\nlabels_custom = sc_custom.fit_predict(A)"
         }
       ]
     }
