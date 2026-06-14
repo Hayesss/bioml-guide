@@ -4,6 +4,7 @@ import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkl
 import { useData } from '../hooks/useData';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
+import ChipLine from '../components/ChipLine';
 
 interface TopicSection {
   type: string;
@@ -253,22 +254,6 @@ export default function BioinfoNgsPage() {
         </section>
       )}
 
-    </div>
-  );
-}
-
-function ChipLine({ label, items }: { label: string; items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mb-2">
-      <span className="text-[11px] font-medium text-brand-ink-muted">{label}: </span>
-      <div className="mt-1 flex flex-wrap gap-1">
-        {items.slice(0, 4).map((item) => (
-          <span key={item} className="text-[11px] px-1.5 py-0.5 rounded border border-brand-border-light text-brand-ink-light">
-            {item}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

@@ -8,15 +8,6 @@
     "stage-1-ml-evaluation-metrics",
     "stage-1-ml-cross-validation",
     "stage-1-ml-overfitting-underfitting",
-    "stage-1-dl-neural-network-basics",
-    "stage-1-dl-fnn",
-    "stage-1-dl-activation-functions",
-    "stage-1-dl-backpropagation",
-    "stage-1-dl-loss-functions",
-    "stage-1-dl-gradient-descent",
-    "stage-1-dl-vectorization",
-    "stage-1-dl-minibatch",
-    "stage-1-dl-pytorch-tensorflow",
     "stage-2-ml-svm",
     "stage-2-ml-random-forest",
     "stage-2-ml-gradient-boosting",
@@ -28,6 +19,27 @@
     "stage-2-ml-imbalanced-data",
     "stage-2-ml-survival-analysis",
     "stage-2-ml-r-ecosystem",
+    "stage-3-ml-stacking-blending",
+    "stage-3-ml-active-learning",
+    "stage-3-ml-semi-supervised",
+    "stage-3-ml-gnn",
+    "stage-3-ml-automl",
+    "stage-4-ml-alphafold-ml",
+    "stage-4-ml-esm",
+    "stage-4-ml-genomic-language",
+    "stage-4-ml-causal-inference",
+    "stage-4-ml-reinforcement-bio",
+    "stage-4-ml-nas",
+    "stage-4-ml-federated",
+    "stage-1-dl-neural-network-basics",
+    "stage-1-dl-fnn",
+    "stage-1-dl-activation-functions",
+    "stage-1-dl-backpropagation",
+    "stage-1-dl-loss-functions",
+    "stage-1-dl-gradient-descent",
+    "stage-1-dl-vectorization",
+    "stage-1-dl-minibatch",
+    "stage-1-dl-pytorch-tensorflow",
     "stage-2-dl-cnn",
     "stage-2-dl-rnn",
     "stage-2-dl-lstm-gru",
@@ -41,11 +53,6 @@
     "stage-2-dl-optimizers",
     "stage-2-dl-gradient-issues",
     "stage-2-dl-resnet",
-    "stage-3-ml-stacking-blending",
-    "stage-3-ml-active-learning",
-    "stage-3-ml-semi-supervised",
-    "stage-3-ml-gnn",
-    "stage-3-ml-automl",
     "stage-3-dl-seq2seq",
     "stage-3-dl-attention",
     "stage-3-dl-transformer",
@@ -58,16 +65,9 @@
     "stage-3-dl-jax",
     "stage-3-dl-end-to-end",
     "stage-3-dl-ml-strategy",
-    "stage-4-dl-mamba-ssm",
     "stage-3-dl-contrastive-learning",
+    "stage-4-dl-mamba-ssm",
     "stage-4-dl-llm-bioinfo",
-    "stage-4-ml-alphafold-ml",
-    "stage-4-ml-esm",
-    "stage-4-ml-genomic-language",
-    "stage-4-ml-causal-inference",
-    "stage-4-ml-reinforcement-bio",
-    "stage-4-ml-nas",
-    "stage-4-ml-federated",
     "stage-4-dl-alphafold2",
     "stage-4-dl-esm2",
     "stage-4-dl-enformer",
@@ -3758,6 +3758,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第11章：AlphaFold不是单一技巧而是多项ML技术的系统整合——MSA的进化特征、Evoformer的三角注意力、结构模块的IPA，每个都是独立的ML创新。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\nfrom scipy.spatial.distance import pdist, squareform\n\n# AlphaFold的ML核心: 共进化分析\n# MSA (多序列比对) -> 共进化矩阵\nmsa = np.random.choice([0,1,2,3,4], size=(1000, 50))  # 模拟MSA\n\n# 互信息: I(i,j) = sum_{a,b} p_ij(a,b) * log(p_ij(a,b) / (p_i(a)*p_j(b)))\ndef mutual_info(msa, n_states=5):\n    L = msa.shape[1]\n    mi = np.zeros((L, L))\n    for i in range(L):\n        for j in range(i+1, L):\n            p_i = np.bincount(msa[:,i], minlength=n_states) / len(msa)\n            p_j = np.bincount(msa[:,j], minlength=n_states) / len(msa)\n            joint = np.histogram2d(msa[:,i], msa[:,j], bins=n_states)[0] / len(msa)\n            for a in range(n_states):\n                for b in range(n_states):\n                    if joint[a,b] > 0 and p_i[a]*p_j[b] > 0:\n                        mi[i,j] += joint[a,b] * np.log(joint[a,b] / (p_i[a]*p_j[b]))\n    return mi + mi.T"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -3802,6 +3808,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Hands-On Machine Learning》Aurélien Géron</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《Hands-On ML》覆盖了蛋白质语言模型 (ESM系列)的核心实践方法。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">最实用的ML入门书，以scikit-learn和TensorFlow为主线，含大量可运行代码和端到端项目</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR从统计视角为蛋白质语言模型 (ESM系列)提供了坚实的理论基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\nfrom transformers import AutoTokenizer, AutoModel\n\n# ESM-2: 蛋白质语言模型 (掩码语言模型)\nmodel_name = 'facebook/esm2_t6_8M_UR50D'  # 最小版本用于演示\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModel.from_pretrained(model_name)\n\n# 蛋白质序列\nseq = 'MKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG'\ninputs = tokenizer(seq, return_tensors='pt')\n\n# 获取每个残基的表示 (可用于下游任务)\nwith torch.no_grad():\n    outputs = model(**inputs)\nresidue_embeddings = outputs.last_hidden_state[0, 1:-1]  # 去掉CLS和EOS\nprint(f'Residue embeddings: {residue_embeddings.shape}')  # (L, 320)"
         },
         {
           "type": "check",
@@ -3850,6 +3862,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第9章系统介绍了Enformer/Nucleotide Transformer/Borzoi等基因组大模型——它们将DNA视为\"语言\"，用NLP方法学习DNA的\"语义\"。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C3)《结构化机器学习项目》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng的端到端DL思想解释了基因组语言模型——从DNA序列直接学习调控语法，跳过手工特征工程。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">两周：ML策略/正交化/单一指标→误差分析/数据不匹配/迁移学习/多任务/端到端DL</p></div>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C5)《序列模型》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">基因组Transformer的注意力机制直接源自Ng讲解的自注意力——每个DNA位置都可以直接看到所有其他位置。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：RNN/GRU/LSTM→词嵌入(Word2Vec/GloVe)→Seq2Seq/注意力/Transformer</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\n\n# 基因组语言模型: DNA序列的k-mer表示\nseq = 'ATCGATCGATCGATCGATCG'\nk = 4\n\ndef kmer_frequencies(seq, k):\n    '''k-mer频率 -> 基因组特征向量'''\n    kmers = {}\n    for i in range(len(seq) - k + 1):\n        kmer = seq[i:i+k]\n        kmers[kmer] = kmers.get(kmer, 0) + 1\n    return kmers\n\n# One-hot编码\nmapping = {'A': 0, 'T': 1, 'C': 2, 'G': 3, 'N': 4}\none_hot = np.zeros((4, len(seq)))\nfor i, base in enumerate(seq):\n    if base in mapping and mapping[base] < 4:\n        one_hot[mapping[base], i] = 1\nprint(f'One-hot shape: {one_hot.shape}')  # (4, L) - 像图像的channel"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -3896,6 +3914,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Probabilistic Machine Learning》Kevin P. Murphy</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Murphy第31章专门讲因果推断——从do-calculus到反事实推理，是因果ML最权威的参考。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">2022-2023年出版的现代ML百科全书(两卷)，覆盖最新进展如Transformer和扩散模型</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 14：Ng用冰淇淋销量和溺水率的例子解释因果vs相关——两者相关但禁售冰淇淋不会减少溺水，因为有第三个变量温度同时影响两者。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\n\n# 因果推断: 逆概率加权 (IPTW)\n# 估计 \"变异X是否导致表型Y\"\nn = 1000\nX = np.random.binomial(1, 0.3, n)  # 变异 (treatment)\n# 混杂因素\nC = np.random.normal(0, 1, n)\n# 结局 (effect)\nY = 2*X + 0.5*C + np.random.normal(0, 0.5, n)\n\n# 倾向得分 (propensity score)\nps_model = LogisticRegression().fit(C.reshape(-1,1), X)\nps = ps_model.predict_proba(C.reshape(-1,1))[:, 1]\n\n# IPTW: weight treated by 1/ps, control by 1/(1-ps)\nw = X / ps + (1 - X) / (1 - ps)\n# 加权平均处理效应\nate = np.average(Y[X==1]) - np.average(Y[X==0])\niptw_ate = np.average(Y, weights=w*X) / np.average(w*X) - np.average(Y, weights=w*(1-X)) / np.average(w*(1-X))\nprint(f'Naive ATE: {ate:.2f}, IPTW ATE: {iptw_ate:.2f}')"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -3940,6 +3964,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Hands-On Machine Learning》Aurélien Géron</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《Hands-On ML》覆盖了强化学习在生物中的应用的核心实践方法。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">最实用的ML入门书，以scikit-learn和TensorFlow为主线，含大量可运行代码和端到端项目</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR从统计视角为强化学习在生物中的应用提供了坚实的理论基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 16-17：Ng用一整周讲强化学习——从MDP到Q-Learning/Policy Gradient。他的直升机自动驾驶例子展示了RL在复杂连续动作空间中的学习能力。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\n\n# RL for molecular optimization\n# 状态=分子, 动作=添加/修改原子, 奖励=drug-likeness\nclass MoleculeEnv:\n    def __init__(self):\n        self.state = ['C']  # 起始原子\n    def step(self, action):\n        '''action: 0=add C, 1=add O, 2=add N, 3=terminate'''\n        if action == 3:\n            reward = self._drug_likeness()\n            done = True\n        else:\n            atom = ['C','O','N'][action]\n            self.state.append(atom)\n            reward = -0.01  # 每步小惩罚\n            done = len(self.state) > 50\n        return self.state, reward, done\n    def _drug_likeness(self):\n        '''简化的drug-likeness评分'''\n        return min(1.0, len(self.state)/20) * (0.5 + 0.5*np.random.random())\n\n# Q-learning\nQ = {}\nenv = MoleculeEnv()"
         },
         {
           "type": "check",
@@ -4086,6 +4116,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第11章专门讲解AlphaFold——从协同进化到Evoformer到结构模块的三阶段架构，配以代码级别的解析。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C4)《卷积神经网络》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng对ResNet、注意力和等变性的讲解为理解AlphaFold提供了所有必要基础。AlphaFold2的IPA模块的设计原理正是Ng强调的等变性。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">四周：CNN基础→经典网络(ResNet/Inception)→目标检测(YOLO)→人脸识别/风格迁移</p></div>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C3)《结构化机器学习项目》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng的端到端DL讨论直接适用于AlphaFold2的架构选择——从MSA到3D坐标的端到端预测。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">两周：ML策略/正交化/单一指标→误差分析/数据不匹配/迁移学习/多任务/端到端DL</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\n\n# AlphaFold2简化: Evoformer核心\ndef triangle_update(pair_repr):\n    '''三角更新: 利用pair表示的几何约束'''\n    # (N_res, N_res, C) -> 轴向注意力\n    # Pair representation满足三角不等式\n    left = torch.einsum('ijc,ikc->ijkc', pair_repr, pair_repr)\n    right = torch.einsum('ijc,kjc->ijkc', pair_repr, pair_repr)\n    return pair_repr + left.mean(1) + right.mean(1)\n\n# 使用预训练模型 (OpenFold)\n# from openfold.model import AlphaFold\n# model = AlphaFold.from_pretrained('openfold')\n# output = model(seq_embedding, msa_repr, pair_repr)"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4137,6 +4173,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第10章讲蛋白质语言模型——从one-hot到embedding到Transformer，ESM-2的掩码预训练等价于\"学习蛋白质的语法\"。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C5)《序列模型》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C5 Week 2-3：Ng对词嵌入和语言模型的讲解是理解ESM-2的最佳前置知识。蛋白质的氨基酸等于语言的词，掩码语言模型等于在蛋白质序列上做完形填空。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：RNN/GRU/LSTM→词嵌入(Word2Vec/GloVe)→Seq2Seq/注意力/Transformer</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\nfrom transformers import AutoTokenizer, AutoModel\n\n# 加载ESM-2 (650M参数)\nmodel_name = \"facebook/esm2_t33_650M_UR50D\"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModel.from_pretrained(model_name)\n\n# 蛋白质序列 -> 嵌入\nsequence = \"MKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG\"\ninputs = tokenizer(sequence, return_tensors=\"pt\")\n\nwith torch.no_grad():\n    outputs = model(**inputs)\nembeddings = outputs.last_hidden_state  # (1, L, 1280)\nprint(f'Embedding shape: {embeddings.shape}')\n\n# 突变效应预测 (零样本)\n# delta_log_likelihood = logP(wt_seq) - logP(mt_seq) @ mutated position"
         },
         {
           "type": "check",
@@ -4191,6 +4233,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第9章讲基因组深度学习——DeepSEA/Basset/Enformer的演进，从1kb窗口到200kb窗口，注意力捕捉远距离增强子-启动子互作。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C3)《结构化机器学习项目》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng的端到端DL思想完美解释了Enformer的设计——从200kb DNA序列直接预测基因表达，跳过中间步骤。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">两周：ML策略/正交化/单一指标→误差分析/数据不匹配/迁移学习/多任务/端到端DL</p></div>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C5)《序列模型》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Enformer的自注意力直接源自Ng在C5中讲解的Transformer——多头注意力让模型从不同视角看序列。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：RNN/GRU/LSTM→词嵌入(Word2Vec/GloVe)→Seq2Seq/注意力/Transformer</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\n\n# Enformer: 从DNA序列预测基因表达 (200kb context)\n# 输入: one-hot DNA (4, 196608)\n# 输出: 5313 human + 1643 mouse genomic tracks\n\n# from enformer_pytorch import Enformer\n# model = Enformer.from_pretrained('EleutherAI/enformer-official-rough')\n\n# 简化版: 卷积+Transformer\nclass SimplifiedEnformer(torch.nn.Module):\n    def __init__(self, seq_len=196608, n_tracks=5313):\n        super().__init__()\n        self.conv = torch.nn.Sequential(\n            torch.nn.Conv1d(4, 64, 15, padding=7),\n            torch.nn.GELU(),\n            torch.nn.Conv1d(64, 128, 5, padding=2),\n        )\n        # 7个Transformer层 + 裁剪到中心896bins\n        self.transformer = torch.nn.TransformerEncoder(\n            torch.nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first=True),\n            num_layers=7\n        )\n        self.head = torch.nn.Linear(128, n_tracks)\n    \n    def forward(self, x):\n        x = self.conv(x.transpose(1,2))  # (B, C, L)\n        x = self.transformer(x.transpose(1,2))\n        return self.head(x[:, 448:-448])  # center crop"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4241,6 +4289,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Probabilistic Machine Learning》Kevin P. Murphy</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Murphy第24章详细介绍扩散模型——从DDPM的前向/反向过程到score-based的数学框架，是理解扩散模型最权威的教材。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">2022-2023年出版的现代ML百科全书(两卷)，覆盖最新进展如Transformer和扩散模型</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C4)《卷积神经网络》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng在神经风格迁移中讲解的从噪声逐步生成的思想与扩散模型异曲同工。Ng说的AI能创造新东西而不仅是识别正好概括了扩散模型+生信的价值。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">四周：CNN基础→经典网络(ResNet/Inception)→目标检测(YOLO)→人脸识别/风格迁移</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\nimport torch.nn as nn\n\n# 简化的DDPM (Denoising Diffusion Probabilistic Model)\nclass SimpleDDPM(nn.Module):\n    def __init__(self, n_steps=1000):\n        super().__init__()\n        self.n_steps = n_steps\n        beta = torch.linspace(1e-4, 0.02, n_steps)\n        self.alpha = 1 - beta\n        self.alpha_bar = torch.cumprod(self.alpha, 0)\n    \n    def forward_diffusion(self, x0, t):\n        '''前向: x_0 -> x_t 加噪'''\n        noise = torch.randn_like(x0)\n        alpha_bar_t = self.alpha_bar[t].view(-1, 1)\n        xt = torch.sqrt(alpha_bar_t) * x0 + torch.sqrt(1 - alpha_bar_t) * noise\n        return xt, noise\n    \n    def sample(self, model, shape):\n        '''反向: 从噪声生成'''\n        x = torch.randn(shape)\n        for t in reversed(range(self.n_steps)):\n            z = torch.randn(shape) if t > 0 else 0\n            alpha_t = self.alpha[t]\n            alpha_bar_t = self.alpha_bar[t]\n            eps = model(x, torch.tensor([t]))\n            x = (1 / torch.sqrt(alpha_t)) * (x - (1-alpha_t)/torch.sqrt(1-alpha_bar_t) * eps) + 0.1*z\n        return x"
         },
         {
           "type": "check",
@@ -4295,6 +4349,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Probabilistic Machine Learning》Kevin P. Murphy</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Murphy第29章专门讲多模态学习——不同模态的融合策略(早期融合/晚期融合/跨模态注意力)及其理论基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">2022-2023年出版的现代ML百科全书(两卷)，覆盖最新进展如Transformer和扩散模型</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C3)《结构化机器学习项目》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C3 Week 2：Ng讲多任务学习时说一个模型同时做多个任务——共享底层特征，独立顶层输出。这个思路与多模态学习一脉相承。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">两周：ML策略/正交化/单一指标→误差分析/数据不匹配/迁移学习/多任务/端到端DL</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import torch\nimport torch.nn as nn\n\n# 多模态融合: RNA + ATAC 联合模型\nclass MultiModalFusion(nn.Module):\n    def __init__(self, n_rna=2000, n_atac=50000, d_model=256):\n        super().__init__()\n        self.rna_encoder = nn.Sequential(\n            nn.Linear(n_rna, 512), nn.ReLU(), nn.Linear(512, d_model))\n        self.atac_encoder = nn.Sequential(\n            nn.Linear(n_atac, 1024), nn.ReLU(), nn.Linear(1024, d_model))\n        # 跨模态注意力\n        self.cross_attn = nn.MultiheadAttention(d_model, num_heads=4, batch_first=True)\n        self.fusion = nn.Sequential(\n            nn.Linear(d_model*2, d_model), nn.ReLU(), nn.Linear(d_model, 64))\n    \n    def forward(self, rna, atac):\n        rna_emb = self.rna_encoder(rna)  # (B, d_model)\n        atac_emb = self.atac_encoder(atac)\n        # 跨模态注意力\n        cross, _ = self.cross_attn(rna_emb.unsqueeze(1), atac_emb.unsqueeze(1), atac_emb.unsqueeze(1))\n        fused = self.fusion(torch.cat([rna_emb, cross.squeeze(1)], dim=-1))\n        return fused"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4345,6 +4405,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning for the Life Sciences》Ramsundar, Eastman, Walters, Pande</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《DL for Life Sciences》第7章讲单细胞深度学习——scVI/scGen/scGPT的演进，VAE到Transformer的技术路线。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">专门面向生物信息学和药物发现的DL教材，DeepChem作者团队，含分子/蛋白质/基因组实战</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C3)《结构化机器学习项目》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng讲迁移学习时说在大数据上预训练、在小数据上微调——这正是scGPT/scFoundation的设计范式。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">两周：ML策略/正交化/单一指标→误差分析/数据不匹配/迁移学习/多任务/端到端DL</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import omicverse as ov\n\n# 使用预训练scGPT进行细胞注释\nadata = ov.read('pbmc3k.h5ad')\n\n# 加载scGPT预训练权重\nov.fm.load_model('scGPT')\n\n# 提取嵌入 (基于基因表达上下文)\nadata.obsm['X_scGPT'] = ov.fm.embed('scGPT', adata)\n\n# 零样本注释 (无需训练数据!)\nadata.obs['scGPT_celltype'] = ov.fm.annotate(\n    'scGPT', adata, tissue='blood', species='human')\n\n# 评估注释质量\nfrom sklearn.metrics import adjusted_rand_score\nari = adjusted_rand_score(\n    adata.obs['known_celltype'],\n    adata.obs['scGPT_celltype'])\nprint(f'Zero-shot ARI: {ari:.3f}')"
         },
         {
           "type": "check",
@@ -4399,6 +4465,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授说\"线性代数的核心就是四个基本子空间\"——列空间、零空间、行空间、左零空间。理解这四个就理解了线性代数。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">3Blue1Brown 数学视频系列</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">3Blue1Brown的\"Essence of Linear Algebra\"系列用动画展示线性变换的本质——矩阵不是一堆数字，而是一种空间变换。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">用动画直观展示线性代数、微积分和神经网络的核心思想，培养数学直觉的最佳资源</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Coursera《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng在Week 1就用矩阵形式化线性回归。他说你不必成为线性代数专家，但理解矩阵乘法是理解ML实现的最基本要求。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">全球最受欢迎的ML入门课，以直觉为导向，每周有编程作业</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 向量运算\nv = np.array([1, 2, 3])\nw = np.array([4, 5, 6])\ndot_product = np.dot(v, w)  # 点积: 32\ncross = np.cross(v, w)      # 叉积: [-3, 6, -3]\nnorm = np.linalg.norm(v)    # L2范数: sqrt(14)\n\n# 矩阵运算\nA = np.array([[1, 2], [3, 4]])\nB = np.array([[5, 6], [7, 8]])\nC = A @ B                   # 矩阵乘法\ndet = np.linalg.det(A)       # 行列式\ninv = np.linalg.inv(A)       # 逆矩阵\neigenvals, eigenvecs = np.linalg.eig(A)  # 特征值和特征向量"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4449,6 +4521,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">3Blue1Brown 数学视频系列</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">3Blue1Brown的\"Essence of Calculus\"系列用动画直观展示导数=变化率、积分=面积——看完后微分和反向传播的直觉自然建立。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">用动画直观展示线性代数、微积分和神经网络的核心思想，培养数学直觉的最佳资源</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Coursera《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng在Week 2讲梯度下降时手算偏导数。他说你不用手算导数——框架帮你算——但理解导数是什么会让你的调参直觉好10倍。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">全球最受欢迎的ML入门课，以直觉为导向，每周有编程作业</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\ndef numerical_derivative(f, x, h=1e-5):\n    '''中心差分法求导数'''\n    return (f(x + h) - f(x - h)) / (2 * h)\n\ndef gradient_descent(f, grad_f, x0, lr=0.01, n_iter=100):\n    '''梯度下降优化'''\n    x = x0\n    path = [x]\n    for _ in range(n_iter):\n        x = x - lr * grad_f(x)\n        path.append(x)\n    return np.array(path)\n\n# 示例: f(x) = x^2\ngrad = lambda x: 2 * x\npath = gradient_descent(lambda x: x**2, grad, 3.0, lr=0.1)\nprint(f'最小值: {path[-1]:.4f}')  # ~0"
         },
         {
           "type": "check",
@@ -4503,6 +4581,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR第2章给出概率和统计的简洁回顾——贝叶斯定理P(A|B)=P(B|A)P(A)/P(B)是整个统计学和ML的基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 4：Ng用贝叶斯定理推导GDA。他说贝叶斯定理是ML中最重要的一条公式——从先验经过证据得到后验。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy import stats\n\n# 二项分布: n次试验, 成功率p\nbinom = stats.binom(n=10, p=0.3)\nprint(f'P(X=3)={binom.pmf(3):.3f}')\n\n# 正态分布\nnormal = stats.norm(loc=0, scale=1)\nprint(f'P(-1<X<1)={normal.cdf(1)-normal.cdf(-1):.3f}')  # 68-95-99.7\n\n# 贝叶斯定理模拟\nprior = 0.01  # P(患病)\nsensitivity = 0.95  # P(阳性|患病)\nspecificity = 0.90  # P(阴性|健康)\n# P(患病|阳性) = P(阳性|患病)*P(患病) / P(阳性)\nposterior = (sensitivity * prior) / (sensitivity*prior + (1-specificity)*(1-prior))\nprint(f'后验概率={posterior:.3f}')"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4553,6 +4637,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR第2.1节给出均值、方差、标准差的统计直觉——这些简单的描述性统计是理解所有高级分析方法的基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 1：Ng开场就回顾均值/方差/高斯分布——假设数据服从正态分布，就可以给每个数据点算p-value，构成统计检验的基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy import stats\n\n# 描述性统计\ndata = np.array([2, 5, 7, 8, 10, 12, 15])\nprint(f'均值={np.mean(data):.1f}, 中位数={np.median(data):.1f}')\nprint(f'标准差={np.std(data, ddof=1):.1f}')\n\n# t检验\nsample = np.random.normal(0.5, 1, 30)\nt_stat, p_val = stats.ttest_1samp(sample, popmean=0)\nprint(f't={t_stat:.2f}, p={p_val:.4f}')\n\n# 置信区间\nsem = stats.sem(sample)\nci = stats.t.interval(0.95, df=len(sample)-1, loc=np.mean(sample), scale=sem)\nprint(f'95% CI: [{ci[0]:.2f}, {ci[1]:.2f}]')"
         },
         {
           "type": "check",
@@ -4607,6 +4697,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授将SVD称为\"线性代数的终极定理\"——任何矩阵都可以分解为旋转×缩放×旋转，这是PCA和推荐系统的数学基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 10：Ng从SVD讲PCA——X=USigmaV转置，U的列是左奇异向量，V的列是右奇异向量（等于主成分方向）。这是ML中最优雅的数学联系之一。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# SVD分解\nA = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])\nU, S, Vt = np.linalg.svd(A)\nprint(f'Singular values: {S}')\n# 低秩近似 (k=2)\nk = 2\nA_approx = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]\nprint(f'Reconstruction error: {np.linalg.norm(A - A_approx):.3f}')\n\n# PCA等价于SVD\nX = np.random.randn(100, 10)\nX_centered = X - X.mean(axis=0)\nU_pca, S_pca, Vt_pca = np.linalg.svd(X_centered, full_matrices=False)\nPCs = U_pca[:, :3] @ np.diag(S_pca[:3])  # Top 3 PCs"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4657,6 +4753,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《动手学深度学习》Aston Zhang, Zachary Lipton 等</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">D2L第12章用整章讲优化算法——从SGD到Adam，配以动画展示不同优化器在山谷中的寻路轨迹。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">亚马逊科学家写的交互式DL教材，PyTorch代码可直接运行，从线性回归到Transformer逐层深入</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第8章：梯度下降是\"一阶优化方法\"——只用一阶导数(梯度)。牛顿法用二阶导数(Hessian)但计算成本太高，所以实践中几乎都用一阶方法。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C1)《神经网络与深度学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C1 Week 2：Ng用盲人下山比喻梯度下降。学习率=每步跨多大——太大跳过最小值，太小收敛太慢。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">四周：DL引言→神经网络编程基础→浅层网络→深层网络。向量化、激活函数、反向传播的完整推导</p></div>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C2)《改善深层神经网络》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C2 Week 2：Ng用小球滚下山讲动量，用不同方向不同步长讲RMSprop，用结合两者优点引出Adam。这些比喻让复杂的优化算法变得易懂。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：正则化/Dropout/BN→优化算法(Momentum/RMSprop/Adam)→超参数调优。偏差方差诊断框架</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 对比SGD, Momentum, Adam on Rosenbrock function\n# f(x,y) = (1-x)^2 + 100(y-x^2)^2\ndef rosenbrock(x, y):\n    return (1 - x)**2 + 100 * (y - x**2)**2\n\ndef grad_rosenbrock(x, y):\n    dx = -2*(1-x) - 400*x*(y - x**2)\n    dy = 200*(y - x**2)\n    return np.array([dx, dy])\n\n# SGD\nx = np.array([-1.0, 1.0])\nfor i in range(1000):\n    g = grad_rosenbrock(x[0], x[1])\n    x -= 0.001 * g\nprint(f'SGD: ({x[0]:.3f}, {x[1]:.3f}), f={rosenbrock(*x):.5f}')"
         },
         {
           "type": "check",
@@ -4711,6 +4813,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR第2章给出概率和统计的简洁回顾——贝叶斯定理P(A|B)=P(B|A)P(A)/P(B)是整个统计学和ML的基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 4：Ng用贝叶斯定理推导GDA。他说贝叶斯定理是ML中最重要的一条公式——从先验经过证据得到后验。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy import stats\n\n# 泊松分布 (scRNA UMI counts)\npois = stats.poisson(mu=5)\nsample = pois.rvs(1000)\nprint(f'P(X=0)={pois.pmf(0):.3f}')  # dropout概率\n\n# 负二项分布 (scRNA overdispersion)\nfrom scipy.stats import nbinom\n# mean=mu, variance=mu+mu^2/phi\nmu, phi = 5, 2\np = phi / (phi + mu)\nnb = nbinom(n=phi, p=p)\nprint(f'P(X=0)={nb.pmf(0):.3f}')  # 负二项dropout\n\n# Beta分布 (DNA methylation)\nbeta = stats.beta(a=2, b=5)\nx = np.linspace(0, 1, 100)\npdf = beta.pdf(x)"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4761,6 +4869,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第5.5节：最大似然=让数据在模型下出现的概率最大。几乎所有现代损失函数都可以从这个原则导出。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 4：Ng从MLE推导线性回归的最小二乘——假设y给定x服从正态分布，最大化log-likelihood等价于最小化MSE。损失函数不是随意选的——它来自对数据分布的假设。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy.optimize import minimize\n\n# MLE: 正态分布参数估计\ndata = np.random.normal(2, 0.5, 1000)\n\ndef neg_log_likelihood(params):\n    mu, sigma = params[0], np.exp(params[1])  # exp保证sigma>0\n    return -np.sum(stats.norm.logpdf(data, loc=mu, scale=sigma))\n\nresult = minimize(neg_log_likelihood, x0=[0, 0])\nmu_mle = result.x[0]\nsigma_mle = np.exp(result.x[1])\nprint(f'MLE: mu={mu_mle:.3f}, sigma={sigma_mle:.3f}')\n\n# 对比解析解\nprint(f'Analytic: mu={np.mean(data):.3f}, sigma={np.std(data, ddof=0):.3f}')"
         },
         {
           "type": "check",
@@ -4815,6 +4929,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第3.13节：熵=不确定性的度量，交叉熵=用分布Q编码分布P的平均比特数。交叉熵损失=最小化\"用模型分布编码真实分布\"的成本。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 1-3：Ng从y=1时log(h)要大、y=0时log(1-h)要大的角度推导交叉熵——本质上就是用信息论的直觉来设计损失函数。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 熵 H(X) = -sum(p_i * log(p_i))\ndef entropy(p):\n    p = p[p > 0]  # filter zero probabilities\n    return -np.sum(p * np.log2(p))\n\n# 均匀分布: 最大熵\np_uniform = np.ones(4) / 4\nprint(f'Uniform entropy: {entropy(p_uniform):.2f} bits')\n\n# KL散度: D_KL(P||Q)\ndef kl_divergence(p, q):\n    return np.sum(p * np.log2(p / q))\n\np = np.array([0.5, 0.3, 0.2])\nq = np.array([0.3, 0.3, 0.4])\nprint(f'KL(P||Q): {kl_divergence(p, q):.3f}')\n\n# 互信息\n# I(X;Y) = H(X) + H(Y) - H(X,Y)\nx = np.random.randint(0, 2, 1000)\ny = x ^ np.random.binomial(1, 0.1, 1000)  # noisy copy"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4865,6 +4985,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《动手学深度学习》Aston Zhang, Zachary Lipton 等</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">D2L第11章专门讲注意力机制——从注意力热图的物理直觉到缩放点积注意力的数学公式，再到多头注意力的设计原理。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">亚马逊科学家写的交互式DL教材，PyTorch代码可直接运行，从线性回归到Transformer逐层深入</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第12.4.5节：注意力机制解决了Seq2Seq的信息瓶颈——解码器不再依赖单个固定向量，而是动态地从编码器所有位置中提取相关信息。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C5)《序列模型》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C5 Week 3：Ng说注意力是他最喜欢讲解的概念之一。注意力权重的alpha矩阵可以被可视化——你会看到翻译时source和target的词确实在正确对齐。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：RNN/GRU/LSTM→词嵌入(Word2Vec/GloVe)→Seq2Seq/注意力/Transformer</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# Scaled Dot-Product Attention\n# Q, K, V: (seq_len, d_model)\nnp.random.seed(42)\nseq_len, d_k = 10, 64\nQ = np.random.randn(seq_len, d_k)\nK = np.random.randn(seq_len, d_k)\nV = np.random.randn(seq_len, d_k)\n\n# Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) * V\nscores = Q @ K.T / np.sqrt(d_k)\nattn_weights = np.exp(scores) / np.exp(scores).sum(axis=1, keepdims=True)\noutput = attn_weights @ V\nprint(f'Attention output shape: {output.shape}')  # (10, 64)\nprint(f'Weight sparsity: {(attn_weights<0.01).mean():.1%}')"
         },
         {
           "type": "check",
@@ -4919,6 +5045,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Pattern Recognition and Machine Learning》(PRML) Christopher Bishop</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Bishop第10章从KL散度和ELBO的角度系统推导变分推断——近似推断为什么有效的数学基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">贝叶斯视角的ML经典，数学严谨，适合深入理解概率图模型和核方法</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第19章：VAE的重参数化技巧使得梯度可以流过采样操作——这是VAE能被SGD训练的关键工程技巧。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 15：Ng讲EM算法时用反复猜测-更新的迭代来近似难以直接计算的分布——这个用简单分布逼近复杂后验的思想是变分推断的核心。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy.stats import norm\n\n# ELBO (Evidence Lower BOund) for VAE\ndef elbo(x, mu_q, logvar_q, mu_p=0, logvar_p=0):\n    '''x: data, mu_q/logvar_q: encoder output'''\n    # Reconstruction (assuming Gaussian decoder)\n    recon = -0.5 * np.sum((x - mu_q)**2, axis=1)\n    # KL(N(mu_q, sigma_q) || N(mu_p, sigma_p))\n    kl = -0.5 * np.sum(1 + logvar_q - logvar_p \n                       - (mu_q - mu_p)**2 / np.exp(logvar_p)\n                       - np.exp(logvar_q) / np.exp(logvar_p), axis=1)\n    return np.mean(recon + kl)\n\n# 重参数化技巧\neps = np.random.randn(100, 10)\nz = mu_q + np.exp(0.5 * logvar_q) * eps  # 可导的采样"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4969,6 +5101,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授讲解图拉普拉斯矩阵的特征值和图分割的关系——第二小特征值(Fiedler值)告诉你图可以如何自然地切成两块。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 图拉普拉斯矩阵\n# L = D - A (未归一化)\n# L_sym = D^{-1/2} L D^{-1/2} (对称归一化)\nA = np.array([[0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0]])  # 邻接矩阵\nD = np.diag(A.sum(axis=1))\nD_inv_sqrt = np.linalg.inv(np.sqrt(D))\nL_sym = np.eye(4) - D_inv_sqrt @ A @ D_inv_sqrt\n\n# 谱分解 (GCN的谱域基础)\neigvals, eigvecs = np.linalg.eigh(L_sym)\nprint(f'Smallest eigval: {eigvals[0]:.3f}')  # 应该接近0\nprint(f'Spectral gap: {eigvals[1]-eigvals[0]:.3f}')  # 代数连通性"
         },
         {
           "type": "check",
@@ -5023,6 +5161,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">3Blue1Brown 数学视频系列</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">3Blue1Brown的动画系列建立了优化理论进阶的核心直觉。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">用动画直观展示线性代数、微积分和神经网络的核心思想，培养数学直觉的最佳资源</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授的课程从线性代数的角度给出了优化理论进阶的严谨解释。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# Adam优化器实现\nclass Adam:\n    def __init__(self, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8):\n        self.lr, self.b1, self.b2, self.eps = lr, beta1, beta2, eps\n        self.m, self.v, self.t = 0, 0, 0\n    \n    def update(self, param, grad):\n        self.t += 1\n        self.m = self.b1 * self.m + (1-self.b1) * grad\n        self.v = self.b2 * self.v + (1-self.b2) * grad**2\n        m_hat = self.m / (1 - self.b1**self.t)\n        v_hat = self.v / (1 - self.b2**self.t)\n        return param - self.lr * m_hat / (np.sqrt(v_hat) + self.eps)\n\n# 对比SGD with momentum\nsgd_v = 0\nlr, momentum = 0.01, 0.9\nsgd_v = momentum * sgd_v - lr * grad  # velocity update\nparam = param + sgd_v"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -5073,6 +5217,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授用拉格朗日乘子法推导最小二乘的约束版本和PCA的对偶形式——\"约束优化=拉格朗日乘子法\"是最核心的数学思想之一。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 6：Ng在推导SVM的对偶问题时展示了拉格朗日乘子法的完整计算——引入乘子alpha将约束融入目标函数，然后求鞍点。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy.optimize import minimize\n\n# 拉格朗日乘子法: max f(x,y)=xy s.t. x^2+y^2=1\n# L(x,y,lambda) = xy + lambda*(1 - x^2 - y^2)\ndef lagrangian(vars):\n    x, y, lam = vars\n    return -(x*y + lam*(1 - x**2 - y**2))  # neg for minimization\n\n# 直接约束优化\ncons = {'type': 'eq', 'fun': lambda x: x[0]**2 + x[1]**2 - 1}\nres = minimize(lambda x: -(x[0]*x[1]), [0.5, 0.5], constraints=cons)\nprint(f'Optimal: x={res.x[0]:.3f}, y={res.x[1]:.3f}, f={-res.fun:.3f}')"
         },
         {
           "type": "check",
@@ -5127,6 +5277,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授也出了微分方程教材——\"微分方程的核心是特征解(eigensolution)\"，这一思路贯穿了从物理到ML的应用。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom scipy.integrate import solve_ivp\n\n# ODE: dx/dt = -k * x (指数衰减)\ndef decay(t, x, k=0.1):\n    return -k * x\n\nsol = solve_ivp(decay, [0, 100], [10], args=(0.1,), max_step=1)\nprint(f'After t=100: x={sol.y[0,-1]:.3f}')  # 10*exp(-0.1*100) ~ 0.00045\n\n# SIR 流行病模型 (scRNA fate dynamics)\ndef sir(t, y, beta=0.3, gamma=0.1):\n    S, I, R = y\n    dS = -beta * S * I\n    dI = beta * S * I - gamma * I\n    dR = gamma * I\n    return [dS, dI, dR]\n\nsol_sir = solve_ivp(sir, [0, 160], [0.99, 0.01, 0], max_step=1)"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -5177,6 +5333,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Pattern Recognition and Machine Learning》(PRML) Christopher Bishop</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Bishop第13章讲隐马尔可夫模型(HMM)——前向-后向算法=HMM版的BP，Viterbi解码=找最可能的隐藏状态序列。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">贝叶斯视角的ML经典，数学严谨，适合深入理解概率图模型和核方法</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Stanford CS229《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">CS229 Lecture 16：Ng用MDP引入马尔可夫链——下一状态的概率只取决于当前状态和动作，不依赖于历史路径。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福校内版ML课程，数学推导完整，涵盖监督学习、生成学习、SVM、核方法、学习理论和强化学习</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 布朗运动 (Wiener process)\nn_steps = 1000\nn_paths = 5\ndt = 0.01\nW = np.zeros((n_paths, n_steps))\nfor t in range(1, n_steps):\n    W[:, t] = W[:, t-1] + np.sqrt(dt) * np.random.randn(n_paths)\n\n# 伊藤积分: ∫ W_t dW_t = 0.5*(W_T^2 - T)\nT = n_steps * dt\nito_int = 0.5 * (W[:,-1]**2 - T)\nprint(f'Ito integral: mean={ito_int.mean():.3f} (theory: 0)')\n\n# Gillespie算法 (生化反应随机模拟)\n# A + B -> C 的随机动力学\nn_A, n_B = 1000, 1000\nk = 0.001"
         },
         {
           "type": "check",
@@ -5231,6 +5393,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">3Blue1Brown 数学视频系列</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">3Blue1Brown的\"Essence of Calculus\"系列用动画直观展示导数=变化率、积分=面积——看完后微分和反向传播的直觉自然建立。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">用动画直观展示线性代数、微积分和神经网络的核心思想，培养数学直觉的最佳资源</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Coursera《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng在Week 2讲梯度下降时手算偏导数。他说你不用手算导数——框架帮你算——但理解导数是什么会让你的调参直觉好10倍。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">全球最受欢迎的ML入门课，以直觉为导向，每周有编程作业</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 泛函优化: 最短路径 (直线)\n# J[y] = ∫ sqrt(1 + y'^2) dx → Euler-Lagrange → y''=0 → y=ax+b\ndef arc_length(y, dx=0.01):\n    y_prime = np.gradient(y, dx)\n    return np.sum(np.sqrt(1 + y_prime**2)) * dx\n\n# 验证直线是最短路径\nx = np.linspace(0, 1, 100)\ny_straight = x  # 直线\ncurve = np.sin(np.pi * x) * 0.2 + x  # 弯曲\nprint(f'Straight: {arc_length(y_straight):.3f}')\nprint(f'Curved: {arc_length(curve):.3f}')  # 应该>straight"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -5283,6 +5451,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">3Blue1Brown 数学视频系列</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">3Blue1Brown的动画系列建立了信息论进阶 (互信息、KL散度)的核心直觉。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">用动画直观展示线性代数、微积分和神经网络的核心思想，培养数学直觉的最佳资源</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Gilbert Strang《Linear Algebra》MIT 18.06</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Strang教授的课程从线性代数的角度给出了信息论进阶 (互信息、KL散度)的严谨解释。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">MIT最受欢迎的线性代数课程，Strang教授以直觉导向的讲解风格著称</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\n\n# 互信息估计 (kNN方法)\nfrom sklearn.feature_selection import mutual_info_regression\n\nX = np.random.randn(1000, 5)\ny = 0.5*X[:, 0] + 0.3*X[:, 1] + 0.1*np.random.randn(1000)\nmi = mutual_info_regression(X, y)\nprint(f'Mutual info per feature: {mi}')\n\n# Fisher Information 数值计算\ndef fisher_information(log_likelihood, theta, eps=1e-5):\n    '''Fisher = -E[d^2 logL / dtheta^2]'''\n    d1 = (log_likelihood(theta + eps) - log_likelihood(theta - eps)) / (2*eps)\n    d2 = (log_likelihood(theta + eps) - 2*log_likelihood(theta) + log_likelihood(theta - eps)) / eps**2\n    return -d2  # observed Fisher information"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -5333,6 +5507,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第5.11.3节：流形假设——自然数据(图像、声音、基因表达)实际分布在低维流形上，DL的隐式表示学习在自动恢复这个流形结构。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NumPy/SciPy 实现",
+          "code": "import numpy as np\nfrom sklearn.manifold import TSNE, Isomap\nfrom sklearn.decomposition import PCA\n\n# Swiss roll: 2D manifold in 3D\nfrom sklearn.datasets import make_swiss_roll\nX_3d, color = make_swiss_roll(1000, noise=0.1)\n\n# 不同流形学习方法对比\n# PCA: 线性, 无法展开\npca_2d = PCA(n_components=2).fit_transform(X_3d)\n# Isomap: 测地距离\niso_2d = Isomap(n_neighbors=10, n_components=2).fit_transform(X_3d)\n# t-SNE: 概率分布\n# tsne_2d = TSNE(n_components=2).fit_transform(X_3d)\nprint(f'PCA explained variance: {PCA().fit(X_3d).explained_variance_ratio_[0]:.1%}')"
         },
         {
           "type": "check",

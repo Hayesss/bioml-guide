@@ -5,6 +5,7 @@ import QuizBase from '../components/QuizBase';
 import type { QuizQuestion } from '../components/QuizBase';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
+import ChipLine from '../components/ChipLine';
 import { useData } from '../hooks/useData';
 
 interface TopicSection {
@@ -235,12 +236,12 @@ export default function TopicLearnPage() {
                 <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
                   {module.biological_question}
                 </p>
-                <ModuleChips label="输入" items={module.inputs} />
-                <ModuleChips label="输出" items={module.outputs} />
-                <ModuleChips label="工具" items={module.tools} />
-                <ModuleChips label="QC" items={module.qc_metrics} />
-                <ModuleChips label="决策" items={module.decision_rules} muted />
-                <ModuleChips label="跨组学接口" items={module.cross_omics_interfaces} />
+                <ChipLine label="输入" items={module.inputs} />
+                <ChipLine label="输出" items={module.outputs} />
+                <ChipLine label="工具" items={module.tools} />
+                <ChipLine label="QC" items={module.qc_metrics} />
+                <ChipLine label="决策" items={module.decision_rules} muted />
+                <ChipLine label="跨组学接口" items={module.cross_omics_interfaces} />
                 <div className="mt-2 text-xs text-brand-ink-muted" style={{ lineHeight: 1.5 }}>
                   <span className="font-medium text-brand-ink-light">ML/DL:</span> {module.ml_dl_connection}
                 </div>
@@ -302,25 +303,6 @@ export default function TopicLearnPage() {
         >
           返回学习路径
         </button>
-      </div>
-    </div>
-  );
-}
-
-function ModuleChips({ label, items, muted = false }: { label: string; items: string[]; muted?: boolean }) {
-  if (!items.length) return null;
-  return (
-    <div className="mb-2">
-      <span className="text-[11px] font-medium text-brand-ink-muted">{label}: </span>
-      <div className="mt-1 flex flex-wrap gap-1">
-        {items.map((item) => (
-          <span
-            key={item}
-            className={`text-[11px] px-1.5 py-0.5 rounded border ${muted ? 'bg-brand-off-white text-brand-ink-muted' : 'bg-white text-brand-ink-light'} border-brand-border-light`}
-          >
-            {item}
-          </span>
-        ))}
       </div>
     </div>
   );
