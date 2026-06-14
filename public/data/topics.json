@@ -130,7 +130,19 @@
     "common-hierarchical-clustering",
     "common-nmf",
     "common-umap-tsne",
-    "common-pca"
+    "common-pca",
+    "common-poisson-nb",
+    "common-cox-ph",
+    "common-empirical-bayes",
+    "common-shap",
+    "common-gcn-gat",
+    "common-diffusion-maps",
+    "common-em-algorithm",
+    "common-anova",
+    "common-ks-test",
+    "common-rfe-boruta",
+    "common-gaussian-processes",
+    "common-mcl"
   ],
   "topics": [
     {
@@ -9653,6 +9665,370 @@
           "icon": "代码",
           "title": "谱聚类: 非线性分群 + Hi-C域",
           "code": "from sklearn.cluster import SpectralClustering\n\n# === 单细胞: 非线性细胞群 ===\nsc = SpectralClustering(\n    n_clusters=8, affinity='nearest_neighbors',\n    n_neighbors=10, random_state=42)\nlabels = sc.fit_predict(adata.obsm['X_pca'][:, :30])\n\n# === 自定义affinity矩阵 (基于KNN图) ===\nfrom sklearn.neighbors import kneighbors_graph\nA = kneighbors_graph(adata.obsm['X_pca'][:, :30],\n                      n_neighbors=10, mode='connectivity')\nsc_custom = SpectralClustering(\n    n_clusters=8, affinity='precomputed')\nlabels_custom = sc_custom.fit_predict(A)"
+        }
+      ]
+    },
+    {
+      "key": "common-poisson-nb",
+      "name": "Poisson / 负二项回归",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-lasso-ridge"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Poisson回归像给\"计数\"数据量身定做的回归：</strong>普通线性回归假设数据是连续的、正态的。但RNA-seq的reads count是整数（0, 1, 2...）、非负的、方差随均值增大。Poisson假设方差=均值，负二项回归更灵活——方差=均值+均值²/phi，允许overdispersion（生物数据的常态）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "计数回归跨组学应用",
+          "content": "<table><tr><td><strong>RNA-seq DEG：</strong>DESeq2和edgeR的数学基础就是负二项回归——建模每个基因的read count</td></tr><tr><td><strong>scRNA-seq：</strong>scVI使用零膨胀负二项（ZINB）作为decoder的输出分布</td></tr><tr><td><strong>ATAC-seq peak calling：</strong>Poisson背景模型——在随机期望下有多少reads落在每个区域</td></tr><tr><td><strong>ChIP-seq：</strong>MACS2使用Poisson分布估计local background</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "负二项回归 DEG实战",
+          "code": "import statsmodels.api as sm\nimport numpy as np\n\n# 负二项回归: 基因i的count ~ condition + offset(log(library_size))\n# DESeq2本质: NB(μ_ij, α_i)\n# log(μ_ij) = β_i0 + β_i1 * condition_j + offset(log(s_j))\n\n# 使用statsmodels\nimport statsmodels.formula.api as smf\ndf = pd.DataFrame({\n    'counts': gene_counts,\n    'condition': np.repeat(['ctrl','treat','treat','ctrl'], 25),\n    'lib_size': np.log(library_sizes)\n})\nmodel = smf.glm('counts ~ condition', data=df,\n    family=sm.families.NegativeBinomial(alpha=1.0),\n    offset=df['lib_size']).fit()\nprint(model.summary())"
+        }
+      ]
+    },
+    {
+      "key": "common-cox-ph",
+      "name": "Cox 比例风险模型 (生存分析)",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-lasso-ridge"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Cox模型像预测\"还能活多久\"而非\"死没死\"：</strong>普通逻辑回归只看终点——治愈了/没治愈。但生存分析利用时间信息——病人A活了36个月死亡，病人B活了72个月还活着（删失数据）。Cox模型的关键假设是比例风险——基因X的表达量翻倍，死亡风险乘以hazard ratio（HR），且HR不随时间变化。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "生存分析跨组学应用",
+          "content": "<table><tr><td><strong>TCGA癌症预后：</strong>每个基因做Cox回归→找出HR显著的预后基因</td></tr><tr><td><strong>biomarker验证：</strong>将患者按基因表达中位数分高低组→Kaplan-Meier曲线→log-rank检验</td></tr><tr><td><strong>多基因signature：</strong>LASSO+Cox构建预后模型（如Oncotype DX）</td></tr><tr><td><strong>药物响应：</strong>Time-to-event分析药物处理后细胞死亡时间</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Cox回归 + KM曲线",
+          "code": "from lifelines import CoxPHFitter, KaplanMeierFitter\nimport pandas as pd\n\n# === Cox 回归 ===\ncph = CoxPHFitter()\ncph.fit(df, duration_col='survival_months',\n        event_col='vital_status', formula='TP53 + EGFR + age')\ncph.print_summary()  # HR, p-value, CI\n# HR > 1 → 高风险（表达越高，死亡越快）\n\n# === Kaplan-Meier 曲线 ===\nkmf = KaplanMeierFitter()\nhigh = df['TP53'] > df['TP53'].median()\nkmf.fit(df[high]['survival_months'],\n        df[high]['vital_status'], label='TP53 High')\nkmf.plot()\nkmf.fit(df[~high]['survival_months'],\n        df[~high]['vital_status'], label='TP53 Low')\nkmf.plot()\n# log-rank test 比较两组"
+        }
+      ]
+    },
+    {
+      "key": "common-empirical-bayes",
+      "name": "经验贝叶斯 (limma/EBSeq)",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-multiple-testing"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>经验贝叶斯像\"借用所有基因的信息估计单个基因\"：</strong>你要估计基因TP53在癌症vs正常中的差异。但你想：\"样本只有10个，TP53自己的方差估计不准。如果我能借用其他19999个基因的方差信息，是不是更靠谱？\"经验贝叶斯就是做这件事——先从全体基因估计方差的先验分布，再用这个先验\"收缩\"单个基因的方差估计。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "经验贝叶斯跨组学应用",
+          "content": "<table><tr><td><strong>Bulk RNA-seq DEG：</strong>limma-voom的数学核心——先验方差+后验收缩，使小样本DEG更稳定。这是最广泛的生物信息学EB应用</td></tr><tr><td><strong>蛋白质组学：</strong>limma用于蛋白质差异丰度分析</td></tr><tr><td><strong>DNA甲基化：</strong>limma用于差异甲基化位点(DMP)检测</td></tr><tr><td><strong>单细胞pseudobulk DEG：</strong>pseudobulk后用limma</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "limma 经验贝叶斯DEG",
+          "code": "import numpy as np\n\n# limma核心: 收缩方差估计\n# 普通t检验: t = (mean1 - mean2) / sqrt(s^2/n)\n# limma:     t_mod = (mean1 - mean2) / sqrt(s_moderated^2/n)\n# 其中 s_moderated^2 是单个基因方差和先验方差的加权平均\n\n# 模拟: 20000个基因, 每组5个样本\nn_genes, n_per_group = 20000, 5\ngene_vars = 1 / np.random.gamma(2, 0.5, n_genes)  # 真实方差\n\n# 每个基因的样本方差 (自由度=8)\nsample_vars = np.array([\n    gene_vars[i] * np.random.chisquare(8) / 8\n    for i in range(n_genes)\n])\n\n# limma: fit prior distribution to all sample_vars\n# → posterior variance = weighted avg of sample and prior\n# 小方差基因借力大, 大方差基因少借力"
+        }
+      ]
+    },
+    {
+      "key": "common-shap",
+      "name": "SHAP 模型可解释性",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "stage-2-ml-random-forest"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>SHAP像给每个特征开\"贡献发票\"：</strong>模型预测\"高风险\"得80分。SHAP把这80分拆解到每个特征——\"TP53高表达贡献了+30分，年龄>60贡献了+20分，EGFR正常贡献了-15分...\"加起来正好80。SHAP基于Shapley值——博弈论中\"每个玩家对总收益的边际贡献\"。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "SHAP 跨组学应用",
+          "content": "<table><tr><td><strong>疾病预测模型解释：</strong>\"为什么这个患者被预测为高危？\"——SHAP waterfall plot显示每个基因的贡献</td></tr><tr><td><strong>biomarker排序：</strong>SHAP feature importance比permutation importance更可靠</td></tr><tr><td><strong>药物响应：</strong>哪些基因特征驱动了药物敏感性预测？</td></tr><tr><td><strong>单细胞扰动：</strong>哪些基因对细胞状态转变的贡献最大？</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "SHAP 基因贡献分解",
+          "code": "import shap\nimport xgboost as xgb\n\n# 训练模型预测疾病\nmodel = xgb.XGBClassifier().fit(X_train, y_train)\n\n# SHAP解释\nexplainer = shap.TreeExplainer(model)\nshap_values = explainer.shap_values(X_test)\n\n# Summary plot: 每个基因的全局重要性\nshap.summary_plot(shap_values, X_test,\n                  feature_names=gene_names)\n\n# Waterfall: 单个样本的预测分解\nshap.waterfall_plot(\n    shap.Explanation(values=shap_values[0],\n                     base_values=explainer.expected_value,\n                     data=X_test.iloc[0],\n                     feature_names=gene_names))\n\n# 依赖图: 单个基因的SHAP值 vs 表达量\nshap.dependence_plot('TP53', shap_values,\n                     X_test, feature_names=gene_names)"
+        }
+      ]
+    },
+    {
+      "key": "common-gcn-gat",
+      "name": "GCN/GAT 图神经网络",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "stage-3-ml-gnn",
+        "common-leiden-louvain"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>GCN像\"邻居信息汇总到我身上\"：</strong>在社交网络中，一个人的特征可以表示为他自己+他的朋友们特征的加权平均。GCN把这个想法变成可训练的神经网络层——每一层，每个节点从邻居聚合信息。GAT更进一步：不是简单平均，而是用注意力机制学习\"哪些邻居更重要\"。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "GCN/GAT 跨组学应用",
+          "content": "<table><tr><td><strong>蛋白质功能预测：</strong>PPI网络+GCN——根据互作伙伴的功能推断未知蛋白功能</td></tr><tr><td><strong>药物-靶标预测：</strong>drug-target网络+GNN预测新的相互作用</td></tr><tr><td><strong>单细胞：</strong>KNN细胞图+GAT——增强的细胞类型分类和批次整合</td></tr><tr><td><strong>分子性质预测：</strong>分子图+GNN预测溶解性/毒性/活性</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GCN/GAT 蛋白质功能预测",
+          "code": "import torch\nimport torch_geometric\nfrom torch_geometric.nn import GCNConv, GATConv\n\n# === GCN: 蛋白质功能预测 ===\nclass ProteinGCN(torch.nn.Module):\n    def __init__(self, in_dim, hidden, out_dim):\n        super().__init__()\n        self.conv1 = GCNConv(in_dim, hidden)\n        self.conv2 = GCNConv(hidden, out_dim)\n    def forward(self, x, edge_index):\n        x = self.conv1(x, edge_index).relu()\n        x = self.conv2(x, edge_index)\n        return x\n\n# PPI图: 节点=蛋白特征(序列嵌入), 边=互作\n# data.x: (N_proteins, feature_dim)\n# data.edge_index: (2, N_edges)\nmodel = ProteinGCN(in_dim=1280, hidden=256, out_dim=50)\nout = model(data.x, data.edge_index)\n\n# === GAT: 学习哪些邻居更重要 ===\ngat = GATConv(in_dim, hidden, heads=4, concat=True)\n# 多头注意力——4个不同的\"重要性\"视角"
+        }
+      ]
+    },
+    {
+      "key": "common-diffusion-maps",
+      "name": "扩散图与PHATE",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-pca",
+        "common-umap-tsne"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>扩散图像墨水在纸上扩散——距离=扩散时间：</strong>两滴墨水，分别滴在纸的两端——它们需要很长时间才能\"相遇\"（扩散时间大）。滴在附近的墨水，很快就在中间汇合（扩散时间小）。扩散图用这个直觉定义细胞间的距离——不是欧氏距离，而是\"扩散距离\"。这在发育轨迹推断中特别有用。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "扩散图/PHATE 在组学中的应用",
+          "content": "<table><tr><td><strong>单细胞轨迹：</strong>扩散图是Palantir和Destiny的基础——扩散伪时间比PCA伪时间更好地反映发育过程</td></tr><tr><td><strong>PHATE：</strong>专门为生物数据设计——保留全局轨迹结构，可视化造血分化等分支过程效果优异</td></tr><tr><td><strong>蛋白质构象：</strong>扩散图揭示蛋白质折叠的能量景观</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "扩散图 + PHATE 轨迹可视化",
+          "code": "import phate\nfrom sklearn.manifold import SpectralEmbedding\n\n# === 扩散图 ===\n# diffusion map = 转移概率矩阵的特征分解\ndiffmap = SpectralEmbedding(\n    n_components=3, affinity='nearest_neighbors',\n    n_neighbors=15, random_state=42)\ndc = diffmap.fit_transform(adata.obsm['X_pca'][:, :50])\n# DC1常捕获伪时间 (如未分化→分化)\n\n# === PHATE: 保留轨迹结构 ===\nphate_op = phate.PHATE(n_components=2,\n                        knn=5, decay=40,\n                        n_jobs=-2)\nphate_coords = phate_op.fit_transform(adata.X)\n# 可视化\nadata.obsm['X_phate'] = phate_coords\nsc.pl.embedding(adata, basis='phate',\n                color=['pseudotime', 'celltype'])"
+        }
+      ]
+    },
+    {
+      "key": "common-em-algorithm",
+      "name": "EM 算法 (期望最大化)",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-gmm",
+        "stage-2-math-mle"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>EM像\"不知道谁属于哪组→猜→用猜的结果重新估计→再猜\"的迭代过程：</strong>假设你有一堆身高数据，但不知道哪些是男生哪些是女生。EM的做法：先随便猜μ_male=170, μ_female=160（E步：算每个数据属于男女的概率）→用这些概率更新μ_male和μ_female的估计（M步）→反复直到收敛。GMM、scVI、Isoform定量的数学基础都是EM。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "EM 跨组学应用",
+          "content": "<table><tr><td><strong>GMM聚类：</strong>EM是GMM参数估计的标准方法</td></tr><tr><td><strong>Isoform定量（RSEM/kallisto）：</strong>reads来自哪个isoform？→未知→EM迭代分配</td></tr><tr><td><strong>scVI：</strong>变分EM——用神经网络参数化E步</td></tr><tr><td><strong>Haplotype phasing：</strong>哪些SNP在同一条染色体上→未知→EM估计</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "EM 算法从头实现 (GMM)",
+          "code": "import numpy as np\nfrom scipy.stats import multivariate_normal\n\n# EM for GMM (2 components, 1D for simplicity)\nX = np.concatenate([np.random.normal(-2,1,500),\n                     np.random.normal(3,1.5,500)])\nmu = [-1, 1]; sigma = [1, 1]; pi = [0.5, 0.5]\nfor it in range(100):\n    # E-step: 计算每个点属于每个component的概率\n    resp = np.zeros((len(X), 2))\n    for k in range(2):\n        resp[:, k] = pi[k] * multivariate_normal.pdf(\n            X, mu[k], sigma[k])\n    resp /= resp.sum(axis=1, keepdims=True)\n    # M-step: 用加权数据更新参数\n    Nk = resp.sum(axis=0)\n    mu = (resp * X.reshape(-1,1)).sum(axis=0) / Nk\n    sigma = np.array([np.average((X-mu[k])**2,\n        weights=resp[:,k]) for k in range(2)])\n    pi = Nk / len(X)\nprint(f'Final: mu={mu}, sigma={sigma}')"
+        }
+      ]
+    },
+    {
+      "key": "common-anova",
+      "name": "ANOVA 方差分析",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [
+        "stage-1-math-statistics-basics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>ANOVA像把总变异拆解为\"组间差异+组内差异\"：</strong>你要判断三种药物对细胞增殖的影响是否有区别。ANOVA把总变异分解——\"不同药物之间的差异\"vs\"同一药物内不同重复之间的差异\"。如果组间差异远大于组内波动→至少有一种药物的效果不同。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "ANOVA 跨组学应用",
+          "content": "<table><tr><td><strong>多条件差异分析：</strong>超过2组时，ANOVA替代t检验——如比较WT vs KO vs Rescue三种基因型</td></tr><tr><td><strong>时间序列：</strong>重复测量ANOVA——比较基因在不同时间点的表达变化</td></tr><tr><td><strong>批次效应评估：</strong>ANOVA分解batch vs condition的方差贡献</td></tr><tr><td><strong>多因素实验：</strong>双因素ANOVA——同时评估药物+剂量的主效应和交互作用</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "ANOVA 多组比较",
+          "code": "from scipy.stats import f_oneway\nimport statsmodels.api as sm\nfrom statsmodels.formula.api import ols\n\n# === 单因素ANOVA ===\ngroup_a = expr[condition == 'WT']\ngroup_b = expr[condition == 'KO']\ngroup_c = expr[condition == 'KO+rescue']\nF, p = f_oneway(group_a, group_b, group_c)\nprint(f'ANOVA F={F:.2f}, p={p:.2e}')\n\n# === 双因素ANOVA (drug + dose) ===\nmodel = ols('expression ~ C(drug) + C(dose) + C(drug):C(dose)',\n            data=df).fit()\nanova_table = sm.stats.anova_lm(model, typ=2)\nprint(anova_table)  # 主效应+交互作用"
+        }
+      ]
+    },
+    {
+      "key": "common-ks-test",
+      "name": "Kolmogorov-Smirnov 检验",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-wilcoxon"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>KS检验像比较两条\"身高分布曲线\"的差异：</strong>你有两个班的成绩分布——不只是比平均分（t检验），而是比整条累积分布曲线。KS统计量=两条CDF曲线的最大垂直距离。GSEA的enrichment score就是基于KS统计量——看基因集的成员是否在全体基因排序的\"两端\"富集。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "KS检验跨组学应用",
+          "content": "<table><tr><td><strong>GSEA富集分析：</strong>KS统计量是GSEA的数学基础——running sum statistic本质就是加权KS</td></tr><tr><td><strong>单细胞分布比较：</strong>比较某个基因在两种细胞类型中的表达分布——是否来自同一分布</td></tr><tr><td><strong>测序深度归一化验证：</strong>标准化后两组的read count分布是否一致</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "KS检验 + GSEA原理",
+          "code": "from scipy.stats import ks_2samp\nimport numpy as np\n\n# === KS检验: 两组分布比较 ===\nt_cells = adata[adata.obs['celltype']=='T','CD3D'].X.toarray().flatten()\nb_cells = adata[adata.obs['celltype']=='B','CD3D'].X.toarray().flatten()\nstat, p = ks_2samp(t_cells, b_cells)\nprint(f'KS stat={stat:.3f}, p={p:.2e}')\n\n# === GSEA running sum (基于KS) ===\nranked = np.argsort(de_stats)[::-1]  # 按log2FC降序\nin_set = np.isin(ranked, pathway_genes)\n# 遇到集合内基因→加分, 集合外→减分\nhit = 1.0 / in_set.sum()  # 加权（GSEA常用|log2FC|^p）\nmiss = -1.0 / (~in_set).sum()\nscore = np.cumsum(np.where(in_set, hit, miss))\nes = score.max() - score.min()  # Enrichment Score\n# permutation test评估ES的显著性"
+        }
+      ]
+    },
+    {
+      "key": "common-rfe-boruta",
+      "name": "RFE / Boruta 特征选择",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-lasso-ridge",
+        "stage-2-ml-random-forest"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>RFE像\"反复考试踢掉表现最差的学生\"：</strong>训练模型→看每个特征的重要性→踢掉最不重要的那个→重新训练→再踢→只保留top K。Boruta更进一步：为每个真实基因创建\"影子基因\"（打乱顺序的随机版本），只有重要性显著高于影子基因的才被认为是真正的\"重要特征\"。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "RFE/Boruta 跨组学应用",
+          "content": "<table><tr><td><strong>biomarker发现：</strong>从20000基因中用Boruta严格筛选出真正与疾病相关的基因</td></tr><tr><td><strong>预测模型降维：</strong>RFE将特征从20000降到20-50，减少过拟合风险</td></tr><tr><td><strong>多组学特征整合：</strong>从RNA+甲基化+突变中联合选择最有预测力的特征</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "RFE + Boruta 基因选择",
+          "code": "from sklearn.feature_selection import RFE, RFECV\nfrom sklearn.ensemble import RandomForestClassifier\nfrom boruta import BorutaPy\n\n# === RFE: 迭代消除 ===\nrf = RandomForestClassifier(n_estimators=100, random_state=42)\nrfe = RFECV(rf, step=50, cv=5, scoring='roc_auc')\nrfe.fit(X, y)\nselected = np.where(rfe.support_)[0]\nprint(f'RFE selected {len(selected)} genes')\n\n# === Boruta: 影子特征法 ===\nrf_boruta = RandomForestClassifier(\n    n_jobs=-1, class_weight='balanced',\n    max_depth=5)\nboruta = BorutaPy(rf_boruta, n_estimators='auto',\n                  perc=100, random_state=42)\nboruta.fit(X.values, y)\n# boruta.support_: True=confirmed important\n# boruta.support_weak_: True=tentative\nconfirmed = np.where(boruta.support_)[0]\nprint(f'Boruta confirmed: {len(confirmed)} genes')"
+        }
+      ]
+    },
+    {
+      "key": "common-gaussian-processes",
+      "name": "高斯过程",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "stage-2-math-probability-distributions"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>高斯过程像\"无限维的多元正态分布\"——为每个预测提供不确定性：</strong>普通回归给你一个数\"药效=0.7\"。高斯过程给你一个正态分布\"药效~N(0.7, 0.2²)\"——不仅告诉你\"最可能的药效是0.7\"，还告诉你\"95%可能在0.3到1.1之间\"。这在生物实验中特别重要——你需要知道预测的可靠性。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "高斯过程跨组学应用",
+          "content": "<table><tr><td><strong>基因表达时间序列：</strong>GP回归平滑基因在多个时间点的表达——同时给出不确定性带</td></tr><tr><td><strong>贝叶斯优化：</strong>GP作为surrogate model——优化实验条件（如药物浓度、温度）</td></tr><tr><td><strong>空间转录组：</strong>GP建模基因表达的空间梯度——预测未测位置的表达</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GP 基因表达时间序列",
+          "code": "from sklearn.gaussian_process import GaussianProcessRegressor\nfrom sklearn.gaussian_process.kernels import RBF, WhiteKernel\nimport numpy as np\n\n# 基因表达: 5个时间点\ntime = np.array([0, 2, 4, 6, 8]).reshape(-1, 1)\nexpr = np.array([1.0, 2.1, 3.0, 2.8, 2.5])\n\n# RBF kernel: 假设相邻时间点表达更相似\nkernel = RBF(length_scale=2.0) + WhiteKernel(noise_level=0.1)\ngp = GaussianProcessRegressor(kernel=kernel, alpha=0.0)\ngp.fit(time, expr)\n\n# 预测+不确定性\ntest_time = np.linspace(0, 10, 100).reshape(-1, 1)\nmu, sigma = gp.predict(test_time, return_std=True)\n# mu: 最可能的表达值\n# sigma: 不确定性 (95% CI = mu ± 1.96*sigma)"
+        }
+      ]
+    },
+    {
+      "key": "common-mcl",
+      "name": "MCL 马尔可夫聚类",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-leiden-louvain"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>MCL像在图里\"随机游走+放大\"：</strong>你从某个蛋白质出发，在图里随机走。MCL的直觉：如果你经常走到蛋白质B附近，A和B很可能属于同一个protein complex。算法交替执行expansion（游走扩散——让信息流动）和inflation（放大强连接、衰减弱连接），收敛后每个节点属于一个cluster。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "MCL 跨组学应用",
+          "content": "<table><tr><td><strong>蛋白质家族聚类：</strong>MCL是最经典的序列相似性网络聚类方法——OrthoMCL用MCL找直系同源群</td></tr><tr><td><strong>PPI网络：</strong>MCL发现蛋白质复合物——比层次聚类更适合重叠度低的模块</td></tr><tr><td><strong>基因共表达网络：</strong>MCL发现的模块边界比WGCNA更清晰</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "MCL 蛋白质家族聚类",
+          "code": "import markov_clustering as mc\nimport networkx as nx\nimport numpy as np\n\n# 构建序列相似性图\n# nodes: 蛋白质, edges: BLAST E-value < 1e-5\nG = nx.from_pandas_edgelist(blast_hits,\n    'query', 'target', edge_attr='evalue')\n\n# 转换为邻接矩阵\nadj = nx.to_scipy_sparse_array(G)\n\n# MCL聚类\n# inflation: 1.5-5.0，越高→越多小簇\nresult = mc.run_mcl(adj, inflation=2.0)\nclusters = mc.get_clusters(result)\n\nprint(f'Found {len(clusters)} protein families')\nfor i, cluster in enumerate(clusters[:5]):\n    print(f'Cluster {i}: {len(cluster)} proteins')"
         }
       ]
     }

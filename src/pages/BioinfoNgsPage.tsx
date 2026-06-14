@@ -100,15 +100,19 @@ const omicsTabs: OmicsTab[] = [
     id: 'algorithms',
     label: '共用算法',
     icon: <Calculator size={15} />,
-    description: '跨组学共用算法：降维(PCA/t-SNE/UMAP/MDS)、矩阵分解(NMF/SVD/ICA)、聚类(K-means/DBSCAN/GMM/谱聚类/层次/Leiden)、统计检验(Wilcoxon/Bootstrap/多重校正)、富集分析(GSEA)、正则化(Lasso/Ridge)、网络(WGCNA)、关联(CCA)',
+    description: '31个跨组学共用算法，每个标注最适场景。覆盖降维、矩阵分解、聚类、统计检验、回归、网络分析、特征选择、贝叶斯方法',
     topicKeys: [
-      'common-pca', 'common-umap-tsne', 'common-mds',
+      'common-pca', 'common-umap-tsne', 'common-mds', 'common-diffusion-maps',
       'common-nmf', 'common-svd', 'common-ica',
-      'common-kmeans', 'common-dbscan', 'common-gmm',
-      'common-hierarchical-clustering', 'common-leiden-louvain', 'common-spectral-clustering',
+      'common-kmeans', 'common-dbscan', 'common-gmm', 'common-hierarchical-clustering',
+      'common-leiden-louvain', 'common-spectral-clustering', 'common-mcl',
       'common-wilcoxon', 'common-bootstrap', 'common-multiple-testing',
+      'common-anova', 'common-ks-test',
       'common-gsea-enrichment',
-      'common-lasso-ridge', 'common-wgcna', 'common-cca'
+      'common-lasso-ridge', 'common-poisson-nb', 'common-cox-ph',
+      'common-empirical-bayes', 'common-shap', 'common-em-algorithm',
+      'common-wgcna', 'common-cca', 'common-gcn-gat',
+      'common-rfe-boruta', 'common-gaussian-processes'
     ],
   },
 ];
@@ -165,6 +169,9 @@ export default function BioinfoNgsPage() {
           {activeOmics.description}
         </p>
       </section>
+
+      {/* Algorithm Scenario Guide — visible on algorithms tab */}
+      {activeTab === 'algorithms' && <AlgorithmScenarioGuide />}
 
       {/* Topic Cards Grid */}
       <section>
@@ -270,5 +277,100 @@ export default function BioinfoNgsPage() {
       )}
 
     </div>
+  );
+}
+
+// ============================================================
+// Algorithm Scenario Guide
+// ============================================================
+
+interface AlgoScenario {
+  name: string;
+  bestFor: string;
+  notFor: string;
+  omics: string[];
+  key: string;
+}
+
+const algoScenarios: AlgoScenario[] = [
+  // 降维
+  { name: 'PCA', bestFor: '线性降维、样本QC、去噪预处理', notFor: '非线性关系可视化、保留全局结构', omics: ['Bulk RNA','scRNA','ATAC','Hi-C','甲基化'], key: 'common-pca' },
+  { name: 't-SNE/UMAP', bestFor: '单细胞可视化、非线性降维、聚类展示', notFor: '保留全局距离、需要可重复性时用UMAP替代t-SNE', omics: ['scRNA','CyTOF','蛋白嵌入'], key: 'common-umap-tsne' },
+  { name: 'MDS/NMDS', bestFor: '任意距离矩阵的可视化、微生物组beta多样性', notFor: '需要原始特征loading时用PCA', omics: ['微生物组','生态学','Bulk RNA'], key: 'common-mds' },
+  { name: '扩散图/PHATE', bestFor: '保留全局轨迹结构、发育路径可视化', notFor: '简单聚类可视化（UMAP更快）', omics: ['scRNA轨迹','蛋白构象'], key: 'common-diffusion-maps' },
+  // 矩阵分解
+  { name: 'NMF', bestFor: '基因程序发现、突变签名提取、去卷积', notFor: '需要特征值解释方差时用PCA', omics: ['癌症基因组','scRNA','空间组'], key: 'common-nmf' },
+  { name: 'SVD', bestFor: '基因表达去噪、缺失值填补、Hi-C标准化', notFor: '需要非负约束时用NMF', omics: ['Bulk RNA','Hi-C','scRNA'], key: 'common-svd' },
+  { name: 'ICA', bestFor: '独立通路盲分离、fMRI网络、代谢通路', notFor: '通路间存在已知相关性时', omics: ['基因表达','代谢组','fMRI'], key: 'common-ica' },
+  // 聚类
+  { name: 'K-means', bestFor: '快速粗聚类、球形分布、分子亚型', notFor: '非凸形状、有噪声点、不知道K', omics: ['Bulk RNA','甲基化','蛋白'], key: 'common-kmeans' },
+  { name: 'DBSCAN/HDBSCAN', bestFor: '稀有细胞发现、任意形状簇、自动处理噪声', notFor: '均匀密度的球形簇（K-means更好）', omics: ['scRNA','CyTOF','空间组'], key: 'common-dbscan' },
+  { name: 'GMM', bestFor: '概率软分配、过渡态细胞、CNV检测', notFor: '需要硬分配做下游差异分析', omics: ['scRNA','CNV','甲基化'], key: 'common-gmm' },
+  { name: '层次聚类', bestFor: '样本/基因树+热图、可剪枝选择K', notFor: '大型数据集(>10000样本)', omics: ['Bulk RNA','蛋白','微生物组'], key: 'common-hierarchical-clustering' },
+  { name: 'Leiden/Louvain', bestFor: '单细胞标准聚类、图社区检测、PPI模块', notFor: '需要手动指定K时用K-means', omics: ['scRNA','scATAC','PPI网络'], key: 'common-leiden-louvain' },
+  { name: '谱聚类', bestFor: '非线性可分细胞群、Hi-C空间域', notFor: '大型数据集（计算量大）', omics: ['scRNA','Hi-C','蛋白构象'], key: 'common-spectral-clustering' },
+  { name: 'MCL', bestFor: '蛋白质家族聚类、直系同源群', notFor: '需要重叠社区时用NOCD', omics: ['蛋白质组','序列分析'], key: 'common-mcl' },
+  // 统计检验
+  { name: 'Wilcoxon', bestFor: '非正态分布数据DEG、单细胞/微生物组差异', notFor: '正态分布且需要高统计功效时用t检验', omics: ['scRNA','微生物组','代谢组'], key: 'common-wilcoxon' },
+  { name: 'Bootstrap', bestFor: '置信区间估计、系统发育支持率、无分布假设', notFor: '样本量极小(<20)时偏差大', omics: ['系统发育','DEG','网络'], key: 'common-bootstrap' },
+  { name: '多重检验校正', bestFor: '任何大规模并行检验——必须！', notFor: '单个假设检验', omics: ['所有组学'], key: 'common-multiple-testing' },
+  { name: 'ANOVA', bestFor: '多组(>=3)差异比较、多因素实验', notFor: '只有两组时用t检验/Wilcoxon', omics: ['Bulk RNA','蛋白','代谢组'], key: 'common-anova' },
+  { name: 'KS检验', bestFor: '分布整体比较、GSEA的数学基础', notFor: '只关心均值/中位数差异', omics: ['GSEA','scRNA分布比较'], key: 'common-ks-test' },
+  // 功能分析
+  { name: 'GSEA/富集分析', bestFor: '通路功能解释——所有差异分析的下游', notFor: '单基因层面的分析', omics: ['所有组学'], key: 'common-gsea-enrichment' },
+  // 回归
+  { name: 'Lasso/Ridge/ElasticNet', bestFor: 'biomarker选择、高维特征>样本数', notFor: '特征数<样本数且不需要选择', omics: ['Bulk RNA','多组学','药物'], key: 'common-lasso-ridge' },
+  { name: 'Poisson/NB回归', bestFor: '计数数据建模（read count）', notFor: '连续型数据（用线性回归）', omics: ['RNA-seq','ATAC','ChIP'], key: 'common-poisson-nb' },
+  { name: 'Cox PH', bestFor: '生存分析——\"还能活多久\"', notFor: '横断面数据（无时间信息）', omics: ['TCGA','临床研究'], key: 'common-cox-ph' },
+  { name: '经验贝叶斯(limma)', bestFor: '小样本DEG——借全体基因信息稳定方差', notFor: '大量重复(>20)时与普通t检验差别小', omics: ['Bulk RNA','蛋白','甲基化'], key: 'common-empirical-bayes' },
+  // 可解释性与学习
+  { name: 'SHAP', bestFor: '模型预测解释——\"为什么这么预测？\"', notFor: '线性模型（直接看系数即可）', omics: ['疾病预测','药物响应','biomarker'], key: 'common-shap' },
+  { name: 'EM算法', bestFor: '隐变量模型参数估计——GMM/Isoform/scVI', notFor: '没有隐变量时直接用MLE', omics: ['Isoform定量','GMM','scVI'], key: 'common-em-algorithm' },
+  // 网络
+  { name: 'WGCNA', bestFor: '共表达模块+性状关联+hub gene', notFor: '样本量<15时网络不稳定', omics: ['Bulk RNA','蛋白','代谢组','甲基化'], key: 'common-wgcna' },
+  { name: 'CCA', bestFor: '两组学关联——RNA↔ATAC、菌群↔代谢物', notFor: '超过2个组学时用MOFA', omics: ['scMultiome','微生物-代谢','影像-基因'], key: 'common-cca' },
+  { name: 'GCN/GAT', bestFor: '图结构数据——PPI网络、分子图、细胞图', notFor: '无图结构的数据（先用KNN建图）', omics: ['蛋白功能','药物靶标','分子性质'], key: 'common-gcn-gat' },
+  // 特征选择与高级方法
+  { name: 'RFE/Boruta', bestFor: '严格的特征选择——必须比随机噪声好', notFor: '快速筛选（用Lasso即可）', omics: ['biomarker','多组学整合'], key: 'common-rfe-boruta' },
+  { name: '高斯过程', bestFor: '需要不确定性的预测——时间序列、贝叶斯优化', notFor: '只需要点预测+大规模数据', omics: ['时间序列','空间组','实验优化'], key: 'common-gaussian-processes' },
+];
+
+function AlgorithmScenarioGuide() {
+  return (
+    <section className="border rounded-lg p-4 border-brand-border bg-brand-off-white">
+      <h2 className="text-sm font-bold text-brand-ink mb-3">算法场景速查 —— 一句话选算法</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[11px] border-collapse">
+          <thead>
+            <tr className="border-b border-brand-border">
+              <th className="text-left p-1.5 font-semibold text-brand-ink">算法</th>
+              <th className="text-left p-1.5 font-semibold text-brand-ink w-[30%]">最适场景</th>
+              <th className="text-left p-1.5 font-semibold text-brand-ink-muted w-[25%]">不适合</th>
+              <th className="text-left p-1.5 font-semibold text-brand-ink-muted">适用组学</th>
+            </tr>
+          </thead>
+          <tbody>
+            {algoScenarios.map((a) => (
+              <tr key={a.key} className="border-b border-brand-border-light hover:bg-white transition-colors">
+                <td className="p-1.5">
+                  <a href={`/learn/${a.key}`} className="font-medium text-brand-accent hover:underline no-underline">
+                    {a.name}
+                  </a>
+                </td>
+                <td className="p-1.5 text-brand-dl">{a.bestFor}</td>
+                <td className="p-1.5 text-brand-ink-muted" style={{ lineHeight: 1.4 }}>{a.notFor}</td>
+                <td className="p-1.5">
+                  <div className="flex flex-wrap gap-0.5">
+                    {a.omics.map((o) => (
+                      <span key={o} className="text-[10px] px-1 py-0.5 rounded bg-white border border-brand-border-light text-brand-ink-light">{o}</span>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
