@@ -156,6 +156,7 @@ function buildIndex(
 }
 
 export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalProps) {
+  const [inputValue, setInputValue] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchItem[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -163,6 +164,12 @@ export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalPr
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Debounce input value → query (200ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setQuery(inputValue), 200);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
 
   // Load search index on first open (fetch-on-demand, intentional pattern)
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -275,8 +282,8 @@ export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalPr
           <input
             ref={inputRef}
             type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="搜索工具、方法、概念..."
             className="flex-1 bg-transparent text-sm outline-none text-brand-ink"

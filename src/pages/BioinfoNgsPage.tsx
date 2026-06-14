@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles } from 'lucide-react';
 import { useData } from '../hooks/useData';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -74,13 +74,19 @@ const omicsTabs: OmicsTab[] = [
     id: 'single-cell',
     label: '单细胞组学',
     icon: <Microscope size={15} />,
-    description: '单细胞转录组全流程分析 + 基础模型（scGPT/GeneFormer/UCE等）',
+    description: '单细胞转录组全流程分析：预处理、聚类、注释、轨迹、通讯、GRN、多组学整合与空间映射',
     topicKeys: [
       'single-preprocessing', 'single-clustering', 'single-annotation',
       'single-trajectory', 'single-communication', 'single-grn',
-      'single-downstream', 'single-multiomics', 'single-spatial',
-      'foundation-models'
+      'single-downstream', 'single-multiomics', 'single-spatial'
     ],
+  },
+  {
+    id: 'foundation',
+    label: '基础模型',
+    icon: <Sparkles size={15} />,
+    description: '单细胞基础模型（scGPT/GeneFormer/scFoundation/UCE/CellPLM/scBERT等），ov.fm统一API',
+    topicKeys: ['foundation-models'],
   },
   {
     id: 'multiomics',
