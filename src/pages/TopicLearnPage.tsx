@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, FlaskConical } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
@@ -6,6 +5,7 @@ import QuizBase from '../components/QuizBase';
 import type { QuizQuestion } from '../components/QuizBase';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
+import { useData } from '../hooks/useData';
 
 interface TopicSection {
   type: string;
@@ -64,25 +64,12 @@ interface TopicsData {
 export default function TopicLearnPage() {
   const { topicKey } = useParams<{ topicKey: string }>();
   const navigate = useNavigate();
-  const [topicsData, setTopicsData] = useState<TopicsData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/topics.json`)
-      .then(r => r.json())
-      .then(data => {
-        setTopicsData(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data: topicsData, loading, error } = useData<TopicsData>('topics');
 
   if (loading) return <LoadingSpinner />;
-
-  if (!topicsData || !topicKey) return <ErrorDisplay message="专题数据加载失败" />;
+  if (error || !topicsData || !topicKey) return <ErrorDisplay message={error || '专题数据加载失败'} />;
 
   const topic = topicsData.topics.find(t => t.key === topicKey);
-
   if (!topic) return <ErrorDisplay message={`专题「${topicKey}」不存在`} />;
 
   const currentIndex = topicsData.topicOrder.indexOf(topicKey);

@@ -6665,6 +6665,42 @@
           "code": "macs2 callpeak -t sample.filtered.bam -f BAMPE -g hs -n sample_atac --outdir peaks -q 0.01"
         },
         {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>ATAC-seq像测绘城市的地图：</strong>T5转座酶像“探测器”，只在开放的染色质区域插入并标记，标记的位置就是潜在的调控元素（启动子、增强子、转录因子结合位点）。</p>"
+        },
+        {
+          "type": "how",
+          "icon": "机制",
+          "title": "ATAC-seq 从实验到矩阵的管线",
+          "content": "<p>标准处理管线：<strong>FastQC → Trimmomatic → Bowtie2比对 → samtools过滤（去线粒体、MAPQ过滤） → Picard去重 → MACS2/Genrich peak calling → IDR一致性评估</strong>。关键步骤：转座酶产生的是adapted fragment而非直接测序read，比对后需要处理Tn5偏移（+4/-5bp调整）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "ATAC-seq在基因调控研究中的应用",
+          "content": "<p>关键应用：</p><ul><li><strong>差异可及性分析（DARs）：</strong>比较不同条件/细胞类型的染色质开放状态变化</li><li><strong>转录因子足迹分析（Footprinting）：</strong>通过Tn5插入偏好在TF结合位点处的精确模式推断TF结合</li><li><strong>motif富集分析：</strong>对差异peak区域进行已知TF motif扫描（HOMER/MEME）</li><li><strong>peak-to-gene关联：</strong>通过基因组距离或Hi-C数据将远端调控区域关联到靶基因</li></ul>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "ATAC-seq 分析最佳实践",
+          "content": "<p><strong>ENCODE ATAC-seq 指南：</strong>（1）每个生物学重复至少25M non-duplicate、non-mitochondrial aligned reads；（2）TSS富集分数>7；（3）FRiP（Fraction of Reads in Peaks）>0.3表明文库质量良好；（4）IDR用于评估重复间一致性。<strong>scATAC-seq特殊考虑：</strong>单细胞ATAC数据极度稀疏，推荐LSI降维、SnapATAC或ArchR进行细胞聚类。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "ATAC-seq 分析工具推荐",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th>工具</th><th>用途</th><th>OmicVerse集成</th></tr></thead><tbody><tr><td><strong>MACS2</strong></td><td>Bulk peak calling</td><td>外部调用</td></tr><tr><td><strong>Genrich</strong></td><td>ATAC-specific peak caller</td><td>外部调用</td></tr><tr><td><strong>chromVAR</strong></td><td>TF motif活性评分</td><td><code>ov.epi.chromvar()</code></td></tr><tr><td><strong>HOMER</strong></td><td>motif富集分析</td><td>外部调用</td></tr><tr><td><strong>SnapATAC2</strong></td><td>scATAC分析</td><td>通过anndata互操作</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>忽略Tn5偏移校正。<strong>解决：</strong>比对后使用deepTools的ATACseqCorrect或自定义脚本调整reads位置。</li><li><strong>陷阱：</strong>scATAC数据用Bulk ATAC的peak caller。<strong>解决：</strong>单细胞应使用MACS2的--nomodel --shift -100 --extsize 200参数。</li><li><strong>陷阱：</strong>忽略线粒体reads。<strong>解决：</strong>ATAC-seq中线粒体reads比例通常5-20%，过高提示细胞状态差。</li></ol>"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -6680,6 +6716,178 @@
               "answer": 0,
               "explanation": "ATAC-seq 反映 transposase-accessible chromatin；CUT&Tag 依赖抗体靶向特定蛋白或修饰。"
             }
+          ]
+        }
+      ],
+      "workflowModules": [
+        {
+          "module_id": "atac_alignment_qc",
+          "module_name": "ATAC-seq 比对与QC",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "ATAC-seq reads是否成功比对到基因组？片段大小分布是否符合预期（核小体周期性模式）？",
+          "inputs": [
+            "paired-end FASTQ",
+            "参考基因组 (hg38/mm10)",
+            "线粒体染色体注释"
+          ],
+          "outputs": [
+            "过滤BAM",
+            "片段大小分布图",
+            "TSS富集分数",
+            "FRiP分数"
+          ],
+          "tools": [
+            "Bowtie2",
+            "samtools",
+            "Picard",
+            "deepTools",
+            "ataqv"
+          ],
+          "key_parameters": [
+            "--very-sensitive",
+            "--no-mixed",
+            "-X 2000"
+          ],
+          "qc_metrics": [
+            "片段分布(NFR信号)",
+            "TSS富集>7",
+            "FRiP>0.3",
+            "线粒体reads比例"
+          ],
+          "decision_rules": [
+            "TSS<5→质量差",
+            "线粒体>20%→裂解过度",
+            "FRiP<0.2→背景噪声高"
+          ],
+          "failure_modes": [
+            "Tn5偏好导致富集偏差",
+            "线粒体污染",
+            "核小体模式缺失"
+          ],
+          "upstream_modules": [
+            "ngs-fastq-qc"
+          ],
+          "downstream_modules": [
+            "atac_peak_calling"
+          ],
+          "cross_omics_interfaces": [
+            "RNA-seq expression",
+            "ChIP-seq TFBS"
+          ],
+          "ml_dl_connection": "CNN（BPNet）预测TF结合和碱基分辨率调控活性",
+          "citations": [
+            "Buenrostro2013",
+            "ENCODE_ATAC"
+          ]
+        },
+        {
+          "module_id": "atac_peak_calling",
+          "module_name": "Peak Calling与峰注释",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "基因组哪些区域是开放的？这些区域位于哪些基因附近？",
+          "inputs": [
+            "过滤BAM",
+            "参考基因组",
+            "基因注释(GTF)"
+          ],
+          "outputs": [
+            "peak BED",
+            "peak注释",
+            "peak count矩阵"
+          ],
+          "tools": [
+            "MACS2",
+            "Genrich",
+            "HOMER",
+            "ChIPseeker"
+          ],
+          "key_parameters": [
+            "--nomodel",
+            "--shift -100",
+            "--extsize 200",
+            "--qvalue 0.05"
+          ],
+          "qc_metrics": [
+            "peak数量(5万-20万)",
+            "IDR>0.05",
+            "peak宽度分布"
+          ],
+          "decision_rules": [
+            "IDR<0.05→保留",
+            "peak<1万→数据不足"
+          ],
+          "failure_modes": [
+            "假阳性峰",
+            "峰过多(背景高)"
+          ],
+          "upstream_modules": [
+            "atac_alignment_qc"
+          ],
+          "downstream_modules": [
+            "atac_diff_analysis"
+          ],
+          "cross_omics_interfaces": [
+            "Hi-C maps",
+            "RNA-seq"
+          ],
+          "ml_dl_connection": "随机森林peak-to-gene关联预测",
+          "citations": [
+            "MACS2_Zhang2008"
+          ]
+        },
+        {
+          "module_id": "atac_diff_analysis",
+          "module_name": "差异可及性分析",
+          "omics_type": "epigenomics",
+          "module_type": "core",
+          "biological_question": "不同条件下哪些染色质区域发生显著变化？富集了哪些TF motif？",
+          "inputs": [
+            "peak count矩阵",
+            "样本元数据",
+            "motif数据库"
+          ],
+          "outputs": [
+            "差异peak列表",
+            "火山图",
+            "motif富集报告"
+          ],
+          "tools": [
+            "DESeq2",
+            "edgeR",
+            "HOMER",
+            "chromVAR"
+          ],
+          "key_parameters": [
+            "FDR<0.05",
+            "log2FC>1",
+            "motif p<1e-4"
+          ],
+          "qc_metrics": [
+            "MA plot",
+            "p-value分布",
+            "motif E-value"
+          ],
+          "decision_rules": [
+            "FDR<0.05+|log2FC|>1→显著"
+          ],
+          "failure_modes": [
+            "批次效应",
+            "motif数据库不完整"
+          ],
+          "upstream_modules": [
+            "atac_peak_calling"
+          ],
+          "downstream_modules": [],
+          "cross_omics_interfaces": [
+            "RNA-seq DEG",
+            "ChIP-seq TFBS"
+          ],
+          "ml_dl_connection": "从DNA序列预测调控元件活性差异(Basenji/Enformer)",
+          "citations": [
+            "DESeq2_Love2014",
+            "chromVAR_Schep2017"
           ]
         }
       ]
