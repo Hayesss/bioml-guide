@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -6,18 +6,21 @@ import Layout from './components/Layout';
 import SearchModal from './components/SearchModal';
 import BackToTop from './components/BackToTop';
 import ErrorBoundary from './components/ErrorBoundary';
-import HomePage from './pages/HomePage';
-import RoadmapPage from './pages/RoadmapPage';
-import ApplicationsPage from './pages/ApplicationsPage';
-import ResourcesPage from './pages/ResourcesPage';
-import ToolsPage from './pages/ToolsPage';
-import MathPage from './pages/MathPage';
-import CheatSheetPage from './pages/CheatSheetPage';
-import TopicLearnPage from './pages/TopicLearnPage';
-import IntroPage from './pages/IntroPage';
-import BioinfoNgsPage from './pages/BioinfoNgsPage';
-import FoundationModelsPage from './pages/FoundationModelsPage';
-import NotFoundPage from './pages/NotFoundPage';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy-loaded pages for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const RoadmapPage = lazy(() => import('./pages/RoadmapPage'));
+const ApplicationsPage = lazy(() => import('./pages/ApplicationsPage'));
+const ResourcesPage = lazy(() => import('./pages/ResourcesPage'));
+const ToolsPage = lazy(() => import('./pages/ToolsPage'));
+const MathPage = lazy(() => import('./pages/MathPage'));
+const CheatSheetPage = lazy(() => import('./pages/CheatSheetPage'));
+const TopicLearnPage = lazy(() => import('./pages/TopicLearnPage'));
+const IntroPage = lazy(() => import('./pages/IntroPage'));
+const BioinfoNgsPage = lazy(() => import('./pages/BioinfoNgsPage'));
+const FoundationModelsPage = lazy(() => import('./pages/FoundationModelsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -32,12 +35,13 @@ export default function App() {
       <div className="flex-1">
         <Layout>
           <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<IntroPage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/ngs" element={<BioinfoNgsPage />} />
-<Route path="/foundation-models" element={<FoundationModelsPage />} />
+            <Route path="/foundation-models" element={<FoundationModelsPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/tools" element={<ToolsPage />} />
@@ -46,6 +50,7 @@ export default function App() {
             <Route path="/learn/:topicKey" element={<TopicLearnPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </Suspense>
           </ErrorBoundary>
         </Layout>
       </div>

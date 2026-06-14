@@ -6,6 +6,7 @@ import type { QuizQuestion } from '../components/QuizBase';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
 import ChipLine from '../components/ChipLine';
+import { sanitizeHTML } from '../utils/sanitize';
 import { useData } from '../hooks/useData';
 
 interface TopicSection {
@@ -193,7 +194,7 @@ export default function TopicLearnPage() {
                 <div
                   className="text-sm leading-relaxed text-brand-ink-light"
                   style={{ lineHeight: 1.9 }}
-                  dangerouslySetInnerHTML={{ __html: section.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(section.content) }}
                 />
               )}
               {section.code && (
