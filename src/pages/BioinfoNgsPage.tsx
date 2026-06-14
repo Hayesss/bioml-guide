@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles, Calculator } from 'lucide-react';
 import { useData } from '../hooks/useData';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -95,6 +95,18 @@ const omicsTabs: OmicsTab[] = [
     icon: <Layers size={15} />,
     description: '跨组学数据整合与接口规范',
     topicKeys: ['multiomics-integration'],
+  },
+  {
+    id: 'algorithms',
+    label: '共用算法',
+    icon: <Calculator size={15} />,
+    description: '跨组学共用算法：PCA/UMAP、NMF/SVD、聚类、多重检验、富集分析、正则化回归 —— 所有组学通用的方法论',
+    topicKeys: [
+      'common-pca', 'common-umap-tsne', 'common-nmf',
+      'common-hierarchical-clustering', 'common-leiden-louvain',
+      'common-multiple-testing', 'common-gsea-enrichment',
+      'common-svd', 'common-lasso-ridge'
+    ],
   },
 ];
 

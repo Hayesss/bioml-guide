@@ -111,7 +111,16 @@
     "single-downstream",
     "single-multiomics",
     "single-spatial",
-    "foundation-models"
+    "foundation-models",
+    "common-lasso-ridge",
+    "common-svd",
+    "common-gsea-enrichment",
+    "common-multiple-testing",
+    "common-leiden-louvain",
+    "common-hierarchical-clustering",
+    "common-nmf",
+    "common-umap-tsne",
+    "common-pca"
   ],
   "topics": [
     {
@@ -6920,6 +6929,42 @@
           "content": "<ol><li><strong>陷阱：</strong>忽略Tn5偏移校正。<strong>解决：</strong>比对后使用deepTools的ATACseqCorrect或自定义脚本调整reads位置。</li><li><strong>陷阱：</strong>scATAC数据用Bulk ATAC的peak caller。<strong>解决：</strong>单细胞应使用MACS2的--nomodel --shift -100 --extsize 200参数。</li><li><strong>陷阱：</strong>忽略线粒体reads。<strong>解决：</strong>ATAC-seq中线粒体reads比例通常5-20%，过高提示细胞状态差。</li></ol>"
         },
         {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>ATAC-seq像测绘城市的地图：</strong>T5转座酶像“探测器”，只在开放的染色质区域插入并标记，标记的位置就是潜在的调控元素（启动子、增强子、转录因子结合位点）。</p>"
+        },
+        {
+          "type": "how",
+          "icon": "机制",
+          "title": "ATAC-seq 从实验到矩阵的管线",
+          "content": "<p>标准处理管线：<strong>FastQC → Trimmomatic → Bowtie2比对 → samtools过滤（去线粒体、MAPQ过滤） → Picard去重 → MACS2/Genrich peak calling → IDR一致性评估</strong>。关键步骤：转座酶产生的是adapted fragment而非直接测序read，比对后需要处理Tn5偏移（+4/-5bp调整）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "ATAC-seq在基因调控研究中的应用",
+          "content": "<p>关键应用：</p><ul><li><strong>差异可及性分析（DARs）：</strong>比较不同条件/细胞类型的染色质开放状态变化</li><li><strong>转录因子足迹分析（Footprinting）：</strong>通过Tn5插入偏好在TF结合位点处的精确模式推断TF结合</li><li><strong>motif富集分析：</strong>对差异peak区域进行已知TF motif扫描（HOMER/MEME）</li><li><strong>peak-to-gene关联：</strong>通过基因组距离或Hi-C数据将远端调控区域关联到靶基因</li></ul>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "ATAC-seq 分析最佳实践",
+          "content": "<p><strong>ENCODE ATAC-seq 指南：</strong>（1）每个生物学重复至少25M non-duplicate、non-mitochondrial aligned reads；（2）TSS富集分数>7；（3）FRiP（Fraction of Reads in Peaks）>0.3表明文库质量良好；（4）IDR用于评估重复间一致性。<strong>scATAC-seq特殊考虑：</strong>单细胞ATAC数据极度稀疏，推荐LSI降维、SnapATAC或ArchR进行细胞聚类。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "ATAC-seq 分析工具推荐",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th>工具</th><th>用途</th><th>OmicVerse集成</th></tr></thead><tbody><tr><td><strong>MACS2</strong></td><td>Bulk peak calling</td><td>外部调用</td></tr><tr><td><strong>Genrich</strong></td><td>ATAC-specific peak caller</td><td>外部调用</td></tr><tr><td><strong>chromVAR</strong></td><td>TF motif活性评分</td><td><code>ov.epi.chromvar()</code></td></tr><tr><td><strong>HOMER</strong></td><td>motif富集分析</td><td>外部调用</td></tr><tr><td><strong>SnapATAC2</strong></td><td>scATAC分析</td><td>通过anndata互操作</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>忽略Tn5偏移校正。<strong>解决：</strong>比对后使用deepTools的ATACseqCorrect或自定义脚本调整reads位置。</li><li><strong>陷阱：</strong>scATAC数据用Bulk ATAC的peak caller。<strong>解决：</strong>单细胞应使用MACS2的--nomodel --shift -100 --extsize 200参数。</li><li><strong>陷阱：</strong>忽略线粒体reads。<strong>解决：</strong>ATAC-seq中线粒体reads比例通常5-20%，过高提示细胞状态差。</li></ol>"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -8828,6 +8873,453 @@
               ],
               "answer": 1,
               "explanation": "scGPT采用与GPT相同的自回归预训练目标——给定部分基因表达预测剩余基因。这使得它可以通过条件生成来模拟基因扰动效应，类似于GPT的条件文本生成。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-pca",
+      "name": "PCA 主成分分析",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [
+        "stage-1-math-linear-algebra"
+      ],
+      "nextTopic": "common-umap-tsne",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>PCA像给高维数据拍一张\"最佳角度\"的照片：</strong>2万维的基因表达数据没法直接看，PCA自动找到\"方差最大\"的观察角度，把数据投影到2-3个维度。就像你给一栋楼拍照——不可能同时拍到所有面，但你可以选择一个角度拍到最多的窗户和门（方差最大的方向）。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "PCA 数学直觉",
+          "content": "<p>PCA通过特征值分解或SVD找到数据的主成分（PC）。<strong>PC1</strong>是数据方差最大的方向，<strong>PC2</strong>是与PC1正交（垂直）的方差第二大的方向，以此类推。每个PC的<strong>特征值</strong>表示该方向上的方差大小。累计方差解释率帮助选择保留多少个PC——通常保留能解释80-90%方差的PC数。</p><p><strong>核心公式：</strong>X_centered = U * Σ * V^T，其中U的列是PCs（样本在新坐标系中的坐标），Σ的对角线是奇异值（与方差成正比），V的行是每个基因对PC的贡献（loading）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "PCA 在不同组学中的应用",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th>组学</th><th>PCA输入</th><th>目的</th><th>典型PC数</th></tr></thead><tbody><tr><td><strong>Bulk RNA-seq</strong></td><td>rlog/vst标准化表达矩阵 (20000×100)</td><td>样本质量评估、批次效应检测、分组趋势</td><td>2-3（可视化）；10-50（下游）</td></tr><tr><td><strong>scRNA-seq</strong></td><td>标准化+HVG筛选 (2000×10000)</td><td>为UMAP/tSNE和聚类准备降维输入</td><td>30-50（标准）</td></tr><tr><td><strong>ATAC-seq</strong></td><td>TF-IDF标准化peak矩阵 (100000×5000)</td><td>LSI降维——scATAC的标准降维方法</td><td>30（scATAC常用）</td></tr><tr><td><strong>Hi-C</strong></td><td>标准化接触矩阵 (bin×bin)</td><td>A/B区室分析——PC1区分开放/封闭区室</td><td>PC1即为区室信号</td></tr><tr><td><strong>DNA Methylation</strong></td><td>甲基化beta值矩阵</td><td>样本甲基化组差异的主成分解构</td><td>2-5</td></tr></tbody></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "PCA 跨组学实战",
+          "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nimport scanpy as sc\n\n# === 1. Bulk RNA-seq: PCA用于样本QC ===\nexpr = np.random.randn(100, 20000)  # 100样本 × 20000基因\npca = PCA(n_components=10)\nsample_pcs = pca.fit_transform(expr.T)  # (100, 10)\nprint(f'PC1 explains {pca.explained_variance_ratio_[0]:.1%} variance')\n\n# 画PCA图检查批次/分组\nimport matplotlib.pyplot as plt\nplt.scatter(sample_pcs[:,0], sample_pcs[:,1], c=groups)\n\n# === 2. scRNA-seq: PCA为UMAP准备 ===\nadata = sc.read('pbmc3k.h5ad')\nsc.pp.normalize_total(adata, target_sum=1e4)\nsc.pp.log1p(adata)\nsc.pp.highly_variable_genes(adata, n_top_genes=2000)\nsc.pp.pca(adata, n_comps=50)  # 50 PCs\n# 后续: sc.pp.neighbors(adata, n_pcs=30); sc.tl.umap(adata)\n\n# === 3. Hi-C: PCA做A/B区室 ===\n# contact_matrix: 对称的Hi-C接触矩阵\nfrom sklearn.decomposition import PCA\npca_hic = PCA(n_components=1)\ncompartment_pc1 = pca_hic.fit_transform(contact_matrix)[:, 0]\n# PC1>0 = A compartment (open), PC1<0 = B compartment (closed)\nA_compartment = compartment_pc1 > 0"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么scRNA-seq在UMAP前先做PCA降维到30-50维？",
+              "options": [
+                "为了节省内存",
+                "PCA去除噪声、加速邻居图构建，30-50个PC通常已经捕获了主要生物变异",
+                "PCA是必须的可视化步骤",
+                "不用PCA UMAP效果更好"
+              ],
+              "answer": 1,
+              "explanation": "单细胞数据2000+HVGs直接做UMAP计算量大且噪声多。PCA作为线性降维预处理，保留>90%方差的同时去除随机噪声，30-50维已足够捕获生物信号。"
+            },
+            {
+              "q": "Hi-C的A/B区室分析中PC1代表什么？",
+              "options": [
+                "基因表达水平",
+                "PC1的正负将基因组分为开放A区室（正）和封闭B区室（负）",
+                "测序深度",
+                "TAD边界"
+              ],
+              "answer": 1,
+              "explanation": "Hi-C接触矩阵PCA的PC1自然将基因组分为两个区室。需要结合基因密度或GC含量确定哪个方向是A（开放/基因富集）。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-umap-tsne",
+      "name": "t-SNE 与 UMAP 降维可视化",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "nextTopic": "common-nmf",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>t-SNE像\"放大镜\"看局部邻里关系，UMAP像\"地图\"既看局部也看全局。</strong>两者都把高维数据变成2D散点图，但策略不同：t-SNE优先保证\"近邻仍是近邻\"（可能扭曲全局距离），UMAP在局部和全局结构间取得更好平衡。类比——t-SNE像把一张纸揉成团再展开，局部纹理保留但形状变了；UMAP像把纸卷成筒再压平，整体轮廓还能看出来。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "t-SNE vs UMAP 核心差异",
+          "content": "<p><strong>t-SNE（t-distributed Stochastic Neighbor Embedding）：</strong>将高维欧氏距离转换为条件概率（高斯核），低维用t分布（更重尾），KL散度最小化两个分布的差异。关键参数perplexity（5-50），控制\"有效邻居数\"。<strong>UMAP（Uniform Manifold Approximation and Projection）：</strong>基于黎曼几何和模糊拓扑理论，用交叉熵替代KL散度。关键参数n_neighbors和min_dist。<strong>关键区别：</strong>t-SNE速度慢于UMAP（尤其是>10万细胞时）；UMAP更好地保留全局结构；t-SNE对perplexity更敏感。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "在不同组学中的使用场景",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><tr><td><strong>scRNA-seq：</strong>UMAP是标准嵌入方法，n_neighbors=15, min_dist=0.5。用于可视化聚类结果、标记基因表达和发育轨迹</td></tr><tr><td><strong>Bulk RNA-seq：</strong>t-SNE和UMAP均可用于样本关系的非线性可视化，弥补PCA只捕捉线性关系的局限</td></tr><tr><td><strong>CyTOF/流式：</strong>t-SNE曾是金标准（perplexity=30），现在逐渐转向UMAP（速度更快）</td></tr><tr><td><strong>蛋白质嵌入：</strong>UMAP可视化ESM/AlphaFold的蛋白质序列嵌入，观察折叠类别的聚类</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "t-SNE / UMAP 对比实战",
+          "code": "import scanpy as sc\nimport omicverse as ov\n\n# === UMAP (单细胞标准) ===\nsc.pp.neighbors(adata, n_neighbors=15, n_pcs=30)\nsc.tl.umap(adata, min_dist=0.5, spread=1.0)\nsc.pl.umap(adata, color=['celltype', 'batch'])\n\n# === t-SNE (适合<10万细胞) ===\nsc.tl.tsne(adata, n_pcs=30, perplexity=30)\nsc.pl.tsne(adata, color=['celltype'])\n\n# === OmicVerse: MDE替代方案 (更好的全局结构) ===\nov.utils.mde(adata, use_rep='X_pca')\nov.pl.embedding(adata, basis='mde', color=['celltype'])\n\n# === 调参建议 ===\n# - n_neighbors/perp 小→强调局部细节，大→强调全局结构\n# - 单细胞通常: n_neighbors=15-30, perplexity=30\n# - min_dist 小→点更聚集，大→点更分散\n# - random_state 固定随机种子保证可重复性"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么单细胞分析中UMAP逐渐取代t-SNE成为标准？",
+              "options": [
+                "UMAP只是更快",
+                "UMAP更好地保留全局结构+更快+更可重复",
+                "t-SNE效果太差",
+                "UMAP不需要PCA预处理"
+              ],
+              "answer": 1,
+              "explanation": "UMAP在三个维度上优于t-SNE：计算速度快（尤其>10万细胞）、更好地保留细胞群之间的全局关系、参数选择更鲁棒。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-nmf",
+      "name": "NMF 非负矩阵分解",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "stage-1-math-linear-algebra"
+      ],
+      "nextTopic": "common-hierarchical-clustering",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>NMF像把混合果汁分离成基础成分：</strong>一杯果汁=30%苹果+50%橙子+20%葡萄。给你100杯不同配比的混合果汁，NMF能反推出只有3种基础果汁，以及每杯的混合比例。基因表达也是\"混合信号\"——NMF找到的是\"基础表达程序\"和每个细胞使用这些程序的比例。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "NMF原理与在生物学的特殊适配性",
+          "content": "<p><strong>NMF（Non-negative Matrix Factorization）：</strong>X ≈ W × H，其中X≥0, W≥0, H≥0。非负性约束使结果天然可解释——基因表达不能为负，所以分解出的components也是\"纯加法\"组合。<strong>与PCA的关键区别：</strong>PCA的loading可正可负（基因对PC的贡献可能是反向的），NMF的loading全部≥0（基因要么参与这个程序，要么不参与），更适合生物数据。<strong>选择k（components数）：</strong>cophentic系数、dispersion、silhouette等方法。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "NMF 跨组学实战",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><tr><td><strong>scRNA-seq (cNMF)：</strong>每个component是一个\"基因表达程序\"（GEP），细胞是多个GEP的组合。可发现细胞状态转变、应激响应程序</td></tr><tr><td><strong>癌症基因组学（Mutational Signatures）：</strong>每个component是一个\"突变签名\"（如COSMIC SBS1=自发脱氨，SBS4=吸烟），肿瘤是多个签名的组合。这是NMF最著名的生物应用</td></tr><tr><td><strong>空间转录组：</strong>每个component是一个\"空间模式\"，spot是多个空间模式的叠加</td></tr><tr><td><strong>Bulk RNA-seq：</strong>肿瘤纯度估计——每个component是一个细胞类型的表达谱，每个样本是多种细胞类型按比例的混合</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "NMF: 突变签名 + 基因程序",
+          "code": "from sklearn.decomposition import NMF\nimport omicverse as ov\n\n# === 1. 突变签名分析 (癌症基因组学) ===\n# mutation_matrix: (96个三核苷酸上下文) × (N个肿瘤)\nnmf = NMF(n_components=5, init='nndsvda', max_iter=1000)\nsignatures = nmf.fit_transform(mutation_matrix)  # 5个签名的96维谱\n# signatures[:,0] = SBS1 (C>T at CpG), signatures[:,1] = SBS5 (clock-like)\n\n# === 2. cNMF: 单细胞基因表达程序 ===\ncnmf_obj = ov.single.cNMF(\n    adata,\n    components=np.arange(5, 15),\n    n_iter=20,\n    num_highvar_genes=2000,\n    output_dir='./cnmf_results')\ncnmf_obj.factorize()\ncnmf_obj.combine()\ncnmf_obj.k_selection_plot()  # 选择最佳k\n\n# === 3. 去卷积: Bulk RNA → 细胞类型比例 ===\n# X_bulk (genes × samples) ≈ W (cell-type signatures) × H (proportions)\n# 固定W (参考signature矩阵)，用NMF或NNLS解H"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "NMF相比PCA在生物学数据上的核心优势是什么？",
+              "options": [
+                "速度更快",
+                "非负约束使结果可直接解释为\"基因程序\"或\"突变签名\"",
+                "NMF总是能自动确定k",
+                "NMF不需要预处理"
+              ],
+              "answer": 1,
+              "explanation": "基因表达/突变计数天然非负。PCA的loading可正可负（基因可能反向加载），解释困难。NMF的非负约束保证了components是\"纯加法\"组合——每个基因要么参与这个程序，要么不参与。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-hierarchical-clustering",
+      "name": "层次聚类",
+      "stage": 1,
+      "type": "bioinfo",
+      "difficulty": "入门",
+      "prerequisites": [],
+      "nextTopic": "common-kmeans",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>层次聚类像整理家族谱系：</strong>从每个个体开始，找最相似的两个人合并成\"家庭\"，再合并成\"家族\"，最终形成完整的树状图。你可以在任意高度\"剪一刀\"决定分多少类——剪得高→大类（主要细胞类型），剪得低→小类（亚型）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "层次聚类在组学中的应用",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><tr><td><strong>Bulk RNA-seq：</strong>样本×样本距离矩阵的层次聚类，生成样本树（sample dendrogram）和基因树。热图+层次聚类是最常用的可视化</td></tr><tr><td><strong>蛋白质组学：</strong>蛋白质表达谱的层次聚类发现共调控蛋白模块</td></tr><tr><td><strong>微生物组：</strong>基于Bray-Curtis距离的样本层次聚类</td></tr><tr><td><strong>单细胞：</strong>虽然Leiden是主流，但层次聚类用于构建marker基因热图和细胞类型树状关系</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "层次聚类跨组学示例",
+          "code": "from scipy.cluster.hierarchy import linkage, dendrogram\nfrom scipy.spatial.distance import pdist\nimport seaborn as sns\n\n# === Bulk RNA-seq: 样本+基因双向层次聚类 ===\n# 计算样本距离\nsample_dist = pdist(expr_df.values.T, metric='correlation')\nsample_linkage = linkage(sample_dist, method='ward')\n# clustermap: 热图+层次聚类\nsns.clustermap(expr_df, method='ward',\n               metric='correlation',\n               cmap='RdBu_r',\n               figsize=(12, 10))\n\n# === 微生物组: Bray-Curtis距离 ===\nfrom scipy.spatial.distance import braycurtis\nbc_dist = pdist(otu_table, metric=braycurtis)\nbc_linkage = linkage(bc_dist, method='average')\ndendrogram(bc_linkage, labels=sample_names)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "层次聚类中选择不同的linkage方法（Ward/Complete/Average）有什么影响？",
+              "options": [
+                "没有影响",
+                "Ward最小化簇内方差（紧凑球状簇），Complete限制最大距离（紧凑簇），Average折中——影响树状图形状和剪枝结果",
+                "只影响运行速度",
+                "Ward只能用欧氏距离"
+              ],
+              "answer": 1,
+              "explanation": "Ward倾向于产生大小均匀的簇（最小化簇内方差），Complete保证簇内所有点的距离都不超过阈值（产生更紧凑的簇），Average介于两者。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-leiden-louvain",
+      "name": "Leiden/Louvain 图聚类",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-hierarchical-clustering"
+      ],
+      "nextTopic": "common-multiple-testing",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Leiden聚类像分析社交网络找\"朋友圈\"：</strong>把每个细胞看作一个人，相似的人之间有\"好友关系\"（KNN边）。Leiden算法自动找出内部联系紧密、对外联系稀疏的群体——不需要提前告知有多少个朋友圈，也不需要知道谁是谁的朋友。在单细胞中，这就对应着不同的细胞类型。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "图聚类跨组学应用",
+          "content": "<table><tr><td><strong>单细胞RNA-seq（scRNA）：</strong>Leiden是标准聚类方法。resolutions=0.25(大类)→1.0(亚型)。与Louvain的区别：Leiden保证well-connected社区，不会产生断开的簇</td></tr><tr><td><strong>蛋白质互作网络(PPI)：</strong>Louvain/Leiden发现功能蛋白模块（complexes）</td></tr><tr><td><strong>Hi-C：</strong>NOCD重叠社区检测发现3D基因组中的重叠TAD结构</td></tr><tr><td><strong>scATAC-seq：</strong>与scRNA相同的聚类流程（LSI降维+KNN+Leiden）</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Leiden跨组学聚类实战",
+          "code": "import omicverse as ov\nimport scanpy as sc\n\n# === 1. scRNA: 多分辨率Leiden ===\nsc.pp.neighbors(adata, n_neighbors=15, n_pcs=30)\nfor res in [0.25, 0.5, 0.8, 1.2]:\n    ov.pp.leiden(adata, resolution=res,\n                  key_added=f'leiden_r{res}')\n# 可视化对比不同分辨率\nsc.pl.umap(adata, color=[f'leiden_r{r}' for r in [0.25,0.5,0.8,1.2]])\n\n# === 2. PPI网络: Louvain发现蛋白复合物 ===\nimport networkx as nx\nimport community as community_louvain\nG = nx.from_pandas_edgelist(ppi_df, 'protein1', 'protein2')\npartition = community_louvain.best_partition(G)\n\n# === 3. Hi-C TAD: NOCD重叠社区 ===\nov.single.nocd(adata_hic, use_rep='X_pca')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Leiden相比Louvain的核心改进是什么？",
+              "options": [
+                "速度更快",
+                "Leiden保证产生的社区是well-connected的——Louvain可能产生内部不连通的\"坏\"社区",
+                "使用不同的距离度量",
+                "不需要KNN图"
+              ],
+              "answer": 1,
+              "explanation": "Louvain的贪心优化可能产生内部断开连接的社区。Leiden在每次迭代中加入了refinement步骤，保证每个社区的连通性。这是sc-best-practices推荐Leiden的根本原因。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-multiple-testing",
+      "name": "多重检验校正",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "stage-1-math-statistics-basics"
+      ],
+      "nextTopic": "common-gsea-enrichment",
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>多重检验校正像高考录取——不能只看分数，要控制\"蒙对\"的考生比例。</strong>假设2万个基因做差异检验，p<0.05的标准意味着即使所有基因都不差异表达，也会有约1000个基因\"显著\"（纯随机）。多重检验校正就是重新设定\"录取线\"，确保假阳性率不超过设定的水平（通常FDR≤5%）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "为什么所有组学都需要多重检验校正",
+          "content": "<table><tr><td><strong>RNA-seq DEG：</strong>20000个基因同时检验→Bonferroni过于保守（p<0.05/20000=2.5e-6），FDR(BH)是实际标准</td></tr><tr><td><strong>ATAC-seq DAR：</strong>10万个peak区域→同样需要FDR控制</td></tr><tr><td><strong>GWAS：</strong>数百万SNP→基因组显著性阈值p<5e-8（Bonferroni for 100万独立检验）</td></tr><tr><td><strong>Hi-C loops：</strong>数十万潜在loop→需要多重检验校正+距离分层FDR</td></tr><tr><td><strong>蛋白质组学：</strong>数千蛋白质→BH-FDR</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "多重检验校正实战",
+          "code": "from statsmodels.stats.multitest import multipletests\nimport numpy as np\n\n# 模拟20000个基因的p值（99%是null）\npvals = np.concatenate([\n    np.random.uniform(0, 1, 19800),  # null\n    np.random.beta(0.5, 5, 200)       # true signal\n])\n\n# Bonferroni: alpha / n_tests\nbonf_reject, bonf_padj, _, _ = multipletests(\n    pvals, alpha=0.05, method='bonferroni')\nprint(f'Bonferroni significant: {bonf_reject.sum()}')  # 极其保守\n\n# BH-FDR (最常用)\nbh_reject, bh_padj, _, _ = multipletests(\n    pvals, alpha=0.05, method='fdr_bh')\nprint(f'BH-FDR significant: {bh_reject.sum()}')  # 实际标准\n\n# Storey's q-value (更精确的FDR估计)\nfrom statsmodels.stats.multitest import fdrcorrection\nreject, qvals = fdrcorrection(pvals, alpha=0.05)\nprint(f'q-value < 0.05: {reject.sum()}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么Bonferroni在基因组学中被认为过于保守？",
+              "options": [
+                "计算太慢",
+                "基因表达之间不独立（共表达），Bonferroni假设独立→过度惩罚→丢失真信号",
+                "它需要特殊软件",
+                "只有R语言支持"
+              ],
+              "answer": 1,
+              "explanation": "Bonferroni假设所有检验独立，将alpha除以检验总数。但20000个基因高度相关（共表达），有效检验数远小于20000。BH-FDR考虑p值分布，在基因组学中达到更好的假阳性/灵敏度平衡。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-gsea-enrichment",
+      "name": "基因集富集分析 (GSEA/ORA)",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-multiple-testing"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>富集分析像检查\"抽奖是否作弊\"：</strong>奖池里有20000个球（所有基因），某通路有100个球（特定基因集）。一个人抽了500个球（差异基因列表），其中有15个来自这个通路。用超几何分布算一下：纯随机抽到≥15个的概率是多少？概率极低→这个通路被\"富集\"了——不是随机发生的。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "富集分析的两种范式和跨组学应用",
+          "content": "<p><strong>ORA（Over-Representation Analysis）：</strong>输入是差异基因列表（有阈值，如FDR<0.05 + |log2FC|>1），用Fisher精确检验或超几何检验。缺点：阈值截断丢失信息。<strong>GSEA（Gene Set Enrichment Analysis）：</strong>输入是全体基因的排序列表（按log2FC排序），看基因集的成员是否在排序的两端富集。不需要硬阈值！</p><table><tr><td><strong>RNA-seq：</strong>标准用法——差异基因→GO/KEGG/Reactome/MSigDB富集</td></tr><tr><td><strong>ATAC-seq：</strong>差异peak关联基因→通路富集</td></tr><tr><td><strong>ChIP-seq/CUT&Tag：</strong>peak靶基因→功能富集</td></tr><tr><td><strong>单细胞：</strong>AUCell为每个细胞评分通路活性（比GSEA更适合稀疏性）</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "GSEA/ORA实战",
+          "code": "import gseapy as gp\n\n# === GSEA: 全基因组排序富集 (推荐) ===\n# ranked_genes: Series, index=gene_name, value=log2FC (从大到小排序)\nranked_genes = deg_results['log2FoldChange'].sort_values(ascending=False)\n\ngsea_res = gp.gsea(\n    gene_list=ranked_genes,\n    gene_sets='MSigDB_Hallmark_2020',\n    organism='human',\n    permutation_num=1000,\n    seed=42)\n\n# === ORA: 差异基因超几何富集 ===\ndiff_genes = deg_results[deg_results['padj']<0.05].index.tolist()\nora_res = gp.enrichr(\n    gene_list=diff_genes,\n    gene_sets=['GO_Biological_Process_2021',\n               'KEGG_2021_Human'],\n    organism='human')\n\n# === 单细胞: AUCell (为每个细胞评分通路) ===\nov.single.aucell_pathway(adata,\n    pathway_database='MSigDB_Hallmark_2020')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "GSEA相比ORA的核心优势是什么？",
+              "options": [
+                "不需要p值",
+                "不需要设置差异基因阈值——使用全基因组排序，不会因为阈值截断丢失渐变信号",
+                "速度更快",
+                "只能用在线工具"
+              ],
+              "answer": 1,
+              "explanation": "ORA设定硬阈值（FDR<0.05）后丢弃了大量信息。GSEA使用全体基因排序，可以检测到\"某通路基因整体略微上调/下调\"的信号，而不需要单个基因显著。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "common-svd",
+      "name": "SVD 奇异值分解与低秩近似",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "stage-1-math-linear-algebra"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>SVD像把复杂的乐谱分解成几个\"主旋律\"和\"音量\"的组合：</strong>一段复杂的交响乐=旋律1(小提琴)×0.7 + 旋律2(大提琴)×0.5 + 旋律3(长笛)×0.3。SVD将任何矩阵分解为几个秩1矩阵的加权和——前几个成分捕获了主要信号，后面的成分是噪声。截断SVD=保留前几个旋律，丢掉噪声。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "SVD 跨组学应用",
+          "content": "<table><tr><td><strong>基因表达去噪：</strong>X(m×n) 低秩近似——保留前k个奇异值，过滤掉随机噪声。对单细胞数据的dropout填补有效</td></tr><tr><td><strong>Hi-C矩阵标准化：</strong>接触矩阵的SVD用于去除GC/可及性偏差</td></tr><tr><td><strong>Bulk去卷积：</strong>CIBERSORTx使用SVD从混合表达中提取细胞类型signature</td></tr><tr><td><strong>多组学整合：</strong>联合SVD（J-SVD）同时分解多个组学矩阵，找共享结构</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "SVD: 基因表达去噪 + 缺失值填补",
+          "code": "import numpy as np\nfrom scipy.sparse.linalg import svds\n\n# === 基因表达矩阵去噪 ===\nX = expr_matrix.values  # (genes × samples)\nU, S, Vt = np.linalg.svd(X, full_matrices=False)\n# 保留前k个成分 (k可通过elbow方法选择)\nk = 20\nX_denoised = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]\nprint(f'Denoising: retained {k}/{len(S)} components')\n\n# === 缺失值填补 (softImpute) ===\n# 迭代SVD逐步填充缺失值\nfor iteration in range(100):\n    X_imputed = np.where(mask, X, X_estimated)\n    U, S, Vt = svds(X_imputed, k=k)\n    X_estimated = U @ np.diag(S) @ Vt\n    if converged: break"
+        }
+      ]
+    },
+    {
+      "key": "common-lasso-ridge",
+      "name": "Lasso / Ridge 正则化回归",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "stage-1-ml-knn"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Lasso像精明的采购员——只买最重要的东西，其他的预算砍为零。Ridge像保守的采购员——什么都买但每样都买少一点。</strong>在基因表达预测中：20000个基因预测一个表型，Lasso自动把19000个基因的系数压缩为0（只保留真正相关的），Ridge给所有基因非零系数但缩小其影响。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Lasso/Ridge 跨组学应用",
+          "content": "<table><tr><td><strong>biomarker发现：</strong>Lasso从20000基因中自动选出5-50个最有预测力的基因——天然的biomarker panel选择</td></tr><tr><td><strong>eQTL分析：</strong>Ridge用于预测SNP→基因表达的关联关系（多SNP→单基因的回归）</td></tr><tr><td><strong>药物响应预测：</strong>Elastic Net从多组学特征中预选药物IC50</td></tr><tr><td><strong>Hi-C去噪：</strong>Lasso用于接触矩阵的平滑和enhancer-promoter loop检测</td></tr><tr><td><strong>蛋白质组学：</strong>Ridge/Lasso用于质谱数据的蛋白质定量</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Lasso/Ridge/ElasticNet 实战",
+          "code": "from sklearn.linear_model import Lasso, Ridge, ElasticNet\nfrom sklearn.model_selection import GridSearchCV\nimport numpy as np\n\n# 20000 genes → predict drug response\nX = expr_df.values  # (100 samples, 20000 genes)\ny = drug_ic50\n\n# === Lasso: 自动特征选择 ===\nlasso = Lasso(alpha=0.01, max_iter=5000)\nlasso.fit(X, y)\nselected = np.where(lasso.coef_ != 0)[0]\nprint(f'Lasso selected {len(selected)} genes')\n\n# === Ridge: 全部基因都保留 ===\nridge = Ridge(alpha=1.0)\nridge.fit(X, y)\n\n# === Elastic Net: L1+L2 混合 (推荐) ===\n# 处理高度相关基因——Lasso只会选其中一个\n# Elastic Net可以选一组相关基因\nen = ElasticNet(alpha=0.01, l1_ratio=0.5)\nen.fit(X, y)\n\n# === 交叉验证选择 alpha ===\nfrom sklearn.linear_model import LassoCV\nlasso_cv = LassoCV(cv=5, max_iter=5000,\n                   n_alphas=100).fit(X, y)\nprint(f'Optimal alpha: {lasso_cv.alpha_}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么高度相关的基因用Elastic Net比Lasso更合适？",
+              "options": [
+                "Lasso太慢",
+                "Lasso倾向于从一组高度相关的基因中只选一个，Elastic Net可以同时保留整组——生物上共调控基因可能都有贡献",
+                "Lasso不支持交叉验证",
+                "没有区别"
+              ],
+              "answer": 1,
+              "explanation": "L1正则化的selection bias——在一组相关的基因中，Lasso倾向于随机选一个而丢弃其他。Elastic Net(L1+L2混合)既能选到整组共调控基因，又保持了稀疏性。"
             }
           ]
         }
