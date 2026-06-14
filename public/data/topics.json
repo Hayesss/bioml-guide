@@ -142,7 +142,15 @@
     "common-ks-test",
     "common-rfe-boruta",
     "common-gaussian-processes",
-    "common-mcl"
+    "common-mcl",
+    "common-sparse-pca",
+    "common-kernel-pca",
+    "common-isomap-lle",
+    "common-autoencoder",
+    "common-pls-da",
+    "common-factor-analysis",
+    "common-tsne-details",
+    "common-umap-details"
   ],
   "topics": [
     {
@@ -10029,6 +10037,250 @@
           "icon": "代码",
           "title": "MCL 蛋白质家族聚类",
           "code": "import markov_clustering as mc\nimport networkx as nx\nimport numpy as np\n\n# 构建序列相似性图\n# nodes: 蛋白质, edges: BLAST E-value < 1e-5\nG = nx.from_pandas_edgelist(blast_hits,\n    'query', 'target', edge_attr='evalue')\n\n# 转换为邻接矩阵\nadj = nx.to_scipy_sparse_array(G)\n\n# MCL聚类\n# inflation: 1.5-5.0，越高→越多小簇\nresult = mc.run_mcl(adj, inflation=2.0)\nclusters = mc.get_clusters(result)\n\nprint(f'Found {len(clusters)} protein families')\nfor i, cluster in enumerate(clusters[:5]):\n    print(f'Cluster {i}: {len(cluster)} proteins')"
+        }
+      ]
+    },
+    {
+      "key": "common-sparse-pca",
+      "name": "Sparse PCA 稀疏主成分分析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Sparse PCA像PCA的\"精炼版\"——只保留最重要的基因：</strong>普通PCA每个PC是所有20000个基因的加权和（几乎每个基因都有非零loading），生物学家看loading时一脸懵——\"到底哪个基因重要？\"Sparse PCA加L1约束，强制大多数基因的loading为零，每个PC只由少数几个基因驱动——PC1=TP53×0.7 + BRCA1×0.5 + 其他19800个基因×0。结果直观可解释。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Sparse PCA 最适场景",
+          "content": "<table><tr><td><strong>biomarker发现：</strong>Sparse PCA自动选出每个PC的\"驱动基因\"——PC1由哪个基因集主导一目了然</td></tr><tr><td><strong>单细胞：</strong>每个sPC可对应一个特定的细胞类型或状态，基因loading稀疏→每个sPC的\"marker genes\"清晰</td></tr><tr><td><strong>Hi-C：</strong>稀疏区室——只有少数基因组区域对区室划分有贡献</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Sparse PCA vs PCA",
+          "code": "from sklearn.decomposition import SparsePCA, PCA\nimport numpy as np\n\n# === PCA: 几乎所有基因都有loading ===\npca = PCA(n_components=5).fit(expr.T)\nprint(f'PCA sparsity: {(np.abs(pca.components_[0])<0.001).mean():.1%} zeros')\n\n# === Sparse PCA: 强制稀疏 ===\n# alpha越大→loading越稀疏\nspca = SparsePCA(n_components=5, alpha=5,\n                 random_state=42)\nspca.fit(expr.T)\nsparsity = (spca.components_[0] == 0).mean()\nprint(f'Sparse PCA sparsity: {sparsity:.1%} zeros')\n# 每个sPC只由几十个基因驱动\n\n# 找每个sPC的驱动基因\nfor i in range(3):\n    top_idx = np.argsort(np.abs(spca.components_[i]))[-10:]\n    print(f'sPC{i+1}: {gene_names[top_idx][:5]}')"
+        }
+      ]
+    },
+    {
+      "key": "common-kernel-pca",
+      "name": "Kernel PCA 核主成分分析",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-pca",
+        "stage-2-ml-svm"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Kernel PCA像\"把弯的数据拉直了再看\"：</strong>普通PCA只能找直线方向（线性）。但如果数据是螺旋形呢？Kernel PCA通过核函数把数据\"映射\"到高维空间，在高维空间中数据变成了线性可分的，再做PCA。就像在地球表面（曲面）上两点最短距离不是直线而是大圆弧——把问题映射到三维空间就变成了直线。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Kernel PCA 最适场景",
+          "content": "<table><tr><td><strong>非线性基因表达模式：</strong>基因调控关系常呈非线性——TF浓度与靶基因表达可能呈S型曲线</td></tr><tr><td><strong>蛋白质构象：</strong>折叠能量景观是非线性的——Kernel PCA比PCA更好地分离折叠态</td></tr><tr><td><strong>代谢组学：</strong>代谢物浓度间的非线性关系（如反馈抑制）</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Kernel PCA vs 线性PCA",
+          "code": "from sklearn.decomposition import PCA, KernelPCA\n\n# === 线性PCA: 只能找直线方向 ===\npca = PCA(n_components=2)\nX_pca = pca.fit_transform(X)\n\n# === Kernel PCA: RBF核捕获非线性 ===\nkpca_rbf = KernelPCA(n_components=2,\n                     kernel='rbf',  # 高斯核\n                     gamma=0.1)\nX_kpca_rbf = kpca_rbf.fit_transform(X)\n\n# === Kernel PCA: 多项式核 ===\nkpca_poly = KernelPCA(n_components=2,\n                       kernel='poly',\n                       degree=3)  # 三次多项式\nX_kpca_poly = kpca_poly.fit_transform(X)\n\n# 核函数选择:\n# RBF: 通用非线性 (最常用)\n# Polynomial: 已知关系是多项式\n# Sigmoid: 类似神经网络激活\n# Cosine: 方向性数据 (如基因表达角度)"
+        }
+      ]
+    },
+    {
+      "key": "common-isomap-lle",
+      "name": "Isomap / LLE 流形学习",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-pca",
+        "stage-4-math-manifold-learning"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Isomap像\"蚂蚁沿曲面爬的最短路径\"（测地距离）、LLE像\"邻居搬家——保持邻里关系\"：</strong>一张卷起来的纸（Swiss roll），欧氏距离认为纸两端的点很远，但测地距离（沿纸面走）它们其实很近。Isomap用KNN构建邻域图，在图上算最短路径作为测地距离的近似。LLE不从距离入手——它假设每个点是其邻居的线性组合，降维后保持这个线性重构关系不变。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Isomap/LLE 最适场景",
+          "content": "<table><tr><td><strong>Isomap——发育轨迹：</strong>胚胎发育中细胞沿分叉路径前进，Isomap的测地距离天然捕获这种\"流形上的距离\"</td></tr><tr><td><strong>LLE——保留局部几何：</strong>适合数据在局部是线性的但全局是非线性的。在单细胞中——局部邻域的基因表达变化近似线性</td></tr><tr><td><strong>蛋白质折叠：</strong>Isomap揭示折叠路径中构象间的真实距离</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Isomap / LLE 实战",
+          "code": "from sklearn.manifold import Isomap, LocallyLinearEmbedding\nfrom sklearn.datasets import make_swiss_roll\nimport numpy as np\n\n# Swiss roll: 经典流形学习测试\nX_3d, color = make_swiss_roll(1000, noise=0.1)\n\n# === Isomap: 测地距离 ===\niso = Isomap(n_neighbors=10, n_components=2)\nX_iso = iso.fit_transform(X_3d)\n# Isomap成功\"展开\"了Swiss roll\n\n# === LLE: 局部线性保持 ===\nlle = LocallyLinearEmbedding(\n    n_neighbors=10, n_components=2,\n    method='standard')  # 'modified','hessian','ltsa'\nX_lle = lle.fit_transform(X_3d)\n\n# === Modified LLE: 更稳定 ===\nlle_mod = LocallyLinearEmbedding(\n    n_neighbors=10, n_components=2,\n    method='modified')\nX_lle_mod = lle_mod.fit_transform(X_3d)\n\n# === Hessian LLE: 理论上最\"正确\"但也最慢 ===\n# lle_hess = LocallyLinearEmbedding(\n#     n_neighbors=20, n_components=2,\n#     method='hessian')"
+        }
+      ]
+    },
+    {
+      "key": "common-autoencoder",
+      "name": "Autoencoder 自编码器降维",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "stage-3-dl-autoencoder-vae",
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Autoencoder像\"用漏斗压缩再解压\"：</strong>把20000维的基因表达数据通过一个\"瓶颈\"（2-3个神经元）压缩，再从瓶颈恢复出20000维。如果恢复得好（重构误差小），说明瓶颈层的2-3个数字成功捕获了数据的\"精髓\"。和PCA的区别：PCA是线性压缩，Autoencoder可以学习非线性的压缩方式。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Autoencoder 最适场景",
+          "content": "<table><tr><td><strong>单细胞降噪（scVI/DCA）：</strong>深度计数自编码器（DCA）建模负二项分布，同时降维+去噪+填补dropout</td></tr><tr><td><strong>批次校正（scVI/scANVI）：</strong>条件VAE将batch信息注入，学习批次无关的潜在表示</td></tr><tr><td><strong>多组学整合（TotalVI/MOFA+）：</strong>多模态VAE联合建模RNA+蛋白+ATAC</td></tr><tr><td><strong>扰动建模（scGEN/CPA）：</strong>条件自编码器预测基因扰动后的细胞状态</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Autoencoder 降维 vs 去噪",
+          "code": "import torch\nimport torch.nn as nn\n\n# === 深度自编码器: 20000 → 32 → 20000 ===\nclass DeepAE(nn.Module):\n    def __init__(self, in_dim=20000):\n        super().__init__()\n        # Encoder: 逐层压缩\n        self.encoder = nn.Sequential(\n            nn.Linear(in_dim, 1024), nn.ReLU(),\n            nn.Dropout(0.2),\n            nn.Linear(1024, 128), nn.ReLU(),\n            nn.Linear(128, 32)  # bottleneck\n        )\n        # Decoder: 逐层恢复\n        self.decoder = nn.Sequential(\n            nn.Linear(32, 128), nn.ReLU(),\n            nn.Linear(128, 1024), nn.ReLU(),\n            nn.Linear(1024, in_dim)\n        )\n    def forward(self, x):\n        z = self.encoder(x)      # 32维潜在表示\n        recon = self.decoder(z)  # 重建\n        return recon, z\n\n# 训练: MSE loss (PCA等价于线性AE+l2 loss)\n# 潜在表示z可用于下游聚类/可视化"
+        }
+      ]
+    },
+    {
+      "key": "common-pls-da",
+      "name": "PLS-DA 偏最小二乘判别分析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>PLS-DA像\"有目标导向的PCA\"：</strong>PCA只关心\"数据的最大变异方向\"（不管这个变异是不是你关心的）。PLS-DA在降维的同时最大化组间分离——\"找最能区分健康vs癌症的表达变化方向\"。就像拍照时，PCA追求拍到的景物最多，PLS-DA追求把要区分的目标放在画面最显眼的位置。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "PLS-DA 最适场景",
+          "content": "<table><tr><td><strong>代谢组学分类：</strong>PLS-DA是代谢组学的标准多变量分析方法——区分病例vs对照的代谢谱</td></tr><tr><td><strong>微生物组：</strong>寻找区分健康vs疾病的菌群模式</td></tr><tr><td><strong>biomarker panel构建：</strong>VIP(Variable Importance in Projection)评分>1的代谢物/基因是候选biomarker</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "PLS-DA 分类+VIP",
+          "code": "from sklearn.cross_decomposition import PLSRegression\nfrom sklearn.preprocessing import LabelBinarizer\nimport numpy as np\n\n# === PLS-DA: 有监督降维 ===\nlb = LabelBinarizer()\nY_onehot = lb.fit_transform(labels)  # (N, n_classes)\n\npls = PLSRegression(n_components=3, scale=True)\npls.fit(X, Y_onehot)\n# X_scores: (N, 3) — 样本在PLS空间\n# X_loadings: (p, 3) — 基因对PLS成分的贡献\n\n# === VIP 评分: 找最重要的变量 ===\n# VIP_j = sqrt(p * sum(SS_b * w_jb^2 / sum(SS_b)))\n# VIP > 1 → 该变量对分离有显著贡献\nW = pls.x_weights_  # (p, n_components)\nt = pls.x_scores_   # (N, n_components)\nSS = np.sum(t**2, axis=0)  # 每个成分的方差\nW_norm = W / np.linalg.norm(W, axis=0)\nvip = np.sqrt(X.shape[1] * np.sum(\n    SS * W_norm**2, axis=1) / np.sum(SS))"
+        }
+      ]
+    },
+    {
+      "key": "common-factor-analysis",
+      "name": "因子分析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-pca",
+        "stage-1-math-probability-basics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>因子分析像\"找导致观测结果的隐藏原因\"：</strong>你测量了20个基因的表达（可观测），但怀疑它们只是3个隐藏的\"调控因子\"（latent factors）驱动的结果。因子分析假设每个基因的表达 = 因子1×系数 + 因子2×系数 + 因子3×系数 + 随机噪声。和PCA的关键区别：FA建模的是\"共同方差\"（shared variance），把每个基因的独特噪声分离出来，而PCA把所有方差混在一起。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "因子分析 最适场景",
+          "content": "<table><tr><td><strong>MOFA多组学因子分析：</strong>从RNA+ATAC+甲基化中提取共享的\"因子\"</td></tr><tr><td><strong>基因共调控模块：</strong>FA发现的因子常对应真实的转录调控程序</td></tr><tr><td><strong>心理学/行为学：</strong>IQ测试中g因子的发现——FA的经典应用</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "因子分析 vs PCA",
+          "code": "from sklearn.decomposition import PCA, FactorAnalysis\nimport numpy as np\n\n# === PCA: 对方差建模 (包含噪声方差) ===\npca = PCA(n_components=3).fit(expr.T)\n# PCA假设所有方差都是\"信号\"\n\n# === 因子分析: 建模共同方差 ===\nfa = FactorAnalysis(n_components=3,\n                    random_state=42)\nfa.fit(expr.T)\n# FA分离: 共同方差(shared) + 独特方差(unique per gene)\n# 每个基因的表达 = 因子×loading + noise_i\n\n# log-likelihood: 模型拟合度\nll = fa.score(expr.T)\nprint(f'Log-likelihood: {ll:.1f}')\n\n# 选择因子数: 逐步增加直到log-likelihood不再显著提升"
+        }
+      ]
+    },
+    {
+      "key": "common-tsne-details",
+      "name": "t-SNE 深度解析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-umap-tsne"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>t-SNE像\"把高维空间中的\"紧邻关系\"翻译到2D\"：</strong>想象CS/EE/NB/GB/PT这五个词——t-SNE在高维空间（语义空间）中测量每对词的相似度（高斯核→条件概率），然后在2D平面上用t分布重建这些相似关系。perplexity就是你告诉算法\"每个词的'朋友圈'大概多大\"——太小只看到最亲密的邻居，太大全局结构模糊。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "t-SNE 参数精调指南",
+          "content": "<p><strong>三个关键参数：</strong></p><ul><li><strong>perplexity（5-50，默认30）：</strong>决定了每个点的\"有效邻居数\"。小值→强调局部细节（微小亚群），大值→强调全局结构（大类分离）。大perplexity计算更慢</li><li><strong>learning_rate（10-1000，默认200）：</strong>太小→所有点挤在中心；太大→点过于分散形成\"球\"。出现异常时先调整learning_rate</li><li><strong>early_exaggeration（默认12）：</strong>早期迭代\"夸大\"簇间距离帮助簇形成，后期恢复正常。增加此值产生更分散的簇</li></ul><p><strong>关键陷阱：</strong>t-SNE的2D距离没有任何意义！不要用t-SNE聚类大小判断细胞丰度。t-SNE的随机种子影响结果——必须固定random_state。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "t-SNE 参数扫描 + 陷阱演示",
+          "code": "from sklearn.manifold import TSNE\nimport numpy as np\n\n# === 参数网格搜索 ===\nperplexities = [5, 15, 30, 50, 100]\nfor perp in perplexities:\n    tsne = TSNE(n_components=2, perplexity=perp,\n                random_state=42, n_iter=1000)\n    X_tsne = tsne.fit_transform(adata.obsm['X_pca'][:, :50])\n    # 存储结果用于比较\n\n# === 陷阱1: 2D距离≠真实距离 ===\n# 两个簇在t-SNE图上距离远≠它们在基因表达空间距离远\n# t-SNE只保证\"附近点\"仍是附近, 不保证\"远点\"的距离\n\n# === 陷阱2: 簇大小≠细胞丰度 ===\n# t-SNE倾向于\"展开\"数据→各簇大小趋于均匀\n# 小细胞群在t-SNE中看起来和大群差不多大\n\n# === 陷阱3: 随机种子影响 ===\n# t-SNE对初始化敏感——不同seed给出不同结果\n# 必须: 固定random_state, 多次运行选最稳定的"
+        }
+      ]
+    },
+    {
+      "key": "common-umap-details",
+      "name": "UMAP 深度解析",
+      "stage": 2,
+      "type": "bioinfo",
+      "difficulty": "中级",
+      "prerequisites": [
+        "common-tsne-details"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>UMAP像\"给高维数据画一张拓扑保持的地图\"：</strong>t-SNE关注\"谁和谁是邻居\"（概率），UMAP关注\"数据的拓扑形状\"——哪些区域是连通的、哪些是分离的。UMAP基于黎曼几何和模糊拓扑理论：先在高维空间构建一个\"模糊\"的邻域图（fuzzy simplicial set），然后在低维空间重建这个拓扑结构。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "UMAP 参数精调指南",
+          "content": "<p><strong>核心参数：</strong></p><ul><li><strong>n_neighbors（5-50，默认15）：</strong>小值→关注局部细节（精细亚群结构），大值→关注全局结构（大类关系）。单细胞通常用15-30</li><li><strong>min_dist（0-1，默认0.1）：</strong>低维空间中点之间的最小距离。小值→点更聚集（簇内紧凑），大值→点更分散（簇间分离）。常用于0.1-0.5</li><li><strong>metric（默认euclidean）：</strong>距离度量。单细胞可用correlation或cosine</li><li><strong>spread（默认1.0）：</strong>控制嵌入的\"松散\"程度。与min_dist配合使用</li></ul><p><strong>UMAP vs t-SNE：</strong>UMAP更快（尤其>10万细胞）、更好地保留全局结构、支持新数据映射（t-SNE不支持）。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "UMAP 参数扫描 + transform",
+          "code": "import umap\nimport numpy as np\n\n# === 参数扫描 ===\nn_neighbors_list = [5, 15, 30, 50]\nmin_dist_list = [0.1, 0.3, 0.5]\nfor n in n_neighbors_list:\n    for md in min_dist_list:\n        reducer = umap.UMAP(\n            n_neighbors=n, min_dist=md,\n            random_state=42)\n        X_umap = reducer.fit_transform(\n            adata.obsm['X_pca'][:, :50])\n\n# === UMAP独特优势: transform新数据 ===\n# t-SNE无法做到——UMAP可以!\nreducer = umap.UMAP(random_state=42)\nreducer.fit(train_data)\n# 新来的query数据映射到同一嵌入空间\nquery_embedding = reducer.transform(query_data)\n# 这对在线学习/大数据集分批处理极其有用"
         }
       ]
     }

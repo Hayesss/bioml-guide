@@ -102,7 +102,11 @@ const omicsTabs: OmicsTab[] = [
     icon: <Calculator size={15} />,
     description: '31个跨组学共用算法，每个标注最适场景。覆盖降维、矩阵分解、聚类、统计检验、回归、网络分析、特征选择、贝叶斯方法',
     topicKeys: [
-      'common-pca', 'common-umap-tsne', 'common-mds', 'common-diffusion-maps',
+      'common-pca', 'common-sparse-pca', 'common-kernel-pca',
+      'common-umap-tsne', 'common-tsne-details', 'common-umap-details',
+      'common-mds', 'common-diffusion-maps',
+      'common-isomap-lle', 'common-autoencoder',
+      'common-pls-da', 'common-factor-analysis',
       'common-nmf', 'common-svd', 'common-ica',
       'common-kmeans', 'common-dbscan', 'common-gmm', 'common-hierarchical-clustering',
       'common-leiden-louvain', 'common-spectral-clustering', 'common-mcl',
@@ -294,10 +298,18 @@ interface AlgoScenario {
 
 const algoScenarios: AlgoScenario[] = [
   // 降维
-  { name: 'PCA', bestFor: '线性降维、样本QC、去噪预处理', notFor: '非线性关系可视化、保留全局结构', omics: ['Bulk RNA','scRNA','ATAC','Hi-C','甲基化'], key: 'common-pca' },
-  { name: 't-SNE/UMAP', bestFor: '单细胞可视化、非线性降维、聚类展示', notFor: '保留全局距离、需要可重复性时用UMAP替代t-SNE', omics: ['scRNA','CyTOF','蛋白嵌入'], key: 'common-umap-tsne' },
-  { name: 'MDS/NMDS', bestFor: '任意距离矩阵的可视化、微生物组beta多样性', notFor: '需要原始特征loading时用PCA', omics: ['微生物组','生态学','Bulk RNA'], key: 'common-mds' },
-  { name: '扩散图/PHATE', bestFor: '保留全局轨迹结构、发育路径可视化', notFor: '简单聚类可视化（UMAP更快）', omics: ['scRNA轨迹','蛋白构象'], key: 'common-diffusion-maps' },
+  { name: 'PCA', bestFor: '线性降维、样本QC、去噪预处理', notFor: '非线性关系、需要可解释的loading', omics: ['Bulk RNA','scRNA','ATAC','Hi-C','甲基化'], key: 'common-pca' },
+  { name: 'Sparse PCA', bestFor: 'biomarker发现、稀疏可解释loading', notFor: '保留全局方差结构', omics: ['Bulk RNA','单细胞'], key: 'common-sparse-pca' },
+  { name: 'Kernel PCA', bestFor: '非线性基因关系、蛋白质折叠', notFor: '需要反向映射到原始特征', omics: ['基因调控','蛋白构象','代谢组'], key: 'common-kernel-pca' },
+  { name: 't-SNE/UMAP', bestFor: '单细胞可视化、聚类展示', notFor: '保留全局距离', omics: ['scRNA','CyTOF','蛋白嵌入'], key: 'common-umap-tsne' },
+  { name: 't-SNE 深度解析', bestFor: 'perplexity/learning_rate调参、陷阱规避', notFor: '大数据集(>10万)', omics: ['scRNA','CyTOF'], key: 'common-tsne-details' },
+  { name: 'UMAP 深度解析', bestFor: 'n_neighbors/min_dist调参、新数据映射', notFor: '不需要可重复性', omics: ['scRNA','大数据集'], key: 'common-umap-details' },
+  { name: 'MDS/NMDS', bestFor: '距离矩阵可视化、微生物组beta多样性', notFor: '需要原始特征loading', omics: ['微生物组','生态学'], key: 'common-mds' },
+  { name: '扩散图/PHATE', bestFor: '全局轨迹结构、发育路径', notFor: '简单聚类可视化（UMAP更快）', omics: ['scRNA轨迹','蛋白构象'], key: 'common-diffusion-maps' },
+  { name: 'Isomap/LLE', bestFor: '测地距离流形学习、Swiss roll展开', notFor: '噪声大的数据（Isomap对short-circuit敏感）', omics: ['发育轨迹','蛋白折叠'], key: 'common-isomap-lle' },
+  { name: 'Autoencoder', bestFor: '非线性降维+去噪、scVI/DCA的基础', notFor: '需要可解释的线性loading', omics: ['scRNA去噪','批次校正','多组学'], key: 'common-autoencoder' },
+  { name: 'PLS-DA', bestFor: '有监督降维——最大化组间分离、代谢组学标准方法', notFor: '无标签数据（用PCA）', omics: ['代谢组','微生物组','biomarker'], key: 'common-pls-da' },
+  { name: '因子分析', bestFor: '隐藏调控因子发现、MOFA的基础', notFor: '只关心方差方向（用PCA）', omics: ['多组学','基因调控','scMultiome'], key: 'common-factor-analysis' },
   // 矩阵分解
   { name: 'NMF', bestFor: '基因程序发现、突变签名提取、去卷积', notFor: '需要特征值解释方差时用PCA', omics: ['癌症基因组','scRNA','空间组'], key: 'common-nmf' },
   { name: 'SVD', bestFor: '基因表达去噪、缺失值填补、Hi-C标准化', notFor: '需要非负约束时用NMF', omics: ['Bulk RNA','Hi-C','scRNA'], key: 'common-svd' },
