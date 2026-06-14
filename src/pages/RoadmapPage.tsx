@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
 import { useProgress } from '../hooks/useProgress';
+import TopicChecklist from '../components/TopicChecklist';
 import { Box, Cpu, Calculator, Code, ChevronDown, ChevronUp, Check, RefreshCw, Dna } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
@@ -152,40 +153,15 @@ export default function RoadmapPage() {
                         <h4 className="text-sm font-semibold text-brand-accent">机器学习</h4>
                       </div>
                       <ul className="space-y-3">
-                        {stage.mlTopics.map((topic) => {
-                          const key = `stage-${stage.id}-ml-${topic.name}`;
-                          const done = isTopicDone(key);
-                          return (
-                          <li key={topic.name}>
-                            <div
-                              className="flex items-start gap-2 cursor-pointer"
-                              onClick={() => toggleTopic(key)}
-                            >
-                              <span
-                                className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${done ? 'border-brand-dl bg-brand-dl' : 'border-gray-300 bg-transparent'}`}
-                              >
-                                {done && <Check size={10} className="text-white" />}
-                              </span>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <div
-                                    className={`font-medium text-sm ${done ? 'text-brand-ink-muted line-through' : 'text-brand-ink'}`}
-                                  >
-                                    {topicKeyMap[topic.name] ? (
-                                      <Link to={`/learn/${topicKeyMap[topic.name]}`} className={`no-underline hover:underline ${done ? 'text-brand-ink-muted' : 'text-brand-accent'}`}>
-                                        {topic.name} <span className="text-[10px] opacity-40">↗</span>
-                                      </Link>
-                                    ) : (
-                                      topic.name
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="text-xs mt-0.5 text-brand-ink-medium" style={{ lineHeight: 1.6 }}>{topic.description}</div>
-                              </div>
-                            </div>
-                          </li>
-                          );
-                        })}
+                        <TopicChecklist
+                          topics={stage.mlTopics}
+                          stageId={stage.id}
+                          typePrefix="ml"
+                          isDone={isTopicDone}
+                          onToggle={toggleTopic}
+                          topicKeyMap={topicKeyMap}
+                          linkColorClass="text-brand-accent"
+                        />
                       </ul>
                     </div>
 
