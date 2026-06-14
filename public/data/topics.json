@@ -58,6 +58,9 @@
     "stage-3-dl-jax",
     "stage-3-dl-end-to-end",
     "stage-3-dl-ml-strategy",
+    "stage-4-dl-mamba-ssm",
+    "stage-3-dl-contrastive-learning",
+    "stage-4-dl-llm-bioinfo",
     "stage-4-ml-alphafold-ml",
     "stage-4-ml-esm",
     "stage-4-ml-genomic-language",
@@ -6701,6 +6704,42 @@
           "content": "<ol><li><strong>陷阱：</strong>忽略Tn5偏移校正。<strong>解决：</strong>比对后使用deepTools的ATACseqCorrect或自定义脚本调整reads位置。</li><li><strong>陷阱：</strong>scATAC数据用Bulk ATAC的peak caller。<strong>解决：</strong>单细胞应使用MACS2的--nomodel --shift -100 --extsize 200参数。</li><li><strong>陷阱：</strong>忽略线粒体reads。<strong>解决：</strong>ATAC-seq中线粒体reads比例通常5-20%，过高提示细胞状态差。</li></ol>"
         },
         {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>ATAC-seq像测绘城市的地图：</strong>T5转座酶像“探测器”，只在开放的染色质区域插入并标记，标记的位置就是潜在的调控元素（启动子、增强子、转录因子结合位点）。</p>"
+        },
+        {
+          "type": "how",
+          "icon": "机制",
+          "title": "ATAC-seq 从实验到矩阵的管线",
+          "content": "<p>标准处理管线：<strong>FastQC → Trimmomatic → Bowtie2比对 → samtools过滤（去线粒体、MAPQ过滤） → Picard去重 → MACS2/Genrich peak calling → IDR一致性评估</strong>。关键步骤：转座酶产生的是adapted fragment而非直接测序read，比对后需要处理Tn5偏移（+4/-5bp调整）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "ATAC-seq在基因调控研究中的应用",
+          "content": "<p>关键应用：</p><ul><li><strong>差异可及性分析（DARs）：</strong>比较不同条件/细胞类型的染色质开放状态变化</li><li><strong>转录因子足迹分析（Footprinting）：</strong>通过Tn5插入偏好在TF结合位点处的精确模式推断TF结合</li><li><strong>motif富集分析：</strong>对差异peak区域进行已知TF motif扫描（HOMER/MEME）</li><li><strong>peak-to-gene关联：</strong>通过基因组距离或Hi-C数据将远端调控区域关联到靶基因</li></ul>"
+        },
+        {
+          "type": "concept",
+          "icon": "最佳实践",
+          "title": "ATAC-seq 分析最佳实践",
+          "content": "<p><strong>ENCODE ATAC-seq 指南：</strong>（1）每个生物学重复至少25M non-duplicate、non-mitochondrial aligned reads；（2）TSS富集分数>7；（3）FRiP（Fraction of Reads in Peaks）>0.3表明文库质量良好；（4）IDR用于评估重复间一致性。<strong>scATAC-seq特殊考虑：</strong>单细胞ATAC数据极度稀疏，推荐LSI降维、SnapATAC或ArchR进行细胞聚类。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "工具",
+          "title": "ATAC-seq 分析工具推荐",
+          "content": "<table style='width:100%;font-size:12px;border-collapse:collapse;'><thead><tr style='background:#F5F5F5;'><th>工具</th><th>用途</th><th>OmicVerse集成</th></tr></thead><tbody><tr><td><strong>MACS2</strong></td><td>Bulk peak calling</td><td>外部调用</td></tr><tr><td><strong>Genrich</strong></td><td>ATAC-specific peak caller</td><td>外部调用</td></tr><tr><td><strong>chromVAR</strong></td><td>TF motif活性评分</td><td><code>ov.epi.chromvar()</code></td></tr><tr><td><strong>HOMER</strong></td><td>motif富集分析</td><td>外部调用</td></tr><tr><td><strong>SnapATAC2</strong></td><td>scATAC分析</td><td>通过anndata互操作</td></tr></tbody></table>"
+        },
+        {
+          "type": "concept",
+          "icon": "陷阱",
+          "title": "常见陷阱与解决方案",
+          "content": "<ol><li><strong>陷阱：</strong>忽略Tn5偏移校正。<strong>解决：</strong>比对后使用deepTools的ATACseqCorrect或自定义脚本调整reads位置。</li><li><strong>陷阱：</strong>scATAC数据用Bulk ATAC的peak caller。<strong>解决：</strong>单细胞应使用MACS2的--nomodel --shift -100 --extsize 200参数。</li><li><strong>陷阱：</strong>忽略线粒体reads。<strong>解决：</strong>ATAC-seq中线粒体reads比例通常5-20%，过高提示细胞状态差。</li></ol>"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -6995,6 +7034,18 @@
           "icon": "代码",
           "title": "统一对象草案",
           "code": "interface MultiOmicsFeatureMatrix {\n  assay: \"rnaseq\" | \"atacseq\" | \"cuttag\" | \"chipseq\" | \"proteomics\" | \"metabolomics\";\n  rows: string[];\n  samples: string[];\n  values: number[][];\n  rowType: \"gene\" | \"region\" | \"protein\" | \"metabolite\" | \"pathway\";\n  normalization: \"raw_counts\" | \"size_factor\" | \"cpm\" | \"tpm\" | \"rlog\" | \"bigwig_signal\";\n}"
+        },
+        {
+          "type": "how",
+          "icon": "机制",
+          "title": "多组学整合的统计框架",
+          "content": "<p><strong>三大整合策略：</strong></p><ul><li><strong>MOFA（Multi-Omics Factor Analysis）：</strong>贝叶斯因子分析框架，从多个组学数据矩阵中发现共享的潜在因子（latent factors）。每个因子可以解释跨组学的变异来源</li><li><strong>iCluster/iClusterPlus：</strong>联合潜在变量模型，假设所有组学数据共享一个低维潜在空间，通过高斯似然+稀疏正则化同时聚类和降维</li><li><strong>DIABLO（mixOmics）：</strong>有监督的多组学整合方法，利用PLS-DA（偏最小二乘判别分析）最大化组学间的协方差，同时区分已知类别</li></ul>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "跨组学联合分析实战",
+          "code": "import omicverse as ov\nimport scanpy as sc\n\n# 假设有三个组学的AnnData\nrna_adata = ov.read('rna_counts.h5ad')      # RNA-seq\natac_adata = ov.read('atac_peaks.h5ad')     # ATAC-seq\ncutntag_adata = ov.read('cutntag_peaks.h5ad') # CUT&Tag\n\n# 1. 统一基因组坐标——peak-to-gene linking\nfrom ov.epi import link_peaks_to_genes\natac_gene_activity = link_peaks_to_genes(\n    atac_adata, genome='hg38',\n    promoter_range=(-2000, 500))\n\ncutntag_gene_activity = link_peaks_to_genes(\n    cutntag_adata, genome='hg38')\n\n# 2. 合并多组学特征矩阵\ncombined = ov.utils.concat_multiomics(\n    [rna_adata, atac_gene_activity,\n     cutntag_gene_activity],\n    keys=['rna', 'atac', 'cutntag'],\n    common_genes=True)\n\n# 3. MOFA因子分析\nov.single.mofa(combined,\n    use_rep=['rna', 'atac', 'cutntag'],\n    n_factors=15, n_iterations=1000)\n\n# 4. 因子解释——哪些基因/peak驱动每个因子\nov.pl.mofa_factor_weights(combined,\n    top_genes=10)"
         },
         {
           "type": "check",
@@ -8400,6 +8451,204 @@
           "ml_dl_connection": "蛋白质语言模型嵌入初始化基因权重→不同物种的同源基因获得语义相近的初始表示",
           "citations": [
             "UCE_Rosen2023"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "stage-4-dl-mamba-ssm",
+      "name": "Mamba与状态空间模型 (SSM)",
+      "stage": 4,
+      "type": "dl",
+      "difficulty": "专业",
+      "prerequisites": [
+        "stage-3-dl-transformer",
+        "stage-2-dl-rnn"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>SSM像选择性阅读：</strong>Transformer像逐字阅读整本书（O(n^2)复杂度），SSM像有选择性地跳过无关内容、只记住关键信息（O(n)复杂度）。Mamba在SSM基础上加了“选择性”机制——不是平等对待所有输入，而是根据输入内容动态调整记忆保留策略。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "从SSM到Mamba",
+          "content": "<p><strong>状态空间模型（State Space Model, SSM）</strong>起源于控制理论，通过隐状态h(t)描述系统动力学。S4（Structured State Space Sequence model）将SSM引入深度学习，实现O(n log n)的序列建模。关键优势：</p><ul><li><strong>线性时间复杂度：</strong>推理时O(n)，训练时O(n log n)，远优于Transformer的O(n^2)</li><li><strong>长序列建模：</strong>可处理百万级token的序列（Transformer受限于上下文窗口）</li><li><strong>Mamba的关键创新：</strong>引入selective scan——SSM参数根据输入动态变化，类似注意力机制的选择性但保留了SSM的效率</li></ul>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "SSM/Mamba在生物信息学中的应用",
+          "content": "<p><strong>HyenaDNA：</strong>基于Hyena（SSM变体）的基因组序列模型，上下文长度可达100万碱基对，远超Transformer的512-2048限制。直接处理长程基因调控关系（增强子-启动子可间隔>100kb）。<strong>Caduceus：</strong>基于Mamba的DNA语言模型，在基因组注释和变异效应预测上达到与Transformer相当的性能。<strong>单细胞应用：</strong>Mamba已开始用于单细胞表达数据的生成式建模和扰动预测。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Mamba在基因组建模中的应用",
+          "code": "import torch\nfrom mamba_ssm import Mamba\n\n# 构建Mamba模型用于DNA序列建模\nclass DNAMamba(torch.nn.Module):\n    def __init__(self, d_model=256, n_layers=4, vocab=5):\n        super().__init__()\n        self.embed = torch.nn.Embedding(vocab, d_model)\n        self.layers = torch.nn.ModuleList([\n            Mamba(d_model=d_model,\n                  d_state=16,\n                  d_conv=4,\n                  expand=2)\n            for _ in range(n_layers)\n        ])\n        self.norm = torch.nn.LayerNorm(d_model)\n        self.head = torch.nn.Linear(d_model, vocab)\n\n    def forward(self, x):\n        x = self.embed(x)\n        for layer in self.layers:\n            x = layer(x)\n        return self.head(self.norm(x))\n\n# 处理100k长度的DNA序列\nmodel = DNAMamba()\n# 输入: (batch, 100000) one-hot DNA\n# 输出: (batch, 100000, 5) 碱基预测"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Mamba相比Transformer的核心优势是什么？",
+              "options": [
+                "速度更快但效果差",
+                "线性时间复杂度O(n)，可处理超长序列",
+                "参数量更少",
+                "完全替代了注意力机制"
+              ],
+              "answer": 1,
+              "explanation": "Mamba通过selective SSM实现O(n)推理复杂度，同时保持与Transformer可比的建模能力。对于基因组这种百万级碱基的序列，Transformer的O(n^2)注意力不可行。"
+            },
+            {
+              "q": "HyenaDNA为什么能处理100万bp的基因组序列？",
+              "options": [
+                "使用了更多GPU",
+                "基于SSM的Hyena架构，上下文长度不受O(n^2)限制",
+                "把序列截断了",
+                "只处理编码区"
+              ],
+              "answer": 1,
+              "explanation": "Hyena是SSM变体，使用卷积+门控替代注意力，计算复杂度O(n log n)。这使得它可以处理完整的长程基因组上下文。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "stage-3-dl-contrastive-learning",
+      "name": "对比学习与自监督表示学习",
+      "stage": 3,
+      "type": "dl",
+      "difficulty": "进阶",
+      "prerequisites": [
+        "stage-2-dl-embedding",
+        "stage-1-dl-loss-functions"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>对比学习像玩“找不同vs找相似”：</strong>给模型看两张图片——来自同一个细胞的两个增强视图是\"正样本对\"（拉近），来自不同细胞的视图是\"负样本对\"（推远）。通过这种方式，模型学会提取不依赖于数据增强方式的本质特征。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "对比学习核心框架",
+          "content": "<p><strong>三大范式：</strong></p><ul><li><strong>SimCLR：</strong>同一数据的不同增强→正样本对，batch内其他数据→负样本对。InfoNCE损失最大化正样本对的相似度</li><li><strong>MoCo：</strong>动量编码器+动态队列，解决大batch需求。负样本存储在队列中，动量更新保持编码器一致性</li><li><strong>BYOL：</strong>不需要负样本！使用target网络和online网络的不对称架构，避免模式坍塌</li></ul><p>关键损失函数——<strong>InfoNCE（Noise Contrastive Estimation）：</strong>L = -log(exp(sim(z_i, z_j)/τ) / Σexp(sim(z_i, z_k)/τ))。温度τ控制分布的sharpness。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "对比学习在生物信息学中的应用",
+          "content": "<p><strong>UCE（Universal Cell Embedding）：</strong>使用对比学习在多个物种的单细胞数据上训练，将不同物种的相似细胞映射到接近的嵌入位置。<strong>scCL（单细胞对比学习）：</strong>对同一细胞的不同基因子集作为正样本对，学习对dropout鲁棒的细胞表示。<strong>蛋白质表示学习：</strong>ESM系列虽然使用MLM，但对比学习（如ProtBERT-CT）在蛋白质功能预测中表现优异。<strong>CLIP在生物影像：</strong>对比学习配对显微镜图像和基因表达，实现跨模态检索。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "SimCLR 单细胞对比学习",
+          "code": "import torch\nimport torch.nn.functional as F\n\ndef info_nce_loss(z1, z2, temperature=0.1):\n    \"\"\"SimCLR对比损失\"\"\"\n    z1 = F.normalize(z1, dim=1)\n    z2 = F.normalize(z2, dim=1)\n    # 拼接所有表示\n    z = torch.cat([z1, z2], dim=0)  # (2N, D)\n    # 相似度矩阵\n    sim = torch.mm(z, z.t()) / temperature\n    # 正样本对：z1[i] 和 z2[i]\n    N = z1.shape[0]\n    labels = torch.cat([\n        torch.arange(N, N*2),\n        torch.arange(0, N)\n    ]).to(z.device)\n    # 去掉自身\n    mask = torch.eye(2*N, dtype=torch.bool).to(z.device)\n    sim = sim.masked_fill(mask, -1e9)\n    return F.cross_entropy(sim, labels)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "BYOL为什么不需要负样本？",
+              "options": [
+                "它用了更多正样本",
+                "不对称架构(online+target网络)避免模式坍塌",
+                "效果比需要负样本的方法差",
+                "其实私下用了负样本"
+              ],
+              "answer": 1,
+              "explanation": "BYOL的非对称设计——online网络有额外的predictor层，target网络通过EMA更新——避免了所有表示坍塌到同一点的模式坍塌问题。"
+            },
+            {
+              "q": "对比学习在单细胞数据的独特优势是什么？",
+              "options": [
+                "不需要GPU",
+                "通过dropout等自然噪声构造正样本对，不需要人工标注",
+                "只能用于聚类",
+                "与传统方法完全相同"
+              ],
+              "answer": 1,
+              "explanation": "单细胞数据固有的dropout和稀疏性可以自然地作为数据增强——同一细胞的两次随机基因子集采样构成正样本对。这不需要任何人工标注。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "stage-4-dl-llm-bioinfo",
+      "name": "大语言模型在生物信息学中的应用",
+      "stage": 4,
+      "type": "dl",
+      "difficulty": "专业",
+      "prerequisites": [
+        "stage-3-dl-transformer",
+        "stage-3-dl-bert-pretraining"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>LLM在生物信息学中像全能研究助理：</strong>不仅能用自然语言理解和总结科学文献、自动提取知识，还能直接\"读懂\"基因序列、蛋白质序列和单细胞数据——因为这些生物数据本身也是一种\"语言\"，LLM的架构天然适合建模序列信息。</p>"
+        },
+        {
+          "type": "concept",
+          "icon": "概念",
+          "title": "LLM在生物信息学的四层应用",
+          "content": "<p><strong>第一层——文献挖掘：</strong>GPT-4/Claude自动从数百万篇论文中提取基因-疾病关联、蛋白质互作信息、药物-靶标关系。PubMedGPT/BioBERT已专门为生物医学文本微调。<strong>第二层——知识整合：</strong>LLM连接分散的知识——将基因功能、通路信息、疾病表型和药物信息整合为统一的推理框架。<strong>第三层——代码生成：</strong>Claude Code/GitHub Copilot驱动生物信息学分析的自动化——从数据加载到统计分析到可视化。<strong>第四层——原生生物序列理解：</strong>scGPT/GeneFormer等模型直接在单细胞数据上预训练，相当于为单细胞数据训练的\"GPT\"。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "应用",
+          "title": "实际应用案例",
+          "content": "<p><strong>CellTalk：</strong>LLM驱动的细胞间通讯分析——自动解读CellPhoneDB输出，生成自然语言描述的生物信号交流网络报告。<strong>GPTAnno：</strong>OmicVerse集成的大模型细胞注释——基于差异基因列表，GPT推理最可能的细胞类型。<strong>GeneGPT：</strong>通过链式思考（Chain-of-Thought）推理基因调控关系。<strong>SciAssist：</strong>自动从文献中构建知识图谱，加速系统综述和meta分析。</p>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "LLM辅助单细胞注释 (GPTAnno)",
+          "code": "import omicverse as ov\n\n# 1. 计算差异基因（每个cluster的marker）\nsc.tl.rank_genes_groups(adata,\n    groupby='leiden', method='wilcoxon')\n\n# 2. 提取marker基因字典\nmarker_dict = ov.single.get_celltype_marker(\n    adata, clustertype='leiden',\n    rank=True, topgenenumber=5,\n    foldchange=2)\n\n# 3. GPT大模型注释\nresult = ov.single.gptcelltype(\n    adata,\n    tissue='Human PBMC',\n    provider='openai',\n    model='gpt-4o-mini',\n    topgenenumber=5)\n\n# 4. 处理结果\nfor cluster, annotation in result.items():\n    clean_label = annotation.split(': ')[-1]\n    adata.obs.loc[\n        adata.obs['leiden'] == cluster,\n        'gpt_celltype'\n    ] = clean_label"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "LLM辅助细胞注释相比传统方法的独特优势是什么？",
+              "options": [
+                "不需要任何基因信息",
+                "可以利用文献知识推理——不仅看基因表达模式，还能结合已知的生物学知识",
+                "比所有方法都便宜",
+                "完全不需要数据库"
+              ],
+              "answer": 1,
+              "explanation": "LLM在预训练过程中内化了大量生物学知识（基因功能、细胞类型、组织特异性），可以在注释时利用这些隐式知识，而不只是做模式匹配。"
+            },
+            {
+              "q": "为什么scGPT被称为单细胞的GPT？",
+              "options": [
+                "只是名字像",
+                "使用自回归生成式预训练——类似GPT在文本上的训练方式，但在基因表达数据上",
+                "只能用GPT的API",
+                "和GPT完全相同"
+              ],
+              "answer": 1,
+              "explanation": "scGPT采用与GPT相同的自回归预训练目标——给定部分基因表达预测剩余基因。这使得它可以通过条件生成来模拟基因扰动效应，类似于GPT的条件文本生成。"
+            }
           ]
         }
       ]

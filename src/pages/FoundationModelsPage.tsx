@@ -147,6 +147,32 @@ const skillReadyModels: FoundationModel[] = [
       'ov.fm.identify_spatial_domains("CellPLM", adata)'
     ],
     useCases: ['空间转录组分析', '组织微环境建模', '细胞互作预测', '空间域识别']
+  },
+  {
+    name: 'scBERT',
+    category: 'Skill-Ready',
+    description: '最早将BERT架构引入单细胞转录组的预训练模型之一。使用掩码基因预测任务在大规模单细胞数据上预训练，学习基因-基因的上下文调控关系。',
+    architecture: 'BERT Encoder (Transformer) + MLM预训练',
+    inputType: '基因表达矩阵（秩标准化）',
+    outputType: '细胞嵌入 / 基因嵌入 / 细胞类型标签',
+    publication: 'Yang et al., Nature Machine Intelligence (2022)',
+    github: 'TencentAILabHealthcare/scBERT',
+    paperUrl: 'https://www.nature.com/articles/s42256-022-00557-0',
+    keyFeatures: [
+      '首个BERT架构单细胞预训练模型',
+      'Performer近似注意力（线性复杂度）',
+      '大规模基因表达上下文建模',
+      '细胞类型注释',
+      '基因功能预测',
+      '跨组织泛化能力验证'
+    ],
+    ovAPI: [
+      'ov.fm.load_model("scBERT")',
+      'ov.fm.embed("scBERT", adata)',
+      'ov.fm.annotate("scBERT", adata)',
+      'ov.fm.finetune("scBERT", adata, task="annotation")'
+    ],
+    useCases: ['细胞类型注释', '基因功能预测', '跨组织迁移学习', '疾病状态预测']
   }
 ];
 
