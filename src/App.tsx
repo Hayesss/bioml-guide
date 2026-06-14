@@ -37,8 +37,8 @@ export default function App() {
           <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={<IntroPage />} />
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/intro" element={<IntroPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/ngs" element={<BioinfoNgsPage />} />
             <Route path="/foundation-models" element={<FoundationModelsPage />} />
