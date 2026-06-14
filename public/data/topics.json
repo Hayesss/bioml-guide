@@ -805,6 +805,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR第2.2节用\"偏差-方差权衡\"框架解释过拟合和欠拟合——这是统计学习最核心的概念，图2.9-2.12用模拟数据直观展示。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">Andrew Ng《深度学习专项课程》deeplearning.ai</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Andrew Ng在DL专项课程第二门课Week 1深入讨论了偏差/方差诊断，并提出\"先解决高偏差(训练集表现)，再解决高方差(验证集表现)\"的调试顺序。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">五门课系统覆盖NN→调优→结构化ML→CNN→序列模型，编程作业用Python+TensorFlow</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Deep Learning》(花书) Goodfellow, Bengio, Courville</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Goodfellow第5章从容量(capacity)、表示(representation)、优化(optimization)三个角度系统分析了过拟合和欠拟合的数学根源。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">深度学习理论圣经，MIT出版社，三位领域先驱合著，深入数学原理和算法设计</p></div>\n<hr style=\"border:none;border-top:1px solid #E5E5E5;margin:12px 0\">\n<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:6px;font-weight:600\"> 吴恩达课程观点</p>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> Coursera《机器学习》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Ng在Week 3&6对过拟合做了最详细的讲解——用复杂多项式完美穿过所有点但在新点上乱飞的动画展示过拟合。解决方案：更多数据/更少特征/正则化。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">全球最受欢迎的ML入门课，以直觉为导向，每周有编程作业</p></div>\n<div style=\"margin-bottom:10px;padding:10px 14px;background:#FFF0E5;border-radius:6px;border-left:3px solid #E67E22\"><p style=\"margin:0 0 3px 0;font-size:12px;font-weight:600;color:#C0392B\"> 深度学习专项(C2)《改善深层神经网络》Andrew Ng</p><p style=\"margin:0 0 3px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">DL专项C2 Week 1：Ng提出先看训练集→解决高偏差→再看验证集→解决高方差的诊断流程。他强调：不要同时调所有东西，遵循正交化原则。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">三周：正则化/Dropout/BN→优化算法(Momentum/RMSprop/Adam)→超参数调优。偏差方差诊断框架</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\nfrom sklearn.model_selection import train_test_split, learning_curve\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.preprocessing import PolynomialFeatures\nfrom sklearn.pipeline import make_pipeline\nimport matplotlib.pyplot as plt\n\n# === 过拟合 vs 欠拟合 演示 ===\n# 生成简单数据 (真实关系: y = sin(x) + noise)\nnp.random.seed(42)\nX = np.random.rand(200, 1) * 6 - 3\ny = np.sin(X).ravel() + np.random.randn(200) * 0.3\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)\n\n# 对比不同复杂度的多项式回归\ndegrees = [1, 4, 15]  # 1=欠拟合, 4=合适, 15=过拟合\nfor d in degrees:\n    model = make_pipeline(PolynomialFeatures(d), LinearRegression())\n    model.fit(X_train, y_train)\n    train_score = model.score(X_train, y_train)\n    test_score = model.score(X_test, y_test)\n    print(f'Degree {d}: Train R²={train_score:.3f}, Test R²={test_score:.3f}')\n    # 过拟合: Train R²>>Test R²\n\n# === 学习曲线: 诊断过拟合/欠拟合 ===\n# 过拟合: train score高, test score低, 两条线差距大\n# 欠拟合: train和test score都低\n# 合适: train和test score都高, 差距小"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4063,6 +4069,12 @@
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Hands-On Machine Learning》Aurélien Géron</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">《Hands-On ML》覆盖了神经架构搜索 (NAS)的核心实践方法。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">最实用的ML入门书，以scikit-learn和TensorFlow为主线，含大量可运行代码和端到端项目</p></div>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《An Introduction to Statistical Learning》(ISLR) James, Witten, Hastie, Tibshirani</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">ISLR从统计视角为神经架构搜索 (NAS)提供了坚实的理论基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">斯坦福统计系经典教材，R语言实现，强调统计直觉而非繁琐数学推导，有免费在线版</p></div>"
         },
         {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\n\n# 神经架构搜索(NAS)简化演示\n# 目标: 在定义的搜索空间中找最佳架构\n\n# 定义搜索空间: 层数 × 每层神经元数 × 激活函数\nsearch_space = {\n    'n_layers': [1, 2, 3, 4],\n    'neurons_per_layer': [32, 64, 128, 256],\n    'activation': ['relu', 'tanh', 'gelu'],\n    'dropout': [0.0, 0.1, 0.3, 0.5]\n}\n\n# 随机搜索 NAS (最简策略)\ndef random_search_nas(search_space, X, y, n_trials=50):\n    best_score = -np.inf\n    best_config = None\n    for _ in range(n_trials):\n        config = {k: np.random.choice(v) for k, v in search_space.items()}\n        score = evaluate_config(config, X, y)  # 训练+验证\n        if score > best_score:\n            best_score, best_config = score, config\n    return best_config, best_score\n\n# 强化学习NAS (ENAS简化)\n# 用RNN controller生成架构描述, 验证性能作为奖励\n# 更新controller策略→生成更好的架构\n# 生物信息学应用: 自动搜索最优单细胞分类器架构"
+        },
+        {
           "type": "check",
           "icon": "自测",
           "title": "检验你的理解",
@@ -4107,6 +4119,12 @@
           "icon": "参考",
           "title": "专家视角",
           "content": "<p style=\"font-size:13px;color:#4A4A4A;margin-bottom:8px\">以下内容摘录自领域内最权威的教材和课程，帮助你从专家视角理解本专题：</p>\n<div style=\"margin-bottom:12px;padding:10px 14px;background:#FFF8E7;border-radius:6px;border-left:3px solid #E6A817\"><p style=\"margin:0 0 4px 0;font-size:13px;font-weight:600;color:#1E3A5F\">《Probabilistic Machine Learning》Kevin P. Murphy</p><p style=\"margin:0 0 4px 0;font-size:12px;color:#4A4A4A;line-height:1.7\">Murphy第27章讲隐私保护ML——联邦学习/差分隐私/安全多方计算的数学基础。</p><p style=\"margin:0;font-size:11px;color:#A0A0A0\">2022-2023年出版的现代ML百科全书(两卷)，覆盖最新进展如Transformer和扩散模型</p></div>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "实战代码",
+          "code": "import numpy as np\n\n# 联邦学习简化演示\n# 场景: 多家医院各自有患者数据, 不能共享原始数据, 但想联合训练模型\n\nclass FederatedAveraging:\n    def __init__(self, n_clients=5):\n        self.n_clients = n_clients\n        self.global_weights = None\n    \n    def local_update(self, client_data, global_weights):\n        \"\"\"每个client用本地数据训练几轮\"\"\"\n        # 在实际中: 用本地数据做SGD, 返回更新后的权重\n        noise = np.random.randn(*global_weights.shape) * 0.01\n        return global_weights + noise  # 模拟本地训练\n    \n    def aggregate(self, client_weights):\n        \"\"\"FedAvg: 加权平均各client的模型\"\"\"\n        return np.mean(client_weights, axis=0)\n    \n    def fit(self, client_datasets, n_rounds=10):\n        \"\"\"联邦训练主循环\"\"\"\n        self.global_weights = np.random.randn(20)  # 初始化\n        for r in range(n_rounds):\n            local_weights = []\n            for data in client_datasets:\n                w = self.local_update(data, self.global_weights)\n                local_weights.append(w)\n            self.global_weights = self.aggregate(local_weights)\n\n# 差分隐私: 在更新中加入噪声保护患者隐私\n# 安全聚合: 使用同态加密或安全多方计算\n# 生物应用: 多中心罕见病研究, 药物副作用联合分析"
         },
         {
           "type": "check",
@@ -9134,6 +9152,24 @@
               "explanation": "Ward倾向于产生大小均匀的簇（最小化簇内方差），Complete保证簇内所有点的距离都不超过阈值（产生更紧凑的簇），Average介于两者。"
             }
           ]
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "层次聚类中Ward、Complete、Average三种linkage方法各适合什么场景？",
+              "options": [
+                "没有区别",
+                "Ward=紧凑球状簇(最小化簇内方差), Complete=簇内最远点控制(紧凑), Average=折中——Ward最常用",
+                "只能选Ward",
+                "Ward不支持R"
+              ],
+              "answer": 1,
+              "explanation": "Ward倾向于产生大小均匀的簇（适合大多数场景），Complete确保簇内所有点距离都不超阈值（产生更紧凑的簇），Average介于两者。生物数据推荐Ward作为默认选择。"
+            }
+          ]
         }
       ]
     },
@@ -9181,6 +9217,24 @@
               ],
               "answer": 1,
               "explanation": "Louvain的贪心优化可能产生内部断开连接的社区。Leiden在每次迭代中加入了refinement步骤，保证每个社区的连通性。这是sc-best-practices推荐Leiden的根本原因。"
+            }
+          ]
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么单细胞聚类中分辨率参数需要从低到高探索(0.25→0.5→1.0)？",
+              "options": [
+                "低分辨率先看大类→高分辨率再看亚型——像从望远镜到显微镜逐级放大",
+                "随便选一个就行",
+                "只用一个分辨率",
+                "分辨率越大聚类越快"
+              ],
+              "answer": 0,
+              "explanation": "多分辨率策略是sc-best-practices推荐的标准做法。res=0.25识别主要细胞类型(如T/B/NK)，res=1.0识别亚型(如CD4+T/CD8+T)。然后在亚群内再做子聚类——\"zooming in\"策略。"
             }
           ]
         }
@@ -9232,6 +9286,24 @@
               "explanation": "Bonferroni假设所有检验独立，将alpha除以检验总数。但20000个基因高度相关（共表达），有效检验数远小于20000。BH-FDR考虑p值分布，在基因组学中达到更好的假阳性/灵敏度平衡。"
             }
           ]
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么Bonferroni在基因组学中被认为过于保守而FDR被广泛接受？",
+              "options": [
+                "Bonferroni假设所有检验独立——但20000个基因高度共表达，有效检验数<<20000，导致过度惩罚",
+                "Bonferroni太慢",
+                "FDR不需要p值",
+                "两者完全相同"
+              ],
+              "answer": 0,
+              "explanation": "Bonferroni将α除以检验总数(0.05/20000=2.5e-6)，假设每个检验独立。但基因共表达意味着有效检验数远小于20000。BH-FDR考虑p值分布，在控制假阳性率的同时保留更多真阳性。Storey's q-value更进一步估计FDR。"
+            }
+          ]
         }
       ]
     },
@@ -9280,6 +9352,24 @@
               "explanation": "ORA设定硬阈值（FDR<0.05）后丢弃了大量信息。GSEA使用全体基因排序，可以检测到\"某通路基因整体略微上调/下调\"的信号，而不需要单个基因显著。"
             }
           ]
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "GSEA相比ORA(超几何富集)的核心优势？",
+              "options": [
+                "GSEA不需要设阈值——使用全基因组排序，避免了阈值截断丢失渐变信号",
+                "GSEA总是更快",
+                "GSEA和ORA完全相同",
+                "GSEA只用于KEGG"
+              ],
+              "answer": 0,
+              "explanation": "ORA需要设硬阈值(FDR<0.05+|log2FC|>1)。GSEA用全基因组排序——某个通路中基因可能都\"略微上调\"(不显著)，但\"集体微调\"有生物学意义——GSEA能检测到这种信号，ORA不行。"
+            }
+          ]
         }
       ]
     },
@@ -9310,6 +9400,24 @@
           "icon": "代码",
           "title": "SVD: 基因表达去噪 + 缺失值填补",
           "code": "import numpy as np\nfrom scipy.sparse.linalg import svds\n\n# === 基因表达矩阵去噪 ===\nX = expr_matrix.values  # (genes × samples)\nU, S, Vt = np.linalg.svd(X, full_matrices=False)\n# 保留前k个成分 (k可通过elbow方法选择)\nk = 20\nX_denoised = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]\nprint(f'Denoising: retained {k}/{len(S)} components')\n\n# === 缺失值填补 (softImpute) ===\n# 迭代SVD逐步填充缺失值\nfor iteration in range(100):\n    X_imputed = np.where(mask, X, X_estimated)\n    U, S, Vt = svds(X_imputed, k=k)\n    X_estimated = U @ np.diag(S) @ Vt\n    if converged: break"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "SVD去噪的核心思想是什么？",
+              "options": [
+                "保留所有奇异值",
+                "保留前k个最大奇异值——后面的奇异值对应噪声",
+                "删除最大奇异值",
+                "随机选择k个奇异值"
+              ],
+              "answer": 1,
+              "explanation": "SVD的低秩近似假设：前k个最大的奇异值对应\"信号\"（如生物变异），后面小的奇异值对应\"噪声\"（如随机测量误差）。截断保留前k个是去噪的核心。"
+            }
+          ]
         }
       ]
     },
@@ -9358,6 +9466,24 @@
               "explanation": "L1正则化的selection bias——在一组相关的基因中，Lasso倾向于随机选一个而丢弃其他。Elastic Net(L1+L2混合)既能选到整组共调控基因，又保持了稀疏性。"
             }
           ]
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "什么时候用Elastic Net而不是Lasso？",
+              "options": [
+                "特征高度相关时——Lasso的L1惩罚会从一组相关基因中随机选一个，Elastic Net(L1+L2)可保留整组",
+                "总是用Elastic Net",
+                "Lasso总是更好",
+                "没有区别"
+              ],
+              "answer": 0,
+              "explanation": "共调控基因组内部高度相关(如同一通路的所有基因)。Lasso的选择具有随机性——从5个高度相关的真阳性基因中随机选1个丢掉4个。Elastic Net的L2成分鼓励保留组结构。"
+            }
+          ]
         }
       ]
     },
@@ -9395,6 +9521,24 @@
           "icon": "代码",
           "title": "K-means 跨组学实战",
           "code": "from sklearn.cluster import KMeans\nfrom sklearn.metrics import silhouette_score\nimport numpy as np\n\n# === 1. Bulk RNA-seq: 分子亚型 ===\nexpr_pca = PCA(n_components=50).fit_transform(expr.T)\n# Elbow method 选K\nwcss = []\nfor k in range(1, 15):\n    km = KMeans(n_clusters=k, n_init=20, random_state=42)\n    km.fit(expr_pca)\n    wcss.append(km.inertia_)\n# 画elbow找拐点\n\n# Silhouette验证\nkmeans = KMeans(n_clusters=4, n_init=20, random_state=42)\nlabels = kmeans.fit_predict(expr_pca)\nprint(f'Silhouette: {silhouette_score(expr_pca, labels):.3f}')\n\n# === 2. K-medoids (PAM): 对异常值鲁棒 ===\nfrom sklearn_extra.cluster import KMedoids\nkmed = KMedoids(n_clusters=4, metric='correlation')\nkmed.fit(expr.T)\n\n# === 3. Gap statistic (自动选K) ===\nfrom gap_statistic import OptimalK\noptimalK = OptimalK(parallel_backend='joblib')\nn_clusters = optimalK(expr_pca, cluster_array=np.arange(1, 15))"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "K-means的K如何选择？",
+              "options": [
+                "随意选",
+                "elbow method(WCSS拐点) + silhouette score + gap statistic",
+                "只能选3",
+                "K必须等于样本数"
+              ],
+              "answer": 1,
+              "explanation": "常用elbow method（WCSS vs K图的拐点处）、silhouette score（簇内紧凑度vs簇间分离度）和gap statistic（比较随机参照的WCSS），综合判断最佳K。"
+            }
+          ]
         }
       ]
     },
@@ -9432,6 +9576,24 @@
           "icon": "代码",
           "title": "DBSCAN/HDBSCAN 稀有细胞发现",
           "code": "from sklearn.cluster import DBSCAN\nimport hdbscan\n\n# === DBSCAN: 发现稀有亚群 ===\n# eps: 可通过k-distance图选择（拐点）\ndb = DBSCAN(eps=0.5, min_samples=10)\nlabels = db.fit_predict(adata.obsm['X_pca'])\n# label=-1 为噪声/稀有细胞\nn_rare = (labels == -1).sum()\nprint(f'Rare/Noise cells: {n_rare} ({n_rare/len(labels):.1%})')\n\n# === HDBSCAN: 自适应密度 (推荐) ===\nclusterer = hdbscan.HDBSCAN(\n    min_cluster_size=10,\n    min_samples=5,\n    cluster_selection_epsilon=0.5)\nhdb_labels = clusterer.fit_predict(adata.obsm['X_pca'])\nprint(f'Clusters found: {len(set(hdb_labels)) - (1 if -1 in hdb_labels else 0)}')\n# 可视化\nadata.obs['hdbscan'] = hdb_labels.astype(str)\nsc.pl.umap(adata, color=['hdbscan', 'celltype'])"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "DBSCAN相比K-means的核心优势？",
+              "options": [
+                "速度更快",
+                "自动发现任意形状簇 + 自动标记噪声点 + 不需要预指定K",
+                "需要更少内存",
+                "只能找球状簇"
+              ],
+              "answer": 1,
+              "explanation": "DBSCAN基于密度——不需要K、能发现任意形状簇、自动识别噪声点(标签=-1)。对稀有细胞发现特别有用。"
+            }
+          ]
         }
       ]
     },
@@ -9462,6 +9624,24 @@
           "icon": "代码",
           "title": "GMM 概率聚类 + BIC选K",
           "code": "from sklearn.mixture import GaussianMixture\nimport numpy as np\n\n# === BIC/AIC 自动选K ===\nn_components = np.arange(1, 20)\nbic = []\nfor n in n_components:\n    gmm = GaussianMixture(n=n, covariance_type='full',\n                          random_state=42)\n    gmm.fit(adata.obsm['X_pca'][:, :30])\n    bic.append(gmm.bic(adata.obsm['X_pca'][:, :30]))\nbest_k = n_components[np.argmin(bic)]\nprint(f'Best K by BIC: {best_k}')\n\n# === 概率软分配 ===\ngmm = GaussianMixture(n_components=best_k, random_state=42)\ngmm.fit(adata.obsm['X_pca'][:, :30])\nprobs = gmm.predict_proba(adata.obsm['X_pca'][:, :30])\n# probs[i, j] = 细胞i属于簇j的概率\nuncertain = np.max(probs, axis=1) < 0.7  # 低置信度细胞\nprint(f'Uncertain cells: {uncertain.sum()}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "GMM的\"软分配\"是什么意思？",
+              "options": [
+                "每个细胞属于多个簇",
+                "每个细胞获得属于每个簇的概率——70%可能是T细胞，30%可能是NK",
+                "GMM不做分配",
+                "等同于K-means"
+              ],
+              "answer": 1,
+              "explanation": "GMM输出后验概率——每个细胞属于每个高斯成分的概率。这比K-means的硬分配更适合建模过渡态细胞（如分化中的细胞）。"
+            }
+          ]
         }
       ]
     },
@@ -9492,6 +9672,24 @@
           "icon": "代码",
           "title": "ICA 基因表达去卷积",
           "code": "from sklearn.decomposition import FastICA\n\n# 从混合表达中分离独立通路\nica = FastICA(n_components=20, random_state=42)\n# S: 独立成分 (样本在IC空间的坐标)\n# A: 混合矩阵 (基因对IC的贡献)\nS = ica.fit_transform(expr.T)  # (samples, 20)\nA = ica.mixing_  # (genes, 20)\n\n# 对每个IC，找top contributing genes\nfor ic_idx in range(5):\n    top_genes_idx = np.argsort(np.abs(A[:, ic_idx]))[-20:]\n    top_genes = expr.index[top_genes_idx]\n    print(f'IC{ic_idx+1} top genes: {top_genes[:5].tolist()}')\n\n# ICA vs PCA: ICA最大化统计独立性（非高斯性），\n# PCA最大化方差。ICA的components通常更\"sharp\""
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "ICA和PCA的关键区别？",
+              "options": [
+                "完全相同",
+                "PCA最大化方差(二阶统计量)，ICA最大化统计独立性(高阶统计量)——发现独立信号源",
+                "ICA总是更快",
+                "ICA需要正态分布"
+              ],
+              "answer": 1,
+              "explanation": "PCA找\"方差最大\"的方向（不关心独立性），ICA找\"最独立\"的方向（不关心方差大小）。在生物学中，独立通路信号常比伪方差信号更有意义。"
+            }
+          ]
         }
       ]
     },
@@ -9522,6 +9720,24 @@
           "icon": "代码",
           "title": "Wilcoxon 跨组学实战",
           "code": "from scipy.stats import mannwhitneyu, wilcoxon\nfrom scipy.stats import ranksums\n\n# === 单细胞DEG: 每个基因的Wilcoxon ===\n# group1: treatment细胞某基因的表达\n# group2: control细胞同一基因的表达\nstat, pval = mannwhitneyu(\n    adata[adata.obs['condition']=='treated', gene].X.toarray().flatten(),\n    adata[adata.obs['condition']=='control', gene].X.toarray().flatten(),\n    alternative='two-sided')\n\n# === 配对Wilcoxon (paired samples) ===\n# 同一患者治疗前后\nbefore = adata[:, 'TP53'].X[adata.obs['time']=='pre'].toarray().flatten()\nafter = adata[:, 'TP53'].X[adata.obs['time']=='post'].toarray().flatten()\nstat_paired, p_paired = wilcoxon(before, after)\n\n# === 微生物组: 多组比较 ===\nfrom scipy.stats import kruskal\n# H0: 所有组的OTU丰度分布相同\ngroups = [otu_table[meta['group']==g] for g in ['A','B','C']]\nH, p_kruskal = kruskal(*groups)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么单细胞DEG默认用Wilcoxon而非t检验？",
+              "options": [
+                "Wilcoxon更快",
+                "单细胞数据高度非正态(大量0值)——Wilcoxon是秩检验，不假设正态性",
+                "t检验不支持单细胞",
+                "两者完全相同"
+              ],
+              "answer": 1,
+              "explanation": "单细胞数据有大量dropout (0值)，分布远非正态。Wilcoxon秩和检验只看排位，不假设数据分布，对单细胞数据更稳健。"
+            }
+          ]
         }
       ]
     },
@@ -9552,6 +9768,24 @@
           "icon": "代码",
           "title": "Bootstrap: 置信区间 + 系统发育",
           "code": "import numpy as np\nfrom sklearn.utils import resample\n\n# === Bootstrap 置信区间 ===\ndata = np.random.lognormal(2, 0.5, 50)\nn_bootstrap = 10000\nmeans = np.zeros(n_bootstrap)\nfor i in range(n_bootstrap):\n    sample = np.random.choice(data, size=len(data), replace=True)\n    means[i] = np.mean(sample)\n\nci_lower, ci_upper = np.percentile(means, [2.5, 97.5])\nprint(f'Mean 95% CI: [{ci_lower:.2f}, {ci_upper:.2f}]')\n\n# === 差异表达 log2FC Bootstrap ===\nfc_boot = np.zeros(1000)\nfor i in range(1000):\n    # 随机重抽样treatment和control\n    t_boot = np.random.choice(treat_expr, size=len(treat_expr), replace=True)\n    c_boot = np.random.choice(ctrl_expr, size=len(ctrl_expr), replace=True)\n    fc_boot[i] = np.log2(np.mean(t_boot) / np.mean(c_boot))\n\n# 如果CI不跨0，log2FC显著\nci = np.percentile(fc_boot, [2.5, 97.5])\nsig = not (ci[0] < 0 < ci[1])\nprint(f'log2FC 95% CI: [{ci[0]:.3f}, {ci[1]:.3f}], sig={sig}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Bootstrap的核心假设是什么？",
+              "options": [
+                "数据必须正态",
+                "样本是总体的良好代表——重抽样可以近似真实的抽样分布",
+                "样本量必须>1000",
+                "Bootstrap不需要任何假设"
+              ],
+              "answer": 1,
+              "explanation": "Bootstrap假设\"样本分布≈总体分布\"——通过有放回重抽样模拟从总体中反复抽样的过程。样本越能代表总体，Bootstrap越准确。"
+            }
+          ]
         }
       ]
     },
@@ -9588,6 +9822,24 @@
           "icon": "代码",
           "title": "WGCNA 跨组学实战",
           "code": "import omicverse as ov\nimport pandas as pd\n\n# === 1. 标准WGCNA (Bulk RNA-seq) ===\n# expr: (genes × samples), meta: 临床指标\n# 选择soft-threshold power\nov.bulk.wgcna_soft_threshold(\n    expr, powers=range(1, 21))\n# 网络构建 + 模块检测\nmodules = ov.bulk.wgcna(\n    expr, power=6, min_module_size=30,\n    merge_cut_height=0.25)\n# 模块-性状关联\nov.bulk.wgcna_trait_correlation(\n    modules, meta[['grade','survival']])\n\n# === 2. Hub gene 识别 ===\n# Module Membership (MM): gene vs module eigengene\n# Gene Significance (GS): gene vs trait\nhub_genes = ov.bulk.wgcna_hub_genes(\n    modules, module='blue', top_n=20)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "WGCNA为什么使用soft-thresholding而非hard-thresholding？",
+              "options": [
+                "soft更快",
+                "生物网络是连续的——硬阈值丢失弱关系，软阈值保留网络拓扑的连续性，使网络更接近scale-free",
+                "hard不支持R",
+                "没有区别"
+              ],
+              "answer": 1,
+              "explanation": "硬阈值(cor>0.8才有边)可能因为0.79而丢失真实的弱调控关系。软阈值(a_ij=|cor|^β)保留所有连接但放大强关系，使网络接近无标度拓扑，更符合真实生物网络。"
+            }
+          ]
         }
       ]
     },
@@ -9618,6 +9870,24 @@
           "icon": "代码",
           "title": "CCA 跨组学关联 + Seurat整合",
           "code": "from sklearn.cross_decomposition import CCA\nimport numpy as np\n\n# === CCA: RNA + ATAC 关联 ===\n# X: (cells, HVGs) RNA表达\n# Y: (cells, peaks) ATAC开放度\ncca = CCA(n_components=20)\nX_c, Y_c = cca.fit_transform(X_rna, Y_atac)\n# X_c[:,0]和Y_c[:,0]是最大化相关的第一对canonical variates\ncorr = np.corrcoef(X_c[:,0], Y_c[:,0])[0,1]\nprint(f'CC1 correlation: {corr:.3f}')\n\n# === Seurat-style CCA整合 ===\n# 1. CCA降维\n# 2. L2-normalize canonical vectors\n# 3. Find mutual nearest neighbors (MNN)\n# 4. Anchor-based integration\n# OmicVerse: ov.single.glue() 提供了类似的图对齐方法\nov.single.glue(adata_rna, adata_atac,\n    annotation_key='celltype')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CCA和PCA的区别是什么？",
+              "options": [
+                "没有区别",
+                "CCA同时分析两组变量——找到X和Y的最大相关方向；PCA只分析一组变量",
+                "CCA只能用于2个变量",
+                "CCA不需要线性假设"
+              ],
+              "answer": 1,
+              "explanation": "PCA在一组变量内找方差最大的方向。CCA在两个变量组之间找相关性最大的方向——第一个canonical variate对(CV1_X, CV1_Y)最大化两组的相关性。"
+            }
+          ]
         }
       ]
     },
@@ -9648,6 +9918,24 @@
           "icon": "代码",
           "title": "MDS/NMDS 距离可视化",
           "code": "from sklearn.manifold import MDS\nfrom scipy.spatial.distance import pdist, squareform\nfrom skbio.stats.ordination import pcoa\nimport numpy as np\n\n# === Metric MDS (PCoA) ===\n# 输入: 样本×样本距离矩阵\nbc_dist = pdist(otu_table, metric='braycurtis')\nbc_square = squareform(bc_dist)\nmds = MDS(n_components=2, dissimilarity='precomputed',\n          random_state=42)\ncoords = mds.fit_transform(bc_square)\n\n# === NMDS (非度量): 只保留相对顺序 ===\n# NMDS: stress函数最小化距离排序 vs 原始排序\n# 适合非欧几里得距离（如Bray-Curtis）\nfrom sklearn.manifold import MDS\nnmds = MDS(n_components=2, metric=False,\n           dissimilarity='precomputed',\n           max_iter=300, random_state=42)\nnmds_coords = nmds.fit_transform(bc_square)\nprint(f'NMDS stress: {nmds.stress_:.3f}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "什么场景下用MDS而不用PCA？",
+              "options": [
+                "数据是距离矩阵而非原始特征矩阵时——如Bray-Curtis距离、相关性距离",
+                "数据是原始表达矩阵",
+                "MDS和PCA完全相同",
+                "MDS只能用于微生物组"
+              ],
+              "answer": 0,
+              "explanation": "MDS只需要距离矩阵（任何距离度量）作为输入。当你的数据不是原始特征（如Bray-Curtis生态距离）或只需要样本间相对关系时，MDS是唯一选择。"
+            }
+          ]
         }
       ]
     },
@@ -9679,6 +9967,24 @@
           "icon": "代码",
           "title": "谱聚类: 非线性分群 + Hi-C域",
           "code": "from sklearn.cluster import SpectralClustering\n\n# === 单细胞: 非线性细胞群 ===\nsc = SpectralClustering(\n    n_clusters=8, affinity='nearest_neighbors',\n    n_neighbors=10, random_state=42)\nlabels = sc.fit_predict(adata.obsm['X_pca'][:, :30])\n\n# === 自定义affinity矩阵 (基于KNN图) ===\nfrom sklearn.neighbors import kneighbors_graph\nA = kneighbors_graph(adata.obsm['X_pca'][:, :30],\n                      n_neighbors=10, mode='connectivity')\nsc_custom = SpectralClustering(\n    n_clusters=8, affinity='precomputed')\nlabels_custom = sc_custom.fit_predict(A)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "谱聚类为什么能处理非线性可分的簇？",
+              "options": [
+                "它用了更多计算资源",
+                "图Laplacian的特征向量天然编码了图的社区结构——即使原始空间非线性，特征向量空间中的数据是线性可分的",
+                "它使用深度学习",
+                "它等同于K-means"
+              ],
+              "answer": 1,
+              "explanation": "谱聚类的关键是graph Laplacian的特征分解。L的前k个最小非零特征值对应\"最自然的社区分割\"。在特征向量组成的空间中，即使原始数据是非线性的，社区结构也被\"拉直\"了。"
+            }
+          ]
         }
       ]
     },
@@ -9709,6 +10015,24 @@
           "icon": "代码",
           "title": "负二项回归 DEG实战",
           "code": "import statsmodels.api as sm\nimport numpy as np\n\n# 负二项回归: 基因i的count ~ condition + offset(log(library_size))\n# DESeq2本质: NB(μ_ij, α_i)\n# log(μ_ij) = β_i0 + β_i1 * condition_j + offset(log(s_j))\n\n# 使用statsmodels\nimport statsmodels.formula.api as smf\ndf = pd.DataFrame({\n    'counts': gene_counts,\n    'condition': np.repeat(['ctrl','treat','treat','ctrl'], 25),\n    'lib_size': np.log(library_sizes)\n})\nmodel = smf.glm('counts ~ condition', data=df,\n    family=sm.families.NegativeBinomial(alpha=1.0),\n    offset=df['lib_size']).fit()\nprint(model.summary())"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "为什么RNA-seq差异分析用负二项而不用Poisson？",
+              "options": [
+                "两者相同",
+                "生物数据的方差通常大于均值(overdispersion)——负二项有额外的dispersion参数φ来建模这个",
+                "Poisson不支持整数",
+                "负二项总是更好的"
+              ],
+              "answer": 1,
+              "explanation": "Poisson假设方差=均值。但真实RNA-seq数据中基因表达的方差通常远超均值（生物学变异+技术噪声）。负二项回归的φ参数让方差=μ+μ²/φ，灵活建模overdispersion。"
+            }
+          ]
         }
       ]
     },
@@ -9739,6 +10063,24 @@
           "icon": "代码",
           "title": "Cox回归 + KM曲线",
           "code": "from lifelines import CoxPHFitter, KaplanMeierFitter\nimport pandas as pd\n\n# === Cox 回归 ===\ncph = CoxPHFitter()\ncph.fit(df, duration_col='survival_months',\n        event_col='vital_status', formula='TP53 + EGFR + age')\ncph.print_summary()  # HR, p-value, CI\n# HR > 1 → 高风险（表达越高，死亡越快）\n\n# === Kaplan-Meier 曲线 ===\nkmf = KaplanMeierFitter()\nhigh = df['TP53'] > df['TP53'].median()\nkmf.fit(df[high]['survival_months'],\n        df[high]['vital_status'], label='TP53 High')\nkmf.plot()\nkmf.fit(df[~high]['survival_months'],\n        df[~high]['vital_status'], label='TP53 Low')\nkmf.plot()\n# log-rank test 比较两组"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Cox模型的核心假设是什么？",
+              "options": [
+                "数据必须正态",
+                "比例风险(PH)——不同组之间的hazard ratio不随时间变化",
+                "必须有1000个样本",
+                "不需要任何假设"
+              ],
+              "answer": 1,
+              "explanation": "Cox最关键的假设是比例风险——协变量的效应（hazard ratio）在时间上是恒定的。如果HR随时间变化（如某药物早期有效后期无效），需要用time-varying Cox或Aalen模型。"
+            }
+          ]
         }
       ]
     },
@@ -9769,6 +10111,24 @@
           "icon": "代码",
           "title": "limma 经验贝叶斯DEG",
           "code": "import numpy as np\n\n# limma核心: 收缩方差估计\n# 普通t检验: t = (mean1 - mean2) / sqrt(s^2/n)\n# limma:     t_mod = (mean1 - mean2) / sqrt(s_moderated^2/n)\n# 其中 s_moderated^2 是单个基因方差和先验方差的加权平均\n\n# 模拟: 20000个基因, 每组5个样本\nn_genes, n_per_group = 20000, 5\ngene_vars = 1 / np.random.gamma(2, 0.5, n_genes)  # 真实方差\n\n# 每个基因的样本方差 (自由度=8)\nsample_vars = np.array([\n    gene_vars[i] * np.random.chisquare(8) / 8\n    for i in range(n_genes)\n])\n\n# limma: fit prior distribution to all sample_vars\n# → posterior variance = weighted avg of sample and prior\n# 小方差基因借力大, 大方差基因少借力"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "limma的经验贝叶斯为什么能让小样本DEG更稳定？",
+              "options": [
+                "用了更多CPU",
+                "借用全体基因的信息估计单个基因的方差——先验方差+后验收缩",
+                "limma总是比DESeq2好",
+                "它不需要生物学重复"
+              ],
+              "answer": 1,
+              "explanation": "小样本时每个基因自己的方差估计非常不稳定（df小）。经验贝叶斯从20000个基因的方差中估计一个先验分布，将每个基因的方差\"收缩\"向先验均值——样本方差大的基因少缩，小的多缩。"
+            }
+          ]
         }
       ]
     },
@@ -9799,6 +10159,24 @@
           "icon": "代码",
           "title": "SHAP 基因贡献分解",
           "code": "import shap\nimport xgboost as xgb\n\n# 训练模型预测疾病\nmodel = xgb.XGBClassifier().fit(X_train, y_train)\n\n# SHAP解释\nexplainer = shap.TreeExplainer(model)\nshap_values = explainer.shap_values(X_test)\n\n# Summary plot: 每个基因的全局重要性\nshap.summary_plot(shap_values, X_test,\n                  feature_names=gene_names)\n\n# Waterfall: 单个样本的预测分解\nshap.waterfall_plot(\n    shap.Explanation(values=shap_values[0],\n                     base_values=explainer.expected_value,\n                     data=X_test.iloc[0],\n                     feature_names=gene_names))\n\n# 依赖图: 单个基因的SHAP值 vs 表达量\nshap.dependence_plot('TP53', shap_values,\n                     X_test, feature_names=gene_names)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "SHAP值的核心性质是什么？",
+              "options": [
+                "只适用于树模型",
+                "可加性——所有特征的SHAP值之和=模型预测值-平均预测值",
+                "SHAP就是feature importance的另一个名字",
+                "SHAP不需要模型"
+              ],
+              "answer": 1,
+              "explanation": "SHAP基于Shapley值的三个公理：可加性（各特征贡献求和=预测）、一致性（模型改了不会降低重要特征的重要性）、缺失性（缺失特征贡献=0）。这是区别于其他解释方法的核心。"
+            }
+          ]
         }
       ]
     },
@@ -9830,6 +10208,24 @@
           "icon": "代码",
           "title": "GCN/GAT 蛋白质功能预测",
           "code": "import torch\nimport torch_geometric\nfrom torch_geometric.nn import GCNConv, GATConv\n\n# === GCN: 蛋白质功能预测 ===\nclass ProteinGCN(torch.nn.Module):\n    def __init__(self, in_dim, hidden, out_dim):\n        super().__init__()\n        self.conv1 = GCNConv(in_dim, hidden)\n        self.conv2 = GCNConv(hidden, out_dim)\n    def forward(self, x, edge_index):\n        x = self.conv1(x, edge_index).relu()\n        x = self.conv2(x, edge_index)\n        return x\n\n# PPI图: 节点=蛋白特征(序列嵌入), 边=互作\n# data.x: (N_proteins, feature_dim)\n# data.edge_index: (2, N_edges)\nmodel = ProteinGCN(in_dim=1280, hidden=256, out_dim=50)\nout = model(data.x, data.edge_index)\n\n# === GAT: 学习哪些邻居更重要 ===\ngat = GATConv(in_dim, hidden, heads=4, concat=True)\n# 多头注意力——4个不同的\"重要性\"视角"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "GAT相比GCN的核心改进是什么？",
+              "options": [
+                "GAT使用注意力机制学习不同邻居的重要性权重——不是所有邻居平等对待",
+                "GAT更快",
+                "GAT不需要图结构",
+                "没有区别"
+              ],
+              "answer": 0,
+              "explanation": "GCN对所有邻居一视同仁（平均聚合）。GAT引入自注意力——为每条边学习一个权重α_ij，表示节点j对节点i有多重要。在PPI网络中，α高=强互作伙伴贡献大。"
+            }
+          ]
         }
       ]
     },
@@ -9861,6 +10257,24 @@
           "icon": "代码",
           "title": "扩散图 + PHATE 轨迹可视化",
           "code": "import phate\nfrom sklearn.manifold import SpectralEmbedding\n\n# === 扩散图 ===\n# diffusion map = 转移概率矩阵的特征分解\ndiffmap = SpectralEmbedding(\n    n_components=3, affinity='nearest_neighbors',\n    n_neighbors=15, random_state=42)\ndc = diffmap.fit_transform(adata.obsm['X_pca'][:, :50])\n# DC1常捕获伪时间 (如未分化→分化)\n\n# === PHATE: 保留轨迹结构 ===\nphate_op = phate.PHATE(n_components=2,\n                        knn=5, decay=40,\n                        n_jobs=-2)\nphate_coords = phate_op.fit_transform(adata.X)\n# 可视化\nadata.obsm['X_phate'] = phate_coords\nsc.pl.embedding(adata, basis='phate',\n                color=['pseudotime', 'celltype'])"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "扩散图的'扩散距离'和欧氏距离有什么不同？",
+              "options": [
+                "完全相同",
+                "扩散距离考虑通过中间节点的所有可能路径——即使两个节点在原始空间很远，通过高密度的中间区域连接可以很近",
+                "扩散距离总是小于欧氏距离",
+                "扩散距离只能用于图数据"
+              ],
+              "answer": 1,
+              "explanation": "扩散距离（diffusion distance）测量的是\"通过随机游走在数据流形上传播的时间\"。在发育轨迹中，祖细胞和终末分化细胞虽然分属两端，但通过连续的中间态存在\"近路\"——扩散距离捕获了这种连续性。"
+            }
+          ]
         }
       ]
     },
@@ -9892,6 +10306,24 @@
           "icon": "代码",
           "title": "EM 算法从头实现 (GMM)",
           "code": "import numpy as np\nfrom scipy.stats import multivariate_normal\n\n# EM for GMM (2 components, 1D for simplicity)\nX = np.concatenate([np.random.normal(-2,1,500),\n                     np.random.normal(3,1.5,500)])\nmu = [-1, 1]; sigma = [1, 1]; pi = [0.5, 0.5]\nfor it in range(100):\n    # E-step: 计算每个点属于每个component的概率\n    resp = np.zeros((len(X), 2))\n    for k in range(2):\n        resp[:, k] = pi[k] * multivariate_normal.pdf(\n            X, mu[k], sigma[k])\n    resp /= resp.sum(axis=1, keepdims=True)\n    # M-step: 用加权数据更新参数\n    Nk = resp.sum(axis=0)\n    mu = (resp * X.reshape(-1,1)).sum(axis=0) / Nk\n    sigma = np.array([np.average((X-mu[k])**2,\n        weights=resp[:,k]) for k in range(2)])\n    pi = Nk / len(X)\nprint(f'Final: mu={mu}, sigma={sigma}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "EM算法的E步和M步分别做什么？",
+              "options": [
+                "E=误差计算, M=模型评估",
+                "E步:估计隐变量的后验概率(expectation); M步:最大化完整数据的对数似然(maximization)",
+                "E=删除,M=添加",
+                "只有E步有意义"
+              ],
+              "answer": 1,
+              "explanation": "E步:基于当前参数，计算隐变量的后验分布（\"猜\"每个数据点属于哪个component）。M步:基于E步的\"猜测\"，更新模型参数使似然最大化。两者交替直到收敛。"
+            }
+          ]
         }
       ]
     },
@@ -9922,6 +10354,24 @@
           "icon": "代码",
           "title": "ANOVA 多组比较",
           "code": "from scipy.stats import f_oneway\nimport statsmodels.api as sm\nfrom statsmodels.formula.api import ols\n\n# === 单因素ANOVA ===\ngroup_a = expr[condition == 'WT']\ngroup_b = expr[condition == 'KO']\ngroup_c = expr[condition == 'KO+rescue']\nF, p = f_oneway(group_a, group_b, group_c)\nprint(f'ANOVA F={F:.2f}, p={p:.2e}')\n\n# === 双因素ANOVA (drug + dose) ===\nmodel = ols('expression ~ C(drug) + C(dose) + C(drug):C(dose)',\n            data=df).fit()\nanova_table = sm.stats.anova_lm(model, typ=2)\nprint(anova_table)  # 主效应+交互作用"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "ANOVA的F统计量度量的是什么？",
+              "options": [
+                "各组均值的大小",
+                "组间方差/组内方差——F大意味着组间差异相对于组内波动显著",
+                "样本量的大小",
+                "p值的大小"
+              ],
+              "answer": 1,
+              "explanation": "F = MSB/MSW = (组间平方和/组间df) / (组内平方和/组内df)。当组间差异远大于组内随机波动时，F>1+阈值→拒绝H0（所有组均值相等）。"
+            }
+          ]
         }
       ]
     },
@@ -9952,6 +10402,24 @@
           "icon": "代码",
           "title": "KS检验 + GSEA原理",
           "code": "from scipy.stats import ks_2samp\nimport numpy as np\n\n# === KS检验: 两组分布比较 ===\nt_cells = adata[adata.obs['celltype']=='T','CD3D'].X.toarray().flatten()\nb_cells = adata[adata.obs['celltype']=='B','CD3D'].X.toarray().flatten()\nstat, p = ks_2samp(t_cells, b_cells)\nprint(f'KS stat={stat:.3f}, p={p:.2e}')\n\n# === GSEA running sum (基于KS) ===\nranked = np.argsort(de_stats)[::-1]  # 按log2FC降序\nin_set = np.isin(ranked, pathway_genes)\n# 遇到集合内基因→加分, 集合外→减分\nhit = 1.0 / in_set.sum()  # 加权（GSEA常用|log2FC|^p）\nmiss = -1.0 / (~in_set).sum()\nscore = np.cumsum(np.where(in_set, hit, miss))\nes = score.max() - score.min()  # Enrichment Score\n# permutation test评估ES的显著性"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "KS检验和t检验的核心区别？",
+              "options": [
+                "KS检验比较整条分布曲线——不只是均值差异",
+                "t检验总是更好",
+                "KS检验需要正态分布",
+                "两者完全相同"
+              ],
+              "answer": 0,
+              "explanation": "t检验只比较均值（位置参数），KS检验比较整个分布的累积分布函数（CDF）。两个分布可以有相同的均值但完全不同的形状——t检验看不出来，KS检验可以。"
+            }
+          ]
         }
       ]
     },
@@ -9983,6 +10451,24 @@
           "icon": "代码",
           "title": "RFE + Boruta 基因选择",
           "code": "from sklearn.feature_selection import RFE, RFECV\nfrom sklearn.ensemble import RandomForestClassifier\nfrom boruta import BorutaPy\n\n# === RFE: 迭代消除 ===\nrf = RandomForestClassifier(n_estimators=100, random_state=42)\nrfe = RFECV(rf, step=50, cv=5, scoring='roc_auc')\nrfe.fit(X, y)\nselected = np.where(rfe.support_)[0]\nprint(f'RFE selected {len(selected)} genes')\n\n# === Boruta: 影子特征法 ===\nrf_boruta = RandomForestClassifier(\n    n_jobs=-1, class_weight='balanced',\n    max_depth=5)\nboruta = BorutaPy(rf_boruta, n_estimators='auto',\n                  perc=100, random_state=42)\nboruta.fit(X.values, y)\n# boruta.support_: True=confirmed important\n# boruta.support_weak_: True=tentative\nconfirmed = np.where(boruta.support_)[0]\nprint(f'Boruta confirmed: {len(confirmed)} genes')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Boruta相比Lasso的特征选择有什么优势？",
+              "options": [
+                "Boruta将每个特征与随机'影子'对比——只有显著优于随机的特征才保留；Lasso可能因L1惩罚而漏选",
+                "Boruta总是更快",
+                "Lasso不需要调参",
+                "没有区别"
+              ],
+              "answer": 0,
+              "explanation": "Boruta为每个真实特征创建随机打乱的影子版本。只有importance显著高于最大影子特征的真实特征才被确认为'重要'。这比Lasso的L1阈值更严格——保证选出的不是随机噪声。"
+            }
+          ]
         }
       ]
     },
@@ -10013,6 +10499,24 @@
           "icon": "代码",
           "title": "GP 基因表达时间序列",
           "code": "from sklearn.gaussian_process import GaussianProcessRegressor\nfrom sklearn.gaussian_process.kernels import RBF, WhiteKernel\nimport numpy as np\n\n# 基因表达: 5个时间点\ntime = np.array([0, 2, 4, 6, 8]).reshape(-1, 1)\nexpr = np.array([1.0, 2.1, 3.0, 2.8, 2.5])\n\n# RBF kernel: 假设相邻时间点表达更相似\nkernel = RBF(length_scale=2.0) + WhiteKernel(noise_level=0.1)\ngp = GaussianProcessRegressor(kernel=kernel, alpha=0.0)\ngp.fit(time, expr)\n\n# 预测+不确定性\ntest_time = np.linspace(0, 10, 100).reshape(-1, 1)\nmu, sigma = gp.predict(test_time, return_std=True)\n# mu: 最可能的表达值\n# sigma: 不确定性 (95% CI = mu ± 1.96*sigma)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "高斯过程相比普通回归的独特优势？",
+              "options": [
+                "高斯过程为每个预测提供不确定性估计——不只是点预测",
+                "高斯过程总是更准确",
+                "高斯过程不需要数据",
+                "高斯过程等同于线性回归"
+              ],
+              "answer": 0,
+              "explanation": "GP是贝叶斯非参数方法——它为函数空间放置先验。预测时返回正态分布N(μ, σ²)，不仅告诉你最可能的值，还告诉你95%置信区间。这在实验设计中至关重要。"
+            }
+          ]
         }
       ]
     },
@@ -10043,6 +10547,24 @@
           "icon": "代码",
           "title": "MCL 蛋白质家族聚类",
           "code": "import markov_clustering as mc\nimport networkx as nx\nimport numpy as np\n\n# 构建序列相似性图\n# nodes: 蛋白质, edges: BLAST E-value < 1e-5\nG = nx.from_pandas_edgelist(blast_hits,\n    'query', 'target', edge_attr='evalue')\n\n# 转换为邻接矩阵\nadj = nx.to_scipy_sparse_array(G)\n\n# MCL聚类\n# inflation: 1.5-5.0，越高→越多小簇\nresult = mc.run_mcl(adj, inflation=2.0)\nclusters = mc.get_clusters(result)\n\nprint(f'Found {len(clusters)} protein families')\nfor i, cluster in enumerate(clusters[:5]):\n    print(f'Cluster {i}: {len(cluster)} proteins')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "MCL聚类的Inflation参数控制什么？",
+              "options": [
+                "数据输入格式",
+                "簇的粒度——inflation越大→越多更小更紧密的簇",
+                "学习率",
+                "模型的层数"
+              ],
+              "answer": 1,
+              "explanation": "MCL在每轮expansion后做inflation（对每列取幂再归一化），强化强连接、衰减弱连接。Inflation参数(1.5-5.0)控制这个\"强化\"的力度——值越大，簇越多越小越紧密。"
+            }
+          ]
         }
       ]
     },
@@ -10073,6 +10595,24 @@
           "icon": "代码",
           "title": "Sparse PCA vs PCA",
           "code": "from sklearn.decomposition import SparsePCA, PCA\nimport numpy as np\n\n# === PCA: 几乎所有基因都有loading ===\npca = PCA(n_components=5).fit(expr.T)\nprint(f'PCA sparsity: {(np.abs(pca.components_[0])<0.001).mean():.1%} zeros')\n\n# === Sparse PCA: 强制稀疏 ===\n# alpha越大→loading越稀疏\nspca = SparsePCA(n_components=5, alpha=5,\n                 random_state=42)\nspca.fit(expr.T)\nsparsity = (spca.components_[0] == 0).mean()\nprint(f'Sparse PCA sparsity: {sparsity:.1%} zeros')\n# 每个sPC只由几十个基因驱动\n\n# 找每个sPC的驱动基因\nfor i in range(3):\n    top_idx = np.argsort(np.abs(spca.components_[i]))[-10:]\n    print(f'sPC{i+1}: {gene_names[top_idx][:5]}')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Sparse PCA解决了普通PCA的什么问题？",
+              "options": [
+                "普通PCA的loading涉及几乎所有基因——Sparse PCA强制多数loading为0，每个PC只由少数基因解释",
+                "PCA太慢",
+                "PCA不能用GPU",
+                "没有区别"
+              ],
+              "answer": 0,
+              "explanation": "PCA的每个PC是所有基因的线性组合（每个基因都有非零loading），生物学家无法判断\"这个PC到底代表什么\"。Sparse PCA加L1约束→每个PC只由几十个基因驱动→结果可解释。"
+            }
+          ]
         }
       ]
     },
@@ -10104,6 +10644,24 @@
           "icon": "代码",
           "title": "Kernel PCA vs 线性PCA",
           "code": "from sklearn.decomposition import PCA, KernelPCA\n\n# === 线性PCA: 只能找直线方向 ===\npca = PCA(n_components=2)\nX_pca = pca.fit_transform(X)\n\n# === Kernel PCA: RBF核捕获非线性 ===\nkpca_rbf = KernelPCA(n_components=2,\n                     kernel='rbf',  # 高斯核\n                     gamma=0.1)\nX_kpca_rbf = kpca_rbf.fit_transform(X)\n\n# === Kernel PCA: 多项式核 ===\nkpca_poly = KernelPCA(n_components=2,\n                       kernel='poly',\n                       degree=3)  # 三次多项式\nX_kpca_poly = kpca_poly.fit_transform(X)\n\n# 核函数选择:\n# RBF: 通用非线性 (最常用)\n# Polynomial: 已知关系是多项式\n# Sigmoid: 类似神经网络激活\n# Cosine: 方向性数据 (如基因表达角度)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Kernel PCA中RBF核的作用是什么？",
+              "options": [
+                "将数据映射到无限维空间——在这个空间中非线性关系变成线性的，然后做PCA",
+                "只改变颜色",
+                "等同于线性PCA",
+                "只用于分类"
+              ],
+              "answer": 0,
+              "explanation": "RBF核通过高斯函数 k(x,y)=exp(-γ||x-y||²) 隐式地将数据映射到无限维的再生核Hilbert空间。在这个空间中，原本非线性的关系变得线性可分→PCA可以发现非线性的主成分。"
+            }
+          ]
         }
       ]
     },
@@ -10135,6 +10693,24 @@
           "icon": "代码",
           "title": "Isomap / LLE 实战",
           "code": "from sklearn.manifold import Isomap, LocallyLinearEmbedding\nfrom sklearn.datasets import make_swiss_roll\nimport numpy as np\n\n# Swiss roll: 经典流形学习测试\nX_3d, color = make_swiss_roll(1000, noise=0.1)\n\n# === Isomap: 测地距离 ===\niso = Isomap(n_neighbors=10, n_components=2)\nX_iso = iso.fit_transform(X_3d)\n# Isomap成功\"展开\"了Swiss roll\n\n# === LLE: 局部线性保持 ===\nlle = LocallyLinearEmbedding(\n    n_neighbors=10, n_components=2,\n    method='standard')  # 'modified','hessian','ltsa'\nX_lle = lle.fit_transform(X_3d)\n\n# === Modified LLE: 更稳定 ===\nlle_mod = LocallyLinearEmbedding(\n    n_neighbors=10, n_components=2,\n    method='modified')\nX_lle_mod = lle_mod.fit_transform(X_3d)\n\n# === Hessian LLE: 理论上最\"正确\"但也最慢 ===\n# lle_hess = LocallyLinearEmbedding(\n#     n_neighbors=20, n_components=2,\n#     method='hessian')"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Isomap的'short-circuit'问题是什么？",
+              "options": [
+                "计算太慢",
+                "如果KNN邻域太大，Isomap可能跳过数据流形中的'洞'，'短路'到流形的另一侧——测地距离被严重低估",
+                "内存不足",
+                "Isomap没有这个问题"
+              ],
+              "answer": 1,
+              "explanation": "Isomap在KNN图上算最短路径。如果K太大，可能跨过流形中的空白区域连接到另一侧的点（'short-circuit'），导致测地距离被低估，流形无法正确展开。K太小则图不连通。"
+            }
+          ]
         }
       ]
     },
@@ -10166,6 +10742,24 @@
           "icon": "代码",
           "title": "Autoencoder 降维 vs 去噪",
           "code": "import torch\nimport torch.nn as nn\n\n# === 深度自编码器: 20000 → 32 → 20000 ===\nclass DeepAE(nn.Module):\n    def __init__(self, in_dim=20000):\n        super().__init__()\n        # Encoder: 逐层压缩\n        self.encoder = nn.Sequential(\n            nn.Linear(in_dim, 1024), nn.ReLU(),\n            nn.Dropout(0.2),\n            nn.Linear(1024, 128), nn.ReLU(),\n            nn.Linear(128, 32)  # bottleneck\n        )\n        # Decoder: 逐层恢复\n        self.decoder = nn.Sequential(\n            nn.Linear(32, 128), nn.ReLU(),\n            nn.Linear(128, 1024), nn.ReLU(),\n            nn.Linear(1024, in_dim)\n        )\n    def forward(self, x):\n        z = self.encoder(x)      # 32维潜在表示\n        recon = self.decoder(z)  # 重建\n        return recon, z\n\n# 训练: MSE loss (PCA等价于线性AE+l2 loss)\n# 潜在表示z可用于下游聚类/可视化"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "自编码器的bottleneck层有什么作用？",
+              "options": [
+                "加速训练",
+                "bottleneck强制信息压缩——如果网络能在低维重建输入，说明bottleneck捕获了数据的本质结构",
+                "增加噪音",
+                "没有特殊作用"
+              ],
+              "answer": 1,
+              "explanation": "bottleneck层的维度远小于输入维度（如20000→32）。这强制编码器学习最有信息量的特征——只有真正重要的模式才能穿过瓶颈被重建。这等价于非线性降维。"
+            }
+          ]
         }
       ]
     },
@@ -10196,6 +10790,24 @@
           "icon": "代码",
           "title": "PLS-DA 分类+VIP",
           "code": "from sklearn.cross_decomposition import PLSRegression\nfrom sklearn.preprocessing import LabelBinarizer\nimport numpy as np\n\n# === PLS-DA: 有监督降维 ===\nlb = LabelBinarizer()\nY_onehot = lb.fit_transform(labels)  # (N, n_classes)\n\npls = PLSRegression(n_components=3, scale=True)\npls.fit(X, Y_onehot)\n# X_scores: (N, 3) — 样本在PLS空间\n# X_loadings: (p, 3) — 基因对PLS成分的贡献\n\n# === VIP 评分: 找最重要的变量 ===\n# VIP_j = sqrt(p * sum(SS_b * w_jb^2 / sum(SS_b)))\n# VIP > 1 → 该变量对分离有显著贡献\nW = pls.x_weights_  # (p, n_components)\nt = pls.x_scores_   # (N, n_components)\nSS = np.sum(t**2, axis=0)  # 每个成分的方差\nW_norm = W / np.linalg.norm(W, axis=0)\nvip = np.sqrt(X.shape[1] * np.sum(\n    SS * W_norm**2, axis=1) / np.sum(SS))"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "PLS-DA和PCA的最关键区别？",
+              "options": [
+                "完全相同",
+                "PLS-DA在降维时利用类别标签——最大化组间分离；PCA是无监督的,只看方差",
+                "PLS-DA只用于回归",
+                "PCA需要标签"
+              ],
+              "answer": 1,
+              "explanation": "PCA无视类别标签——即使PC1方向与组间分离完全无关也没关系。PLS-DA寻找\"最大化X和Y协方差\"的方向——在分类场景中，这意味着找到\"最能区分各组\"的降维方向。"
+            }
+          ]
         }
       ]
     },
@@ -10227,6 +10839,24 @@
           "icon": "代码",
           "title": "因子分析 vs PCA",
           "code": "from sklearn.decomposition import PCA, FactorAnalysis\nimport numpy as np\n\n# === PCA: 对方差建模 (包含噪声方差) ===\npca = PCA(n_components=3).fit(expr.T)\n# PCA假设所有方差都是\"信号\"\n\n# === 因子分析: 建模共同方差 ===\nfa = FactorAnalysis(n_components=3,\n                    random_state=42)\nfa.fit(expr.T)\n# FA分离: 共同方差(shared) + 独特方差(unique per gene)\n# 每个基因的表达 = 因子×loading + noise_i\n\n# log-likelihood: 模型拟合度\nll = fa.score(expr.T)\nprint(f'Log-likelihood: {ll:.1f}')\n\n# 选择因子数: 逐步增加直到log-likelihood不再显著提升"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "因子分析和PCA的方差建模有什么不同？",
+              "options": [
+                "FA建模共同方差(shared variance)，把每个变量的独特噪声分离；PCA把所有方差混在一起",
+                "完全相同",
+                "FA不需要数据",
+                "PCA处理噪声更好"
+              ],
+              "answer": 0,
+              "explanation": "FA假设每个变量=共同因子+独特噪声。只建模\"共同部分\"(communality)。PCA把所有方差当信号。当你的目标就是分离驱动多个变量的\"隐藏因子\"时，FA是正确选择。"
+            }
+          ]
         }
       ]
     },
@@ -10257,6 +10887,24 @@
           "icon": "代码",
           "title": "t-SNE 参数扫描 + 陷阱演示",
           "code": "from sklearn.manifold import TSNE\nimport numpy as np\n\n# === 参数网格搜索 ===\nperplexities = [5, 15, 30, 50, 100]\nfor perp in perplexities:\n    tsne = TSNE(n_components=2, perplexity=perp,\n                random_state=42, n_iter=1000)\n    X_tsne = tsne.fit_transform(adata.obsm['X_pca'][:, :50])\n    # 存储结果用于比较\n\n# === 陷阱1: 2D距离≠真实距离 ===\n# 两个簇在t-SNE图上距离远≠它们在基因表达空间距离远\n# t-SNE只保证\"附近点\"仍是附近, 不保证\"远点\"的距离\n\n# === 陷阱2: 簇大小≠细胞丰度 ===\n# t-SNE倾向于\"展开\"数据→各簇大小趋于均匀\n# 小细胞群在t-SNE中看起来和大群差不多大\n\n# === 陷阱3: 随机种子影响 ===\n# t-SNE对初始化敏感——不同seed给出不同结果\n# 必须: 固定random_state, 多次运行选最稳定的"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "t-SNE中perplexity太小会导致什么问题？",
+              "options": [
+                "计算更快",
+                "只看到最近的邻居——可能把一个大簇撕成碎片，过度强调微观结构",
+                "perplexity越大越好",
+                "t-SNE没有perplexity参数"
+              ],
+              "answer": 1,
+              "explanation": "perplexity≈有效邻居数。太小(如5)→只看到最近邻居，可能把连续的大细胞群\"撕碎\"成多个孤岛。太大(如100)→局部细节被平滑。单细胞通常用15-30。"
+            }
+          ]
         }
       ]
     },
@@ -10287,6 +10935,24 @@
           "icon": "代码",
           "title": "UMAP 参数扫描 + transform",
           "code": "import umap\nimport numpy as np\n\n# === 参数扫描 ===\nn_neighbors_list = [5, 15, 30, 50]\nmin_dist_list = [0.1, 0.3, 0.5]\nfor n in n_neighbors_list:\n    for md in min_dist_list:\n        reducer = umap.UMAP(\n            n_neighbors=n, min_dist=md,\n            random_state=42)\n        X_umap = reducer.fit_transform(\n            adata.obsm['X_pca'][:, :50])\n\n# === UMAP独特优势: transform新数据 ===\n# t-SNE无法做到——UMAP可以!\nreducer = umap.UMAP(random_state=42)\nreducer.fit(train_data)\n# 新来的query数据映射到同一嵌入空间\nquery_embedding = reducer.transform(query_data)\n# 这对在线学习/大数据集分批处理极其有用"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "UMAP相比t-SNE的一个独特优势是什么？",
+              "options": [
+                "完全相同",
+                "UMAP学习的是映射函数(而非仅优化坐标)——可以transform新数据到同一嵌入空间",
+                "UMAP总是更慢",
+                "UMAP需要GPU"
+              ],
+              "answer": 1,
+              "explanation": "t-SNE是非参数方法——新数据来了必须重新跑整个优化。UMAP学习一个实际的映射函数(通过交叉熵优化的fuzzy simplicial set)，可以在训练后对新数据调用transform()直接映射。"
+            }
+          ]
         }
       ]
     },
@@ -10318,6 +10984,24 @@
           "icon": "代码",
           "title": "CP分解: 基因×时间×条件",
           "code": "import tensorly as tl\nfrom tensorly.decomposition import parafac, tucker\nimport numpy as np\n\n# 基因表达张量: (genes, samples, timepoints)\n# shape: (20000, 100, 5)\nX_tensor = np.random.rand(2000, 50, 5)\n\n# === CP (PARAFAC) 分解 ===\n# X ≈ sum_{r=1}^R λ_r * a_r ∘ b_r ∘ c_r\n# rank R: 成分数\nweights, factors = parafac(X_tensor, rank=3)\n# factors[0]: (2000, 3) — 基因在3个成分上的loading\n# factors[1]: (50, 3)   — 样本在3个成分上的坐标\n# factors[2]: (5, 3)    — 时间点在3个成分上的权重\n\n# 解读: 成分1可能代表\"免疫响应随时间增强\"\n# 基因loading高+时间权重递增+样本区分免疫vs非免疫\n\n# === Tucker 分解 (更灵活) ===\n# X ≈ G ×_1 A ×_2 B ×_3 C\ncore, factors_t = tucker(X_tensor, rank=[10, 5, 3])\n# core: (10, 5, 3) — 核心张量\n# 每个维度可以有不同的rank"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "什么时候用张量分解而不是SVD/NMF？",
+              "options": [
+                "数据是二维矩阵",
+                "数据天然是三维或更高维——如基因×时间×条件×个体",
+                "总是用张量分解更好",
+                "张量分解不支持Python"
+              ],
+              "answer": 1,
+              "explanation": "张量分解的设计就是处理多维数据。如果你有基因×样本×时间点的三维数据，把时间\"拍平\"到样本维做SVD会丢失时间维度特有的结构。CP/Tucker直接建模三维相互作用。"
+            }
+          ]
         }
       ]
     },
@@ -10348,6 +11032,24 @@
           "icon": "代码",
           "title": "Robust PCA: 分离信号和异常",
           "code": "from sklearn.decomposition import PCA\nimport numpy as np\n\n# === Robust PCA: min ||L||_* + λ||S||_1 s.t. X = L + S\n# 使用ADMM算法\n# L: 低秩矩阵 (干净的信号)\n# S: 稀疏矩阵 (异常值/噪声)\n\n# 简化版: 用PCA reconstruction error检测异常\ndef robust_pca_outlier_detection(X, n_components=10):\n    pca = PCA(n_components=n_components)\n    X_pca = pca.fit_transform(X)\n    X_recon = pca.inverse_transform(X_pca)\n    # 重构误差大的样本→异常\n    recon_error = np.sum((X - X_recon)**2, axis=1)\n    threshold = np.median(recon_error) + 2*np.std(recon_error)\n    outliers = recon_error > threshold\n    print(f'Outliers detected: {outliers.sum()}')\n    return outliers"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "Robust PCA将数据分解为哪两部分？",
+              "options": [
+                "训练集和测试集",
+                "低秩矩阵L(干净信号)+稀疏矩阵S(异常值)",
+                "编码器和解码器",
+                "均值和方差"
+              ],
+              "answer": 1,
+              "explanation": "RPCA求解 X = L + S，其中L是低秩的(干净的信号结构)，S是稀疏的(异常值/噪声)。在基因表达中，L捕获真实的生物变异，S的稀疏非零元素标识异常样本或基因。"
+            }
+          ]
         }
       ]
     },
@@ -10379,6 +11081,24 @@
           "icon": "代码",
           "title": "字典学习: 比NMF更稀疏",
           "code": "from sklearn.decomposition import DictionaryLearning\nfrom sklearn.decomposition import NMF\nimport numpy as np\n\n# === 字典学习：X ≈ D × C ===\n# D: (n_features, n_components) — 字典 (基础模式)\n# C: (n_components, n_samples) — 稀疏编码 (每个样本用哪些原子)\ndl = DictionaryLearning(\n    n_components=10, alpha=1.0,  # alpha越大→越稀疏\n    max_iter=1000, random_state=42)\nD = dl.fit_transform(expr.T)  # 稀疏编码\natoms = dl.components_  # 字典原子\n\n# 每个细胞只用少数原子表示\nsparsity = (np.abs(D) < 1e-10).mean()\nprint(f'Sparsity: {sparsity:.1%} zeros')\n\n# NMF对比\nnmf = NMF(n_components=10, init='nndsvda')\nW = nmf.fit_transform(expr.T)  # NMF编码\nprint(f'NMF sparsity: {(W<1e-10).mean():.1%} zeros')\n# 字典学习通常比NMF更稀疏"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "字典学习中的'原子'对应什么？",
+              "options": [
+                "随机向量",
+                "基础表达模式——如一个特定的基因共调控程序",
+                "训练样本",
+                "模型的参数"
+              ],
+              "answer": 1,
+              "explanation": "字典原子是从数据中学到的基础组件（类似NMF的component但更稀疏）。在基因表达中，每个原子是一个\"基因表达模式\"——如免疫响应程序或细胞周期程序。每个细胞用少数原子的稀疏组合表示。"
+            }
+          ]
         }
       ]
     },
@@ -10409,6 +11129,24 @@
           "icon": "代码",
           "title": "矩阵补全: softImpute + ALRA",
           "code": "from sklearn.impute import SimpleImputer\nimport numpy as np\n\n# === softImpute: 迭代SVD补全 ===\n# 1. 初始化 (均值填充)\n# 2. SVD低秩近似\n# 3. 用近似值更新缺失位置\n# 4. 重复直到收敛\n\ndef soft_impute(X, rank=20, max_iter=100, tol=1e-6):\n    mask = ~np.isnan(X)\n    X_filled = np.where(mask, X, np.nanmean(X))\n    for i in range(max_iter):\n        U, S, Vt = np.linalg.svd(X_filled, full_matrices=False)\n        X_new = U[:, :rank] @ np.diag(S[:rank]) @ Vt[:rank, :]\n        X_filled = np.where(mask, X, X_new)\n        if np.linalg.norm(X_filled - X_new) < tol:\n            break\n    return X_filled"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "矩阵补全为什么假设矩阵是'低秩'的？",
+              "options": [
+                "为了加速计算",
+                "真实生物变异通常由少数几个潜在因子驱动——20000个基因的表达变化主要来自~20个调控因子",
+                "所有矩阵都是低秩的",
+                "低秩假设没有理论依据"
+              ],
+              "answer": 1,
+              "explanation": "基因表达虽然表面上有20000维，但真正驱动的调控因子可能只有10-50个（转录因子、信号通路等）。低秩假设反映这个生物学事实——矩阵的有效自由度远小于表观维度。"
+            }
+          ]
         }
       ]
     },
@@ -10439,6 +11177,24 @@
           "icon": "代码",
           "title": "CUR分解: 选代表性基因和样本",
           "code": "import numpy as np\nfrom scipy.linalg import svd\n\n# === CUR: 列选择 (代表性基因) ===\ndef column_select(X, n_cols):\n    \"\"\"基于SVD的列选择——选最重要的列\"\"\"\n    U, S, Vt = svd(X, full_matrices=False)\n    # 每列的leverage score = 该列在top PCs上的loading平方和\n    leverage = np.sum(Vt[:n_cols, :]**2, axis=0)\n    # 按leverage score选择top列\n    selected_cols = np.argsort(leverage)[-n_cols:]\n    return selected_cols, leverage\n\n# X: (genes, samples)\nX = expr.values\nselected_genes, scores = column_select(X, n_cols=20)\nprint(f'Representative genes: {gene_names[selected_genes]}')\n# 这些基因最能\"代表\"整个数据集\n\n# 用选出的基因和样本做低秩近似\nC = X[:, selected_cols]      # (genes, 20)\nR = X[selected_rows, :]      # (20, samples)\n# X ≈ C × U × R  (U很小, 20×20)"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "CUR分解相比SVD的独特优势？",
+              "options": [
+                "CUR用原始矩阵的真实列和行——结果就是可解释的基因和样本名",
+                "CUR总是更快",
+                "CUR不需要计算",
+                "没有区别"
+              ],
+              "answer": 0,
+              "explanation": "SVD的U和V是抽象向量（\"0.003×TP53+0.001×BRCA1+...\"），无法直接说\"选这些基因\"。CUR直接选C列（真实基因）和R行（真实样本），结果可操作——\"这20个基因最能代表整个数据集\"。"
+            }
+          ]
         }
       ]
     },
@@ -10470,6 +11226,24 @@
           "icon": "代码",
           "title": "MOFA 多组学因子提取",
           "code": "import omicverse as ov\nimport mofax\n\n# === OmicVerse MOFA ===\n# 输入: 同一批样本的多个组学矩阵\n# adata.obsm['rna']: (N, 20000) RNA\n# adata.obsm['atac']: (N, 50000) ATAC peaks\n# adata.obsm['met']: (N, 10000) 甲基化\n\nov.single.mofa(\n    adata,\n    use_rep=['rna', 'atac', 'met'],\n    n_factors=15,\n    n_iterations=1000,\n    convergence_mode='slow'  # 更精确\n)\n\n# 结果解读:\n# - Variance explained: 每个因子在各组学中解释的方差\n# - Factor weights: 哪些基因/peak驱动每个因子\n# - Factor values: 每个样本在每个因子上的得分\n# - 因子1可能只在RNA中有高权重→RNA特有因子\n# - 因子2在RNA和ATAC中都有→共享因子"
+        },
+        {
+          "type": "check",
+          "icon": "自测",
+          "title": "检验你的理解",
+          "questions": [
+            {
+              "q": "MOFA如何判断一个因子是'共享'还是'组学特异'？",
+              "options": [
+                "通过方差分解——某因子在各组学中解释的方差比例。RNA中>80%→RNA特异；RNA+ATAC中都>30%→共享",
+                "只能手动判断",
+                "MOFA不能区分",
+                "通过p值"
+              ],
+              "answer": 0,
+              "explanation": "MOFA输出每个因子在每个组学中的方差解释比例。因子1在RNA解释60%、ATAC解释5%→RNA特异。因子2在RNA解释25%、ATAC解释30%→共享。这个分解让你判断哪些生物学过程是跨组学保守的。"
+            }
+          ]
         }
       ]
     }
