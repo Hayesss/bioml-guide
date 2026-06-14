@@ -150,7 +150,13 @@
     "common-pls-da",
     "common-factor-analysis",
     "common-tsne-details",
-    "common-umap-details"
+    "common-umap-details",
+    "common-tensor-decomp",
+    "common-robust-pca",
+    "common-dictionary-learning",
+    "common-matrix-completion",
+    "common-cur-decomp",
+    "common-mofa-details"
   ],
   "topics": [
     {
@@ -10281,6 +10287,189 @@
           "icon": "代码",
           "title": "UMAP 参数扫描 + transform",
           "code": "import umap\nimport numpy as np\n\n# === 参数扫描 ===\nn_neighbors_list = [5, 15, 30, 50]\nmin_dist_list = [0.1, 0.3, 0.5]\nfor n in n_neighbors_list:\n    for md in min_dist_list:\n        reducer = umap.UMAP(\n            n_neighbors=n, min_dist=md,\n            random_state=42)\n        X_umap = reducer.fit_transform(\n            adata.obsm['X_pca'][:, :50])\n\n# === UMAP独特优势: transform新数据 ===\n# t-SNE无法做到——UMAP可以!\nreducer = umap.UMAP(random_state=42)\nreducer.fit(train_data)\n# 新来的query数据映射到同一嵌入空间\nquery_embedding = reducer.transform(query_data)\n# 这对在线学习/大数据集分批处理极其有用"
+        }
+      ]
+    },
+    {
+      "key": "common-tensor-decomp",
+      "name": "张量分解 (CP/Tucker)",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "common-svd",
+        "common-nmf"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>张量分解像SVD的3D升级版——同时分解\"样本×基因×条件\"：</strong>普通SVD分解矩阵（样本×基因）。但如果你的数据是三维的——比如100个样本×20000个基因×5个时间点——矩阵不够用了。张量就是一个\"数据立方体\"。CP分解将立方体分解为rank-1成分的和，Tucker分解更灵活——允许每个维度的因子数不同。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "张量分解最适场景",
+          "content": "<table><tr><td><strong>多时间点多条件scRNA：</strong>样本×基因×时间→张量分解发现\"基因程序如何在时间上演化\"</td></tr><tr><td><strong>多组学张量：</strong>样本×基因×组学类型（RNA+ATAC+甲基化）→联合降维</td></tr><tr><td><strong>Hi-C多分辨率：</strong>基因组位点×基因组位点×分辨率→多尺度3D结构</td></tr><tr><td><strong>药物-基因-细胞系：</strong>药物×基因×细胞系→药物响应模式发现</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "CP分解: 基因×时间×条件",
+          "code": "import tensorly as tl\nfrom tensorly.decomposition import parafac, tucker\nimport numpy as np\n\n# 基因表达张量: (genes, samples, timepoints)\n# shape: (20000, 100, 5)\nX_tensor = np.random.rand(2000, 50, 5)\n\n# === CP (PARAFAC) 分解 ===\n# X ≈ sum_{r=1}^R λ_r * a_r ∘ b_r ∘ c_r\n# rank R: 成分数\nweights, factors = parafac(X_tensor, rank=3)\n# factors[0]: (2000, 3) — 基因在3个成分上的loading\n# factors[1]: (50, 3)   — 样本在3个成分上的坐标\n# factors[2]: (5, 3)    — 时间点在3个成分上的权重\n\n# 解读: 成分1可能代表\"免疫响应随时间增强\"\n# 基因loading高+时间权重递增+样本区分免疫vs非免疫\n\n# === Tucker 分解 (更灵活) ===\n# X ≈ G ×_1 A ×_2 B ×_3 C\ncore, factors_t = tucker(X_tensor, rank=[10, 5, 3])\n# core: (10, 5, 3) — 核心张量\n# 每个维度可以有不同的rank"
+        }
+      ]
+    },
+    {
+      "key": "common-robust-pca",
+      "name": "Robust PCA 鲁棒主成分分析",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-svd"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>Robust PCA像PCA的\"抗干扰版\"——自动把数据分成\"干净的信号+离群的噪声\"：</strong>普通PCA被几个异常样本严重拉偏——一个实验失败的样本可能让整个PC1方向完全错误。RPCA将数据矩阵分解为低秩部分（干净的信号）和稀疏部分（异常值）。在基因表达中，低秩部分=真实的生物变异，稀疏部分=技术噪声或异常样本。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "Robust PCA 最适场景",
+          "content": "<table><tr><td><strong>基因表达异常样本检测：</strong>S矩阵（稀疏部分）中非零元素集中的样本→可能是实验失败的样本</td></tr><tr><td><strong>背景分离：</strong>视频监控中L=静止背景，S=移动人物——同样适用于时间序列基因表达</td></tr><tr><td><strong>Hi-C异常接触检测：</strong>L=真实的3D结构，S=实验噪音/随机连接</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "Robust PCA: 分离信号和异常",
+          "code": "from sklearn.decomposition import PCA\nimport numpy as np\n\n# === Robust PCA: min ||L||_* + λ||S||_1 s.t. X = L + S\n# 使用ADMM算法\n# L: 低秩矩阵 (干净的信号)\n# S: 稀疏矩阵 (异常值/噪声)\n\n# 简化版: 用PCA reconstruction error检测异常\ndef robust_pca_outlier_detection(X, n_components=10):\n    pca = PCA(n_components=n_components)\n    X_pca = pca.fit_transform(X)\n    X_recon = pca.inverse_transform(X_pca)\n    # 重构误差大的样本→异常\n    recon_error = np.sum((X - X_recon)**2, axis=1)\n    threshold = np.median(recon_error) + 2*np.std(recon_error)\n    outliers = recon_error > threshold\n    print(f'Outliers detected: {outliers.sum()}')\n    return outliers"
+        }
+      ]
+    },
+    {
+      "key": "common-dictionary-learning",
+      "name": "字典学习与稀疏编码",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-nmf",
+        "common-sparse-pca"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>字典学习像用少量\"基础笔画\"拼出所有汉字：</strong>中国有8万个汉字，但只需要约200个基础偏旁部首就能组成所有字。字典学习从数据中自动学习这些\"偏旁部首\"（字典原子，dictionary atoms），每个数据点表示为少数几个原子的稀疏组合。在基因表达中——学习到的\"原子\"是基础表达模式，每个细胞用少数几个模式描述。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "字典学习最适场景",
+          "content": "<table><tr><td><strong>基因表达模式发现：</strong>字典原子比NMF的components更\"sharp\"——每个原子只涉及更少的基因</td></tr><tr><td><strong>图像去噪：</strong>显微镜图像用字典学习去噪——这是字典学习的经典应用</td></tr><tr><td><strong>突变signature（比NMF更稀疏）：</strong>每个肿瘤只用少数几个signature描述</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "字典学习: 比NMF更稀疏",
+          "code": "from sklearn.decomposition import DictionaryLearning\nfrom sklearn.decomposition import NMF\nimport numpy as np\n\n# === 字典学习：X ≈ D × C ===\n# D: (n_features, n_components) — 字典 (基础模式)\n# C: (n_components, n_samples) — 稀疏编码 (每个样本用哪些原子)\ndl = DictionaryLearning(\n    n_components=10, alpha=1.0,  # alpha越大→越稀疏\n    max_iter=1000, random_state=42)\nD = dl.fit_transform(expr.T)  # 稀疏编码\natoms = dl.components_  # 字典原子\n\n# 每个细胞只用少数原子表示\nsparsity = (np.abs(D) < 1e-10).mean()\nprint(f'Sparsity: {sparsity:.1%} zeros')\n\n# NMF对比\nnmf = NMF(n_components=10, init='nndsvda')\nW = nmf.fit_transform(expr.T)  # NMF编码\nprint(f'NMF sparsity: {(W<1e-10).mean():.1%} zeros')\n# 字典学习通常比NMF更稀疏"
+        }
+      ]
+    },
+    {
+      "key": "common-matrix-completion",
+      "name": "矩阵补全与缺失值填补",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-svd"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>矩阵补全像\"根据已填的格子推测空白的格子\"：</strong>你有一张20000×100的基因表达表，但其中30%是空的（单细胞dropout）。矩阵补全假设这个矩阵本质上是\"低秩\"的——表面上20000维，实际上只有几十个因素在驱动。基于这个假设，可以用已知值推测缺失值——就像Netflix根据你看过的电影猜你还喜欢什么。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "矩阵补全最适场景",
+          "content": "<table><tr><td><strong>单细胞dropout填补：</strong>scRNA-seq中90%值是0——大多数是\"技术dropout\"而非真0。矩阵补全（softImpute/ALRA/MAGIC）推测\"真正的表达值\"</td></tr><tr><td><strong>药物筛选缺失值：</strong>药物×细胞系矩阵有大量未测试的组合</td></tr><tr><td><strong>蛋白质互作预测：</strong>PPI矩阵中已知互作只是冰山一角</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "矩阵补全: softImpute + ALRA",
+          "code": "from sklearn.impute import SimpleImputer\nimport numpy as np\n\n# === softImpute: 迭代SVD补全 ===\n# 1. 初始化 (均值填充)\n# 2. SVD低秩近似\n# 3. 用近似值更新缺失位置\n# 4. 重复直到收敛\n\ndef soft_impute(X, rank=20, max_iter=100, tol=1e-6):\n    mask = ~np.isnan(X)\n    X_filled = np.where(mask, X, np.nanmean(X))\n    for i in range(max_iter):\n        U, S, Vt = np.linalg.svd(X_filled, full_matrices=False)\n        X_new = U[:, :rank] @ np.diag(S[:rank]) @ Vt[:rank, :]\n        X_filled = np.where(mask, X, X_new)\n        if np.linalg.norm(X_filled - X_new) < tol:\n            break\n    return X_filled"
+        }
+      ]
+    },
+    {
+      "key": "common-cur-decomp",
+      "name": "CUR 矩阵分解",
+      "stage": 3,
+      "type": "bioinfo",
+      "difficulty": "高级",
+      "prerequisites": [
+        "common-svd"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>CUR像用\"代表性的列和行\"近似整个矩阵：</strong>SVD的U和V是抽象向量（20000个基因的某种线性组合），生物学家看不懂——\"PC1=0.003×TP53+0.001×BRCA1+...\"。CUR直接用原始矩阵的某些列和行来近似——\"用这10个代表性基因和这5个代表性样本就可以近似整个表达矩阵\"。结果可解释——你选的列就是真实的基因！</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "CUR 最适场景",
+          "content": "<table><tr><td><strong>代表性基因选择：</strong>CUR直接选出\"最能代表整个数据集\"的基因和样本——天然的biomarker</td></tr><tr><td><strong>单细胞sketching：</strong>Geometric Sketching用类似思想选代表性细胞</td></tr><tr><td><strong>Hi-C代表性位点：</strong>选最能代表3D结构的基因组位点子集</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "CUR分解: 选代表性基因和样本",
+          "code": "import numpy as np\nfrom scipy.linalg import svd\n\n# === CUR: 列选择 (代表性基因) ===\ndef column_select(X, n_cols):\n    \"\"\"基于SVD的列选择——选最重要的列\"\"\"\n    U, S, Vt = svd(X, full_matrices=False)\n    # 每列的leverage score = 该列在top PCs上的loading平方和\n    leverage = np.sum(Vt[:n_cols, :]**2, axis=0)\n    # 按leverage score选择top列\n    selected_cols = np.argsort(leverage)[-n_cols:]\n    return selected_cols, leverage\n\n# X: (genes, samples)\nX = expr.values\nselected_genes, scores = column_select(X, n_cols=20)\nprint(f'Representative genes: {gene_names[selected_genes]}')\n# 这些基因最能\"代表\"整个数据集\n\n# 用选出的基因和样本做低秩近似\nC = X[:, selected_cols]      # (genes, 20)\nR = X[selected_rows, :]      # (20, samples)\n# X ≈ C × U × R  (U很小, 20×20)"
+        }
+      ]
+    },
+    {
+      "key": "common-mofa-details",
+      "name": "MOFA 多组学因子分析",
+      "stage": 4,
+      "type": "bioinfo",
+      "difficulty": "专业",
+      "prerequisites": [
+        "common-factor-analysis",
+        "single-multiomics"
+      ],
+      "sections": [
+        {
+          "type": "analogy",
+          "icon": "类比",
+          "title": "一句话理解",
+          "content": "<p><strong>MOFA像\"多组学的通用翻译器——找到跨组学的共享'含义'\"：</strong>你有同一批样本的RNA-seq、ATAC-seq和DNA甲基化数据。MOFA从三个矩阵中同时提取\"因子\"——每个因子可能只在一种组学中出现（组学特异），也可能在多种组学中共享（跨组学一致）。这就像从英文、法文、德文三本书中同时找共同主题——有些主题三本书都有（保守的），有些只有一本书有（特异的）。</p>"
+        },
+        {
+          "type": "bio",
+          "icon": "跨组学应用",
+          "title": "MOFA 最适场景",
+          "content": "<table><tr><td><strong>Multiome (10x)：</strong>同一细胞的RNA+ATAC——MOFA发现哪些因子是RNA特有的、哪些是ATAC特有的、哪些是共享的</td></tr><tr><td><strong>癌症多组学：</strong>TCGA样本有RNA+甲基化+CNV+miRNA——MOFA找跨组学的致癌因子</td></tr><tr><td><strong>药物响应：</strong>药物处理前后多组学——MOFA发现药物影响的共享通路</td></tr></table>"
+        },
+        {
+          "type": "code",
+          "icon": "代码",
+          "title": "MOFA 多组学因子提取",
+          "code": "import omicverse as ov\nimport mofax\n\n# === OmicVerse MOFA ===\n# 输入: 同一批样本的多个组学矩阵\n# adata.obsm['rna']: (N, 20000) RNA\n# adata.obsm['atac']: (N, 50000) ATAC peaks\n# adata.obsm['met']: (N, 10000) 甲基化\n\nov.single.mofa(\n    adata,\n    use_rep=['rna', 'atac', 'met'],\n    n_factors=15,\n    n_iterations=1000,\n    convergence_mode='slow'  # 更精确\n)\n\n# 结果解读:\n# - Variance explained: 每个因子在各组学中解释的方差\n# - Factor weights: 哪些基因/peak驱动每个因子\n# - Factor values: 每个样本在每个因子上的得分\n# - 因子1可能只在RNA中有高权重→RNA特有因子\n# - 因子2在RNA和ATAC中都有→共享因子"
         }
       ]
     }
