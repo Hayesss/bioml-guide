@@ -557,6 +557,7 @@ const publishedToolCategories: ToolCategory[] = [
       { name: 'Dynamo', github: 'https://github.com/aristoteleo/dynamo-release', paper: 'https://www.sciencedirect.com/science/article/pii/S0092867421015774', description: '超越RNA速度——代谢标记和转录爆发建模' },
       { name: 'latentvelo', github: 'https://github.com/Spencerfar/LatentVelo', paper: 'https://www.cell.com/cell-reports-methods/fulltext/S2667-2375(23)00225-4', description: '隐空间RNA速度，在低维流形上推断动力学' },
       { name: 'graphvelo', github: 'https://github.com/xing-lab-pitt/GraphVelo', paper: 'https://www.nature.com/articles/s41467-025-62784-w', description: '基于图的RNA速度，利用邻居信息提升精度' },
+      { name: 'scTour', github: 'https://github.com/LiQian-XC/scTour', paper: 'https://genomebiology.biomedcentral.com/articles/10.1186/s13059-023-02988-9', description: '多任务DL联合学习伪时间+向量场+隐空间，无需根细胞指定和剪接数据，支持跨数据集预测' },
     ],
   },
   {
