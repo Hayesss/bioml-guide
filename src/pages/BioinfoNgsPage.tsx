@@ -559,6 +559,7 @@ const publishedToolCategories: ToolCategory[] = [
       { name: 'graphvelo', github: 'https://github.com/xing-lab-pitt/GraphVelo', paper: 'https://www.nature.com/articles/s41467-025-62784-w', description: '基于图的RNA速度，利用邻居信息提升精度' },
       { name: 'scTour', github: 'https://github.com/LiQian-XC/scTour', paper: 'https://genomebiology.biomedcentral.com/articles/10.1186/s13059-023-02988-9', description: '多任务DL联合学习伪时间+向量场+隐空间，无需根细胞指定和剪接数据，支持跨数据集预测' },
       { name: 'regVelo', github: 'https://github.com/theislab/regvelo', paper: 'https://doi.org/10.1016/j.cell.2026.04.022', description: '基因调控驱动的RNA速度，GRN+剪接耦合变分推断，支持先验GRN(pySCENIC)、扰动模拟、不确定性量化' },
+      { name: 'scProtVelo', github: 'https://github.com/theislab/scProtVelo', paper: 'https://doi.org/10.1126/science.adr8785', description: '翻译动力学建模，从配对scRNA+蛋白质组数据推断mRNA→蛋白质速度，扩展RNA速度到蛋白层面' },
     ],
   },
   {
