@@ -27,8 +27,10 @@ export default function MathPage() {
     <div className="space-y-16">
       <div>
         <h1 className="text-3xl font-bold mb-3 text-brand-ink">数学直觉</h1>
-        <p className="text-base text-brand-ink-muted max-w-[600px]">
-          用生物学直觉理解机器学习背后的数学原理
+        <p className="text-base text-brand-ink-muted max-w-[700px]">
+          用生物学直觉理解ML/DL背后的数学原理。每个主题标注了难度和在
+          <Link to="/roadmap" className="text-brand-accent hover:underline font-medium"> 学习路径</Link>
+          中对应的阶段
         </p>
       </div>
 

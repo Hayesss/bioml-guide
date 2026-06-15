@@ -32,8 +32,39 @@ function buildIndex(
   roadmapStages: { id: number; name: string; description?: string; mlTopics?: { name: string; description?: string }[]; dlTopics?: { name: string; description?: string }[]; mathTopics?: { name: string; description?: string }[]; bioinfoTopics?: { name: string; description?: string }[]; projects?: { name: string; description?: string }[] }[],
   applications: { name: string; description?: string; mlMethods?: { name: string }[]; dlMethods?: { name: string }[]; datasets?: { name: string; description?: string; size: string }[] }[],
   mathTopics: { name: string; description?: string; keyConcepts?: { name: string; description?: string }[] }[],
+  topics: { key: string; name: string; type?: string; stage?: number; sections?: { type: string; title: string; content?: string }[] }[],
 ): SearchItem[] {
   const items: SearchItem[] = [];
+
+  // Build category labels from topic type
+  const typeCategory: Record<string, string> = {
+    ml: 'ML专题',
+    dl: 'DL专题',
+    math: '数学专题',
+    bioinfo: '生信专题',
+    ngs: 'NGS流程',
+  };
+
+  for (const topic of topics) {
+    const cat = typeCategory[topic.type || ''] || '学习专题';
+    items.push({
+      label: topic.name,
+      snippet: (topic.sections || []).find(s => s.content)?.content?.replace(/<[^>]*>/g, '').slice(0, 80) || `阶段${topic.stage || '?'} · ${cat}`,
+      path: `/learn/${topic.key}`,
+      category: cat,
+    });
+    // Also index section titles so users can find specific sections
+    for (const section of topic.sections || []) {
+      if (section.title && section.title !== topic.name) {
+        items.push({
+          label: `${topic.name} › ${section.title}`,
+          snippet: section.content?.replace(/<[^>]*>/g, '').slice(0, 80) || '',
+          path: `/learn/${topic.key}`,
+          category: '专题小节',
+        });
+      }
+    }
+  }
 
   for (const tool of tools) {
     items.push({
@@ -182,14 +213,16 @@ export default function SearchModal({ isOpen, onClose, onToggle }: SearchModalPr
         fetch(`${import.meta.env.BASE_URL}data/roadmap.json`).then(r => r.json()),
         fetch(`${import.meta.env.BASE_URL}data/applications.json`).then(r => r.json()),
         fetch(`${import.meta.env.BASE_URL}data/math.json`).then(r => r.json()),
+        fetch(`${import.meta.env.BASE_URL}data/topics.json`).then(r => r.json()),
       ])
-        .then(([toolsData, resourcesData, roadmapData, appData, mathData]) => {
+        .then(([toolsData, resourcesData, roadmapData, appData, mathData, topicsData]) => {
           const idx = buildIndex(
             toolsData.tools || [],
             resourcesData.resources || [],
             roadmapData.stages || [],
             appData.applications || [],
             mathData.mathTopics || [],
+            topicsData.topics || [],
           );
           setIndex(idx);
         })

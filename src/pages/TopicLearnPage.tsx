@@ -115,14 +115,20 @@ export default function TopicLearnPage() {
 
   return (
     <div className="max-w-[800px] mx-auto py-8 px-6">
-      {/* Back to roadmap */}
-      <Link
-        to="/roadmap"
-        className="inline-flex items-center gap-1.5 text-sm text-brand-ink-muted hover:text-brand-accent no-underline mb-6 transition-colors"
-      >
-        <ChevronLeft size={16} />
-        返回学习路径
-      </Link>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-xs text-brand-ink-muted mb-6">
+        <Link to="/roadmap" className="hover:text-brand-accent no-underline transition-colors">
+          学习路径
+        </Link>
+        <ChevronLeft size={10} className="rotate-180" />
+        <span className="text-brand-ink-light">
+          阶段{topic.stage}：{stageNames[topic.stage]}
+        </span>
+        <ChevronLeft size={10} className="rotate-180" />
+        <span className="text-brand-ink-light">
+          {typeNames[topic.type] || topic.type}
+        </span>
+      </div>
 
       {/* Header */}
       <div className="mb-8">
@@ -158,7 +164,7 @@ export default function TopicLearnPage() {
       {/* Prerequisites */}
       {topic.prerequisites.length > 0 && (
         <div className="mb-6 border rounded-lg p-4 bg-brand-off-white border-brand-border-light">
-          <p className="text-xs font-medium text-brand-ink-light mb-2">📋 前置知识</p>
+          <p className="text-xs font-medium text-brand-ink-light mb-2">前置知识</p>
           <div className="flex flex-wrap gap-2">
             {topic.prerequisites.map(pre => {
               const preTopic = topicsData.topics.find(t => t.key === pre);

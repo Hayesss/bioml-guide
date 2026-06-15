@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
 import { Search, Filter } from 'lucide-react';
 
@@ -54,8 +55,10 @@ export default function ResourcesPage() {
     <div className="space-y-10">
       <div>
         <h1 className="text-3xl font-bold mb-3 text-brand-ink">资源库</h1>
-        <p className="text-base text-brand-ink-muted">
-          精选课程、书籍、论文和视频教程，覆盖ML/DL全学习路径
+        <p className="text-base text-brand-ink-muted max-w-[700px]">
+          精选课程、书籍、论文和视频教程，覆盖ML/DL全学习路径。底部有
+          <Link to="/roadmap" className="text-brand-accent hover:underline font-medium"> 学习路径</Link>
+          对应的推荐顺序
         </p>
       </div>
 

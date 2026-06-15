@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Cpu, Zap, Database, BookOpen, ChevronDown, ChevronUp, ExternalLink, Terminal, Layers } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
@@ -213,6 +214,11 @@ export default function FoundationModelsPage() {
           基于 OmicVerse <code className="text-xs px-1.5 py-0.5 rounded bg-brand-off-white text-brand-accent font-mono">ov.fm</code> 统一API，
           覆盖22个单细胞基础模型的完整参考。从模型选择、环境配置到实战调用，实现基础模型驱动的高效单细胞分析。
         </p>
+        <p className="text-sm text-brand-ink-muted mt-2">
+          基础模型属于阶段4（专业应用）内容。建议先完成
+          <Link to="/roadmap" className="text-brand-accent hover:underline font-medium"> 阶段1-3 的 ML/DL 基础</Link>
+          ，再深入本页
+        </p>
       </header>
 
       {/* Concept Overview */}
@@ -397,6 +403,72 @@ perturbation_result = ov.fm.predict_perturbation(
     cell_type='T cells'
 )`}
         />
+      </section>
+
+      {/* Data Framework & Compute */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Layers size={17} className="text-brand-accent" />
+          <h2 className="text-lg font-bold text-brand-ink">数据框架与计算加速</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="border rounded-lg p-4 border-brand-border bg-white">
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">核心数据结构</h3>
+            <p className="text-brand-ink-muted mb-2" style={{ lineHeight: 1.6 }}>
+              OmicVerse 基于四个核心数据框架构建，与单细胞分析全流程深度集成：
+            </p>
+            <div className="space-y-1.5">
+              {[
+                { lib: 'AnnData', lang: 'Python', desc: '单细胞主数据结构，.X存储表达矩阵，.obs存储细胞注释，.obsm存储嵌入，.uns存储非结构化记录' },
+                { lib: 'MuData', lang: 'Python', desc: '多组学容器，每个模态(RNA/ATAC/蛋白)对应一个AnnData，支持模态间对齐操作' },
+                { lib: 'pandas', lang: 'Python', desc: '表格数据基础，用于metadata/tool output/DE结果等结构化数据' },
+                { lib: 'numpy', lang: 'Python', desc: '底层数值计算，支持向量化和大规模矩阵运算' },
+              ].map((item) => (
+                <div key={item.lib} className="flex items-start gap-2">
+                  <code className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand-off-white text-brand-accent shrink-0">{item.lib}</code>
+                  <span className="text-brand-ink-light" style={{ lineHeight: 1.4 }}>{item.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border rounded-lg p-4 border-brand-border bg-white">
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">GPU 加速模式</h3>
+            <p className="text-brand-ink-muted mb-2" style={{ lineHeight: 1.6 }}>
+              百万级单细胞数据可在 GPU 上实现秒级处理：
+            </p>
+            <div className="space-y-1.5">
+              {[
+                { mode: 'CPU-GPU 混合', cmd: 'ov.settings.cpu_gpu_mixed_init()', desc: '自动将计算密集型操作迁移到GPU' },
+                { mode: 'RAPIDS 全GPU', cmd: 'ov.settings.gpu_init()', desc: '基于NVIDIA RAPIDS加速全流程(需CUDA)' },
+                { mode: 'CPU 回退', cmd: 'ov.pp.anndata_to_CPU(adata)', desc: '随时从GPU切回CPU，适合调试' },
+              ].map((item) => (
+                <div key={item.mode} className="flex items-start gap-2">
+                  <code className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand-off-white text-brand-dl shrink-0">{item.mode}</code>
+                  <span className="text-brand-ink-light" style={{ lineHeight: 1.4 }}>{item.desc}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-brand-border-light">
+              <code className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand-off-white">{'ov.pp.anndata_to_GPU(adata)'}</code>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4 border-brand-border bg-white">
+            <h3 className="text-sm font-semibold mb-2 text-brand-ink">分析报告与溯源</h3>
+            <p className="text-brand-ink-muted mb-2" style={{ lineHeight: 1.6 }}>
+              自动记录每一步参数、耗时和诊断图，生成完整HTML报告：
+            </p>
+            <code className="block text-[10px] font-mono p-2 rounded bg-brand-off-white text-brand-accent mb-2">
+              {'ov.report.from_anndata(adata, output="report.html")'}
+            </code>
+            <p className="text-brand-ink-muted" style={{ lineHeight: 1.5 }}>
+              报告包含：QC诊断图、处理历史、参数记录、数据溯源链。支持导出为独立HTML，便于分享和发表。
+            </p>
+            <p className="text-brand-ink-muted mt-2">
+              完整单细胞分析流程参见
+              <Link to="/ngs" className="text-brand-accent hover:underline font-medium"> 生信NGS流程</Link>
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* References */}
