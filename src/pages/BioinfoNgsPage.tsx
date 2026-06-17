@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles, Calculator, Box } from 'lucide-react';
+import { ArrowRight, Check, Dna, Database, Layers, Microscope, GitBranch, Sparkles, Calculator, Box, GitGraph } from 'lucide-react';
 import { useData } from '../hooks/useData';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -202,6 +202,9 @@ export default function BioinfoNgsPage() {
           <Layers size={17} className="text-brand-accent" />
           <h2 className="text-lg font-bold text-brand-ink">专题导航</h2>
           <span className="text-[11px] text-brand-ink-extra-muted ml-2">点击进入完整教程</span>
+          <Link to="/graph" className="ml-auto text-xs text-brand-accent hover:underline no-underline flex items-center gap-1">
+            <GitGraph size={13} /> 知识图谱总览
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {topics.map((topic, index) => (

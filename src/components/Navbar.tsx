@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna, Glasses, GitGraph, Code } from 'lucide-react';
+import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna, Glasses, Code } from 'lucide-react';
 
 const navGroups = [
   {
     items: [
-      { path: '/graph', label: '图谱', icon: GitGraph },
-      { path: '/roadmap', label: '学习路径', icon: BookOpen },
-      { path: '/ngs', label: '生信NGS', icon: Dna },
-      { path: '/applications', label: '应用方向', icon: Microscope },
-      { path: '/intro', label: '背景知识', icon: Glasses },
+      { path: '/roadmap', label: '路径', icon: BookOpen },
+      { path: '/ngs', label: 'NGS', icon: Dna },
+      { path: '/applications', label: '应用', icon: Microscope },
+      { path: '/intro', label: '背景', icon: Glasses },
     ],
   },
   {
     items: [
       { path: '/python', label: 'Python', icon: Code },
-      { path: '/math', label: '数学直觉', icon: Sigma },
+      { path: '/math', label: '数学', icon: Sigma },
       { path: '/tools', label: '工具', icon: Wrench },
-      { path: '/resources', label: '资源库', icon: Library },
+      { path: '/resources', label: '资源', icon: Library },
       { path: '/cheatsheet', label: '速查', icon: Zap },
     ],
   },
@@ -41,9 +40,9 @@ export default function Navbar({ onSearch }: NavbarProps) {
           BioML Guide
         </Link>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           {navGroups.map((group, gi) => (
-            <div key={gi} className="flex items-center gap-3">
+            <div key={gi} className="flex items-center gap-2">
               {gi > 0 && (
                 <div className="w-px h-4 bg-brand-border-light" />
               )}
@@ -53,9 +52,9 @@ export default function Navbar({ onSearch }: NavbarProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`relative flex items-center gap-1 text-xs font-medium no-underline transition-colors whitespace-nowrap ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
+                    className={`relative flex items-center gap-1 text-[11px] font-medium no-underline transition-colors whitespace-nowrap ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
                   >
-                    <item.icon size={13} />
+                    <item.icon size={12} />
                     {item.label}
                     {active && (
                       <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
@@ -68,10 +67,10 @@ export default function Navbar({ onSearch }: NavbarProps) {
           <div className="w-px h-4 bg-brand-border-light" />
           <button
             onClick={onSearch}
-            className="flex items-center gap-1 text-xs border rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border whitespace-nowrap"
+            className="flex items-center gap-1 text-[11px] border rounded-md px-2 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border whitespace-nowrap"
           >
-            <Search size={13} />
-            <span>搜索</span>
+            <Search size={12} />
+            搜索
             <kbd className="hidden lg:inline text-[10px] px-1 py-0.5 rounded border font-mono border-brand-border bg-brand-off-white">
               Ctrl+K
             </kbd>
