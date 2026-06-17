@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Microscope, ArrowRight, Dna, Layers, FlaskConical, Brain, Zap, ChevronDown } from 'lucide-react';
+import { BookOpen, Microscope, ArrowRight, Dna, Layers, FlaskConical, Brain, Zap, ChevronDown, Database, GitBranch } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
 function Reveal({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -252,6 +252,48 @@ export default function IntroPage() {
         </section>
       </Reveal>
 
+      {/* 3.5. ML/DL method taxonomy for bioinformatics */}
+      <Reveal>
+        <section className="max-w-[860px] mx-auto py-16 px-6">
+          <div className="flex items-center gap-3 mb-8">
+            <Layers size={22} className="text-brand-accent" />
+            <h2 className="text-2xl font-bold text-brand-ink">ML/DL方法全景：生信视角的分类</h2>
+          </div>
+          <p className="text-sm text-brand-ink-muted mb-6">
+            从生信应用的角度，ML/DL方法可以按学习范式组织。下表帮助你在面对一个生物学问题时快速定位可能的方法类别。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { paradigm: '监督学习', color: '#1E3A5F', bio: '有标签数据', methods: ['随机森林 → SNP致病性预测', 'XGBoost → 药物敏感性预测', '逻辑回归 → 疾病风险评分', 'CNN → DeepVariant变异检测', 'Transformer → Enformer基因表达预测'], key: '标签驱动——从已知推未知' },
+              { paradigm: '无监督学习', color: '#2D5A3D', bio: '无标签数据', methods: ['k-means → 单细胞聚类分群', 'PCA/t-SNE/UMAP → 降维可视化', 'Leiden/Louvain → 图社区检测', 'NMF → 突变签名分解', '自编码器 → scVI批次校正'], key: '从数据结构中自动发现模式' },
+              { paradigm: '自监督学习', color: '#5B3A7B', bio: '从数据自身生成标签', methods: ['掩码语言模型(MLM) → ESM-2蛋白质预训练', '掩码基因预测 → scGPT/GeneFormer', '对比学习 → UCE跨物种细胞嵌入', '扩散模型 → RFdiffusion蛋白从头设计'], key: '大规模无标注数据→通用表示→下游微调' },
+              { paradigm: '半监督学习', color: '#8B4513', bio: '少量标签+大量无标签', methods: ['标签传播 → 细胞类型扩散标注', '一致性正则化 → 跨平台数据对齐', '伪标签 → 迭代扩充训练集', 'MixMatch → 稀有细胞类型检测'], key: '标签稀缺场景——让少量标注带动大量未标注数据' },
+              { paradigm: '生成模型', color: '#C53030', bio: '学习数据分布并生成新样本', methods: ['VAE → scVI单细胞隐空间建模', 'GAN → 基因表达谱生成', '扩散模型 → AlphaFold3结构预测', '自回归模型 → DNA序列生成'], key: '不仅预测——还能生成逼真的生物学数据' },
+              { paradigm: '图神经网络', color: '#4A6741', bio: '图结构数据', methods: ['GCN/GAT → 分子性质预测', 'ProteinMPNN → 蛋白质序列设计', 'GNNExplainer → 药物-靶标关系解释', 'GraphST → 空间转录组域识别'], key: '分子、蛋白质、细胞间关系天然是图结构' },
+              { paradigm: '多实例/多模态学习', color: '#6B4C8B', bio: '多种数据类型联合', methods: ['MOFA → 多组学因子分析', 'GLUE → 跨模态知识引导对齐', 'CLIP-style → 基因-图像联合嵌入', '多模态Transformer → 病理+基因组联合诊断'], key: '整合DNA/RNA/蛋白/影像——精准医学的核心需求' },
+              { paradigm: '强化学习', color: '#B8860B', bio: '序贯决策', methods: ['分子生成 → 优化类药物性质', '主动学习 → 高效选择实验验证', '贝叶斯优化 → 超参数调优', '动态治疗方案 → 序贯给药策略'], key: '从"一次预测"到"一系列决策"——优化实验流程' },
+            ].map((item) => (
+              <div key={item.paradigm} className="border rounded-lg p-4 border-brand-border" style={{ borderLeftWidth: 3, borderLeftColor: item.color }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ backgroundColor: item.color + '15', color: item.color }}>{item.paradigm}</span>
+                  <span className="text-[10px] text-brand-ink-muted">{item.bio}</span>
+                </div>
+                <p className="text-[10px] text-brand-ink-muted mb-2 italic">{item.key}</p>
+                <div className="space-y-0.5">
+                  {item.methods.map(m => (
+                    <div key={m} className="text-xs text-brand-ink-light">• {m}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-brand-ink-muted mt-4">
+            参考：Nature Reviews Genetics "Machine Learning in Genomics" Collection (2024-2025); Eraslan, Avsec, Theis, "Deep learning: new computational modelling techniques for genomics", Nature Reviews Genetics (2019)
+          </p>
+        </section>
+      </Reveal>
+
       {/* 4. Breakthrough cases */}
       <Reveal>
         <section className="max-w-[860px] mx-auto py-16 px-6">
@@ -363,6 +405,44 @@ export default function IntroPage() {
         </section>
       </Reveal>
 
+      {/* 5.5. Key databases and benchmarks */}
+      <Reveal>
+        <section className="max-w-[860px] mx-auto py-16 px-6">
+          <div className="flex items-center gap-3 mb-8">
+            <Database size={22} className="text-brand-accent" />
+            <h2 className="text-2xl font-bold text-brand-ink">关键数据库与基准数据集</h2>
+          </div>
+          <p className="text-sm text-brand-ink-muted mb-6">
+            任何ML/DL方法都需要数据来训练和评估。以下是生信ML/DL中最常用的数据库和基准——了解它们才能在正确的地方找到正确的数据。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { name: 'TCGA', url: 'https://portal.gdc.cancer.gov/', cat: '癌症基因组', desc: '33种癌症类型、11000+患者的multi-omics数据（RNA-seq/WES/甲基化/蛋白）。生信ML的"ImageNet"——几乎所有癌症分类/预后预测模型都在这上面跑过。' },
+              { name: 'GEO / SRA', url: 'https://www.ncbi.nlm.nih.gov/geo/', cat: '基因表达', desc: '全球最大的公共基因表达数据库。NCBI SRA含>20PB原始测序数据。几乎任何组织的RNA-seq数据都能在这里找到。' },
+              { name: 'UniProt', url: 'https://www.uniprot.org/', cat: '蛋白质知识库', desc: '最全面的蛋白质序列/功能数据库。Swiss-Prot(手工注释57万条)+TrEMBL(自动注释2.5亿条)。ESM-2/ProtBERT等蛋白语言模型预训练的关键数据源。' },
+              { name: 'PDB', url: 'https://www.rcsb.org/', cat: '蛋白质结构', desc: '22万+实验解析的蛋白质3D结构。AlphaFold的训练数据来源。每个结构包含原子坐标、分辨率、实验方法等注释。' },
+              { name: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/', cat: '临床变异', desc: '人类变异-表型关系数据库。致病性标注(Pathogenic/Benign)是变异致病性预测模型的黄金标准标签。' },
+              { name: 'STRING', url: 'https://string-db.org/', cat: '蛋白互作', desc: '蛋白质-蛋白质互作网络数据库。覆盖>14000物种。整合实验、共表达、文本挖掘等多维度证据，被WGCNA/GCN等方法广泛使用。' },
+              { name: 'ENCODE', url: 'https://www.encodeproject.org/', cat: '调控基因组', desc: '人类基因组功能元件百科全书。Enformer/DNABERT等基因组DL模型的训练数据——ChIP-seq/DNase-seq/RNA-seq等多组学功能注释。' },
+              { name: 'Human Cell Atlas', url: 'https://www.humancellatlas.org/', cat: '单细胞图谱', desc: '全球协作的人类单细胞参考图谱。>1亿细胞，覆盖数十种组织。scGPT/GeneFormer等单细胞基础模型的核心预训练数据。' },
+              { name: 'GDSC / CTRP', url: 'https://www.cancerrxgene.org/', cat: '药物响应', desc: '1000+癌细胞系对数百种药物的敏感性数据(IC50/AUC)。药物响应预测模型(XGBoost/DeepCDR/scDrug)的标准benchmark。' },
+              { name: 'Pfam / InterPro', url: 'https://www.ebi.ac.uk/interpro/', cat: '蛋白结构域', desc: '蛋白质家族和结构域数据库。Pfam含19000+蛋白质家族。蛋白质功能预测和结构域边界检测模型的训练标签来源。' },
+            ].map((db) => (
+              <a key={db.name} href={db.url} target="_blank" rel="noopener noreferrer"
+                className="border rounded-lg p-4 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-xs font-bold text-brand-accent">{db.name}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand-off-white text-brand-ink-muted">{db.cat}</span>
+                </div>
+                <p className="text-xs text-brand-ink-light leading-relaxed">{db.desc}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
       {/* 6. Learning roadmap */}
       <Reveal>
         <section className="max-w-[860px] mx-auto py-16 px-6">
@@ -390,6 +470,44 @@ export default function IntroPage() {
               查看完整学习路径 <ArrowRight size={14} />
             </Link>
           </div>
+        </section>
+      </Reveal>
+
+      {/* 6.5. Typical ML/DL workflow */}
+      <Reveal>
+        <section className="max-w-[860px] mx-auto py-16 px-6">
+          <div className="flex items-center gap-3 mb-8">
+            <GitBranch size={22} className="text-brand-accent" />
+            <h2 className="text-2xl font-bold text-brand-ink">从数据到发现：典型分析工作流</h2>
+          </div>
+          <p className="text-sm text-brand-ink-muted mb-8">
+            无论用哪种ML/DL方法，生信分析都大致遵循以下工作流。理解这个流程可以让你在面对一个新问题时知道从哪开始。
+          </p>
+
+          <div className="space-y-4">
+            {[
+              { step: '1', title: '数据获取与加载', color: '#1E3A5F', detail: '从公共数据库(TCGA/GEO/SRA)下载原始数据，或用测序仪产出FASTQ。使用OmicVerse的ov.read()或scanpy/pandas加载为AnnData/DataFrame。' },
+              { step: '2', title: '预处理与质控(QC)', color: '#2D5A3D', detail: '过滤低质量细胞/基因、去除双细胞(DoubletFinder/Scrublet)、归一化(log1p/Pearson残差)、高变基因筛选(HVG)、批次校正(Harmony/scVI/ComBat)。QC是生信ML中最重要的步骤——垃圾进，垃圾出。' },
+              { step: '3', title: '特征工程 / 表示学习', color: '#5B3A7B', detail: '传统ML：手工设计特征（k-mer频率、氨基酸组成、理化描述符）。DL：自动学习表示（PCA→UMAP降维、scVI隐空间、ESM-2蛋白嵌入、scGPT细胞嵌入）。好的表示比好的模型更重要。' },
+              { step: '4', title: '模型选择与训练', color: '#8B4513', detail: '根据问题类型选择：分类(RF/XGBoost/CNN)、回归(ElasticNet/GradientBoosting)、聚类(Leiden/k-means/谱聚类)、生成(VAE/GAN/扩散模型)。注意过拟合——生信中p>>n是常态。' },
+              { step: '5', title: '评估与验证', color: '#C53030', detail: '交叉验证（样本量有限时必须！）、留一法、独立测试集。注意：随机拆分容易高估性能——生物数据的结构依赖(批次、患者、实验)需要分层拆分。Nested CV是金标准。' },
+              { step: '6', title: '生物学解释', color: '#4A6741', detail: '模型预测了什么只是第一步——为什么这样预测才是生物学发现。特征重要性(SHAP/LIME)、attention权重可视化、通路富集(GSEA/AUCell)、蛋白质互作网络(STRING)。xAI是当前研究的核心方向。' },
+              { step: '7', title: '可复现与部署', color: '#6B4C8B', detail: '用pytest测试分析函数、Git跟踪代码、conda/pip冻结环境、OmicVerse ov.report记录分析历史。从"在我电脑上能跑"到"任何人都能复现"是专业生信分析师的标志。' },
+            ].map((item) => (
+              <div key={item.step} className="flex items-start gap-4 border rounded-lg p-4 border-brand-border bg-white" style={{ borderLeftWidth: 3, borderLeftColor: item.color }}>
+                <span className="flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold text-white shrink-0 mt-0.5" style={{ backgroundColor: item.color }}>
+                  {item.step}
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold text-brand-ink mb-1">{item.title}</h3>
+                  <p className="text-xs text-brand-ink-light leading-relaxed">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-brand-ink-muted mt-4">
+            这个7步工作流本质上就是OmicVerse的设计哲学——从数据加载(ov.read)到报告生成(ov.report)的完整闭环。
+          </p>
         </section>
       </Reveal>
 
