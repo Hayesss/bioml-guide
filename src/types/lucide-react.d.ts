@@ -48,4 +48,5 @@ declare module 'lucide-react' {
   export const BarChart4: LucideIcon;
   export const ExternalLink: LucideIcon;
   export const Glasses: LucideIcon;
+  export const GitGraph: LucideIcon;
 }

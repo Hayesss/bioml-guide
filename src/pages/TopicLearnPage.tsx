@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, FlaskConical } from 'lucide-react';
+import { ChevronLeft, ArrowRight } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 import QuizBase from '../components/QuizBase';
 import type { QuizQuestion } from '../components/QuizBase';
@@ -298,18 +298,89 @@ export default function TopicLearnPage() {
         )}
       </div>
 
+      {/* Related Exploration — Knowledge Graph Links */}
+      {(() => {
+        // Find reverse prerequisites: topics that list this topic as prerequisite
+        const dependentTopics = topicsData.topics.filter(t =>
+          t.prerequisites.includes(topicKey)
+        ).slice(0, 6);
+        // Find same-stage, same-type siblings
+        const siblings = topicsData.topics.filter(t =>
+          t.stage === topic.stage && t.type === topic.type && t.key !== topicKey
+        ).slice(0, 4);
+
+        if (dependentTopics.length === 0 && siblings.length === 0) return null;
+
+        return (
+          <div className="mt-8 border rounded-lg p-5 bg-brand-off-white border-brand-border-light">
+            <h3 className="text-sm font-semibold mb-4 text-brand-ink">关联探索</h3>
+            <div className="space-y-4">
+              {dependentTopics.length > 0 && (
+                <div>
+                  <span className="text-xs font-medium text-brand-ink-muted">学完这个后可以看</span>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {dependentTopics.map(t => (
+                      <Link
+                        key={t.key}
+                        to={`/learn/${t.key}`}
+                        className="text-xs px-2.5 py-1 rounded border no-underline hover:bg-white transition-colors border-brand-border-light text-brand-accent bg-white"
+                      >
+                        {t.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {siblings.length > 0 && (
+                <div>
+                  <span className="text-xs font-medium text-brand-ink-muted">
+                    同阶段 · {typeNames[topic.type] || topic.type} 更多专题
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {siblings.map(t => (
+                      <Link
+                        key={t.key}
+                        to={`/learn/${t.key}`}
+                        className="text-xs px-2.5 py-1 rounded border no-underline hover:bg-white transition-colors border-brand-border-light text-brand-ink-light bg-white"
+                      >
+                        {t.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 pt-3 border-t border-brand-border-light flex items-center gap-4">
+              <Link to="/graph" className="text-xs text-brand-ink-muted hover:text-brand-accent no-underline">
+                知识图谱总览 →
+              </Link>
+              <Link to={`/roadmap`} className="text-xs text-brand-ink-muted hover:text-brand-accent no-underline">
+                返回学习路径 →
+              </Link>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bottom CTA */}
-      <div className="mt-8 border rounded-lg p-6 text-center bg-brand-off-white border-brand-border-light">
-        <FlaskConical size={20} className="mx-auto mb-2 text-brand-accent" />
-        <p className="text-sm text-brand-ink-light mb-3">
-          学完这个专题了？回到学习路径继续下一个主题吧
+      <div className="mt-6 border rounded-lg p-5 text-center bg-brand-off-white border-brand-border-light">
+        <p className="text-sm text-brand-ink-light mb-2">
+          探索更多相关概念？
         </p>
-        <button
-          onClick={() => navigate('/roadmap')}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand-accent text-white"
-        >
-          返回学习路径
-        </button>
+        <div className="flex items-center justify-center gap-3">
+          <Link
+            to="/graph"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-brand-border text-brand-ink-light hover:bg-white transition-colors no-underline"
+          >
+            知识图谱
+          </Link>
+          <button
+            onClick={() => navigate('/roadmap')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-accent text-white"
+          >
+            学习路径
+          </button>
+        </div>
       </div>
     </div>
   );

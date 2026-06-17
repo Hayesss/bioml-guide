@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Microscope, ArrowRight, Dna, Brain, FlaskConical, Layers } from 'lucide-react';
+import { BookOpen, Microscope, Dna, Brain, FlaskConical, Layers, Search, Calculator, Wrench, Library } from 'lucide-react';
 import Quiz from '../components/Quiz';
 import { useData } from '../hooks/useData';
 
@@ -17,17 +17,20 @@ interface Stage {
   projects: { name: string; description: string; starterCode?: string }[];
 }
 
-interface Application {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  dlMethods: { name: string }[];
-}
+
+const hubCategories = [
+  { path: '/roadmap', label: '学习路径', sub: 'ML/DL/Math四阶段', icon: Layers, color: '#1E3A5F', bg: 'bg-brand-accent-light' },
+  { path: '/ngs', label: '生信NGS流程', sub: '单细胞·Bulk·空间', icon: Dna, color: '#2D5A3D', bg: 'bg-brand-dl-light' },
+  { path: '/applications', label: '应用方向', sub: '六大前沿领域', icon: Microscope, color: '#5B3A7B', bg: 'bg-purple-50' },
+  { path: '/math', label: '数学直觉', sub: '生物类比理解数学', icon: Calculator, color: '#8B4513', bg: 'bg-amber-50' },
+  { path: '/tools', label: '工具库', sub: '25+框架与平台', icon: Wrench, color: '#C53030', bg: 'bg-red-50' },
+  { path: '/resources', label: '学习资源', sub: '课程·书籍·论文', icon: Library, color: '#4A6741', bg: 'bg-green-50' },
+  { path: '/cheatsheet', label: '速查表', sub: '代码片段快速复制', icon: FlaskConical, color: '#6B4C8B', bg: 'bg-indigo-50' },
+  { path: '/intro', label: '背景知识', sub: '生信×ML/DL概览', icon: BookOpen, color: '#B8860B', bg: 'bg-yellow-50' },
+];
 
 export default function HomePage() {
   const { data: stages, loading, error } = useData<Stage[]>('roadmap', true);
-  const { data: applications } = useData<Application[]>('applications', true);
 
   if (loading) {
     return (
@@ -37,7 +40,7 @@ export default function HomePage() {
     );
   }
 
-  if (error || !stages || !applications) {
+  if (error || !stages) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-sm text-brand-error">{error || '加载数据失败'}</div>
@@ -45,184 +48,88 @@ export default function HomePage() {
     );
   }
 
+  // Compute topic counts
+  let totalTopics = 0;
+  for (const s of stages) {
+    totalTopics += s.mlTopics.length + s.dlTopics.length + s.mathTopics.length + (s.bioinfoTopics || []).length;
+  }
+
+  const handleSearchClick = () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, metaKey: true, key: 'k', bubbles: true }));
+  };
+
   return (
-    <div className="space-y-20">
-      {/* Hero */}
-      <section className="text-center py-16">
+    <div className="space-y-16">
+      {/* Hero — Knowledge Graph Hub */}
+      <section className="text-center py-12">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 bg-brand-accent-light text-brand-accent">
           <Dna size={13} />
-          面向生物信息学研究者的系统学习指南
+          生信 × 机器学习 · 深度学习 知识图谱
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-5 text-brand-ink">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-brand-ink">
           生物信息学中的机器学习与深度学习
         </h1>
-        <p className="text-lg max-w-2xl mx-auto mb-12 text-brand-ink-muted" style={{ lineHeight: 1.8 }}>
-          从零基础到前沿应用，系统掌握ML/DL在基因组学、蛋白质科学和药物发现中的核心方法与实践技能
+        <p className="text-base max-w-xl mx-auto mb-8 text-brand-ink-muted" style={{ lineHeight: 1.7 }}>
+          {stages.length}个阶段 · {totalTopics}+个专题 · 45个算法 · 78个集成工具 — 按需检索，自由探索
         </p>
 
-        {/* 三路径引导入口 — progressive disclosure */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          <Link
-            to="/intro"
-            className="group border rounded-xl p-6 text-left no-underline hover:shadow-md transition-all border-brand-accent bg-brand-accent-light/30 hover:bg-brand-accent-light/50"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen size={18} className="text-brand-accent" />
-              <span className="text-sm font-semibold text-brand-accent">我是新手</span>
-            </div>
-            <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
-              先了解生物信息学是什么、为什么需要ML/DL，以及关键概念扫盲
-            </p>
-            <span className="text-xs font-medium text-brand-accent group-hover:underline">
-              了解背景知识 →
-            </span>
-          </Link>
-
-          <Link
-            to="/roadmap"
-            className="group border rounded-xl p-6 text-left no-underline hover:shadow-md transition-all border-brand-border hover:border-brand-accent bg-white"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Layers size={18} className="text-brand-ink-light" />
-              <span className="text-sm font-semibold text-brand-ink">我有基础</span>
-            </div>
-            <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
-              直接进入四阶段学习路径，从基础ML/DL到前沿生物大模型
-            </p>
-            <span className="text-xs font-medium text-brand-accent group-hover:underline">
-              开始系统学习 →
-            </span>
-          </Link>
-
-          <Link
-            to="/applications"
-            className="group border rounded-xl p-6 text-left no-underline hover:shadow-md transition-all border-brand-border hover:border-brand-accent bg-white"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Microscope size={18} className="text-brand-ink-light" />
-              <span className="text-sm font-semibold text-brand-ink">我关心应用</span>
-            </div>
-            <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
-              直接探索六大应用方向，了解各领域用什么方法解决什么问题
-            </p>
-            <span className="text-xs font-medium text-brand-accent group-hover:underline">
-              探索应用方向 →
-            </span>
-          </Link>
-        </div>
+        {/* Central search prompt */}
+        <button
+          onClick={handleSearchClick}
+          className="inline-flex items-center gap-3 px-5 py-3 rounded-xl border-2 border-brand-border hover:border-brand-accent bg-white shadow-sm hover:shadow-md transition-all max-w-lg w-full text-left"
+        >
+          <Search size={18} className="text-brand-ink-muted shrink-0" />
+          <span className="text-sm text-brand-ink-muted flex-1">搜索概念、方法、工具、专题...</span>
+          <kbd className="text-xs px-1.5 py-0.5 rounded border font-mono border-brand-border text-brand-ink-muted bg-brand-off-white shrink-0">
+            Ctrl+K
+          </kbd>
+        </button>
       </section>
 
-      {/* Stats bar */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8 border-y px-6 rounded-lg border-brand-border-light bg-brand-off-white">
-        {[
-          { value: '4', label: '学习阶段', icon: Layers },
-          { value: '6', label: '应用方向', icon: Microscope },
-          { value: '25+', label: '工具库', icon: FlaskConical },
-          { value: '20+', label: '学习资源', icon: BookOpen },
-        ].map((stat) => (
-          <div key={stat.label} className="text-center">
-            <stat.icon size={18} className="mx-auto mb-1.5 text-brand-accent" />
-            <div className="text-2xl font-bold text-brand-ink">{stat.value}</div>
-            <div className="text-xs mt-0.5 text-brand-ink-muted">{stat.label}</div>
-          </div>
-        ))}
-      </section>
-
-      {/* Stage overview cards — simplified: just summary, no topic detail */}
+      {/* Category Hub Grid */}
       <section>
-        <div className="flex items-center gap-3 mb-6">
-          <Layers size={20} className="text-brand-accent" />
-          <h2 className="text-2xl font-bold text-brand-ink">四阶段学习路径</h2>
-        </div>
-        <p className="text-sm text-brand-ink-muted mb-6 max-w-2xl">
-          从编程和数学基础到前沿生物大模型，每个阶段覆盖 ML、DL、数学和生物信息学四大维度
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {stages.map((stage) => {
-            const topicCount =
-              stage.mlTopics.length + stage.dlTopics.length + stage.mathTopics.length +
-              (stage.bioinfoTopics || []).length;
-            return (
-            <div
-              key={stage.id}
-              className="border rounded-lg p-5 hover:shadow-sm transition-shadow border-brand-border bg-white"
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {hubCategories.map((cat) => (
+            <Link
+              key={cat.path}
+              to={cat.path}
+              className="border rounded-xl p-4 no-underline hover:shadow-md transition-all border-brand-border bg-white hover:border-brand-accent group"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-brand-accent-light text-brand-accent">
-                  阶段 {stage.id}
-                </span>
-                <span className="text-xs text-brand-ink-muted">{stage.duration}</span>
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center mb-2.5"
+                style={{ backgroundColor: cat.color + '15' }}
+              >
+                <cat.icon size={16} style={{ color: cat.color }} />
               </div>
-              <h3 className="text-base font-semibold mb-1.5 text-brand-ink">{stage.name}</h3>
-              <p className="text-xs text-brand-ink-muted mb-3" style={{ lineHeight: 1.6 }}>
-                {stage.description}
-              </p>
-              <div className="flex items-center gap-2 text-xs text-brand-ink-muted">
-                <span className="px-1.5 py-0.5 rounded bg-brand-off-white border border-brand-border-light">
-                  {topicCount} 个专题
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-brand-off-white border border-brand-border-light">
-                  {stage.tools.length} 个工具
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-brand-off-white border border-brand-border-light">
-                  {stage.projects.length} 个项目
-                </span>
+              <div className="text-sm font-semibold mb-0.5 text-brand-ink group-hover:text-brand-accent transition-colors">
+                {cat.label}
               </div>
-            </div>
-            );
-          })}
-        </div>
-        <div className="mt-5 text-center">
-          <Link
-            to="/roadmap"
-            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline text-brand-accent"
-          >
-            查看完整路径，开始逐项学习
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
-
-      {/* Application preview cards */}
-      <section>
-        <div className="flex items-center gap-3 mb-8">
-          <Microscope size={20} className="text-brand-accent" />
-          <h2 className="text-2xl font-bold text-brand-ink">应用方向</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {applications.map((app) => (
-            <div
-              key={app.id}
-              className="border rounded-lg p-5 hover:shadow-sm transition-shadow border-brand-border bg-white"
-              style={{ borderTopWidth: 3, borderTopColor: app.color }}
-            >
-              <h3 className="text-base font-semibold mb-2 text-brand-ink">
-                {app.name}
-              </h3>
-              <p className="text-sm mb-4 text-brand-ink-muted" style={{ lineHeight: 1.7 }}>
-                {app.description}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {app.dlMethods.slice(0, 2).map((m) => (
-                  <span
-                    key={m.name}
-                    className="text-xs px-2 py-0.5 rounded bg-brand-accent-light text-brand-accent"
-                  >
-                    {m.name}
-                  </span>
-                ))}
-              </div>
-            </div>
+              <div className="text-xs text-brand-ink-muted">{cat.sub}</div>
+            </Link>
           ))}
         </div>
-        <div className="mt-6 text-center">
-          <Link
-            to="/applications"
-            className="inline-flex items-center gap-1.5 text-sm font-medium no-underline text-brand-accent"
-          >
-            查看全部应用方向
-            <ArrowRight size={14} />
+      </section>
+
+      {/* Stage overview — compact strip */}
+      <section>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-brand-ink">学习路径概览</h2>
+          <Link to="/roadmap" className="text-xs font-medium text-brand-accent hover:underline no-underline">
+            完整路径 →
           </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {stages.map((stage) => (
+            <Link
+              key={stage.id}
+              to="/roadmap"
+              className="border rounded-lg px-4 py-3 no-underline hover:shadow-sm transition-shadow border-brand-border bg-white"
+            >
+              <div className="text-xs font-mono font-medium text-brand-accent mb-1">阶段 {stage.id}</div>
+              <div className="text-sm font-semibold text-brand-ink">{stage.name}</div>
+              <div className="text-xs text-brand-ink-muted mt-0.5">{stage.duration}</div>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -274,39 +181,6 @@ export default function HomePage() {
         <Quiz />
       </section>
 
-      {/* Quick links */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Link
-          to="/resources"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
-        >
-          <BookOpen size={18} className="mb-2 text-brand-accent" />
-          <h3 className="text-sm font-semibold mb-1 text-brand-ink">精选资源库</h3>
-          <p className="text-xs text-brand-ink-muted">
-            Andrew Ng课程、Fast.ai、D2L、经典书籍和视频教程
-          </p>
-        </Link>
-        <Link
-          to="/tools"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
-        >
-          <FlaskConical size={18} className="mb-2 text-brand-accent" />
-          <h3 className="text-sm font-semibold mb-1 text-brand-ink">工具与环境</h3>
-          <p className="text-xs text-brand-ink-muted">
-            PyTorch、scikit-learn、ESM-2、AlphaFold2等核心工具安装与配置
-          </p>
-        </Link>
-        <Link
-          to="/math"
-          className="border rounded-lg p-5 no-underline hover:shadow-sm transition-shadow border-brand-border"
-        >
-          <Brain size={18} className="mb-2 text-brand-accent" />
-          <h3 className="text-sm font-semibold mb-1 text-brand-ink">数学直觉</h3>
-          <p className="text-xs text-brand-ink-muted">
-            用生物学直觉理解线性代数、微积分、概率和优化
-          </p>
-        </Link>
-      </section>
     </div>
   );
 }
