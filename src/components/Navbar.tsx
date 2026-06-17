@@ -56,7 +56,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
                     className={`relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
                   >
                     <item.icon size={15} />
-                    <span className="hidden xl:inline">{item.label}</span>
+                    {item.label}
                     {active && (
                       <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
                     )}
