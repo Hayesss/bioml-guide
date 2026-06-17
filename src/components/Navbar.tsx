@@ -2,18 +2,28 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna, Glasses, GitGraph, Code } from 'lucide-react';
 
-const navItems = [
-  { path: '/intro', label: '背景知识', icon: Glasses },
-  { path: '/python', label: 'Python', icon: Code },
-  { path: '/graph', label: '图谱', icon: GitGraph },
-  { path: '/roadmap', label: '学习路径', icon: BookOpen },
-  { path: '/ngs', label: '生信NGS', icon: Dna },
-  { path: '/applications', label: '应用方向', icon: Microscope },
-  { path: '/resources', label: '资源库', icon: Library },
-  { path: '/tools', label: '工具', icon: Wrench },
-  { path: '/math', label: '数学直觉', icon: Sigma },
-  { path: '/cheatsheet', label: '速查', icon: Zap },
+const navGroups = [
+  {
+    items: [
+      { path: '/graph', label: '图谱', icon: GitGraph },
+      { path: '/roadmap', label: '学习路径', icon: BookOpen },
+      { path: '/ngs', label: '生信NGS', icon: Dna },
+      { path: '/applications', label: '应用方向', icon: Microscope },
+      { path: '/intro', label: '背景知识', icon: Glasses },
+    ],
+  },
+  {
+    items: [
+      { path: '/python', label: 'Python', icon: Code },
+      { path: '/math', label: '数学直觉', icon: Sigma },
+      { path: '/tools', label: '工具', icon: Wrench },
+      { path: '/resources', label: '资源库', icon: Library },
+      { path: '/cheatsheet', label: '速查', icon: Zap },
+    ],
+  },
 ];
+
+const allNavItems = navGroups.flatMap(g => g.items);
 
 interface NavbarProps {
   onSearch?: () => void;
@@ -33,23 +43,31 @@ export default function Navbar({ onSearch }: NavbarProps) {
           BioML Guide
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => {
-            const active = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
-              >
-                <item.icon size={15} />
-                {item.label}
-                {active && (
-                  <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
-                )}
-              </Link>
-            );
-          })}
+        <div className="hidden md:flex items-center gap-5">
+          {navGroups.map((group, gi) => (
+            <div key={gi} className="flex items-center gap-5">
+              {gi > 0 && (
+                <div className="w-px h-5 bg-brand-border-light" />
+              )}
+              {group.items.map((item) => {
+                const active = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
+                  >
+                    <item.icon size={15} />
+                    <span className="hidden xl:inline">{item.label}</span>
+                    {active && (
+                      <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+          <div className="w-px h-5 bg-brand-border-light" />
           <button
             onClick={onSearch}
             className="flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border"
@@ -72,20 +90,27 @@ export default function Navbar({ onSearch }: NavbarProps) {
 
       {mobileOpen && (
         <div className="md:hidden bg-white border-b px-6 py-4 space-y-3 border-brand-border">
-          {navItems.map((item) => {
-            const active = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-2 py-1.5 text-sm font-medium no-underline ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                <item.icon size={15} />
-                {item.label}
-              </Link>
-            );
-          })}
+          {navGroups.map((group, gi) => (
+            <div key={gi}>
+              {gi > 0 && <div className="border-t border-brand-border-light pt-3 mt-3" />}
+              <div className="space-y-3">
+                {group.items.map((item) => {
+                  const active = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-2 py-1.5 text-sm font-medium no-underline ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <item.icon size={15} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
           <div className="pt-2 border-t border-brand-border-light">
             <button
               onClick={() => { setMobileOpen(false); onSearch?.(); }}
