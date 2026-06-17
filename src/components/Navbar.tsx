@@ -23,8 +23,6 @@ const navGroups = [
   },
 ];
 
-const allNavItems = navGroups.flatMap(g => g.items);
-
 interface NavbarProps {
   onSearch?: () => void;
 }
