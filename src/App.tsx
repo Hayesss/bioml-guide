@@ -21,6 +21,8 @@ const IntroPage = lazy(() => import('./pages/IntroPage'));
 const BioinfoNgsPage = lazy(() => import('./pages/BioinfoNgsPage'));
 const FoundationModelsPage = lazy(() => import('./pages/FoundationModelsPage'));
 const GraphPage = lazy(() => import('./pages/GraphPage'));
+const PythonPage = lazy(() => import('./pages/PythonPage'));
+const PythonChapterPage = lazy(() => import('./pages/PythonChapterPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
@@ -47,6 +49,8 @@ export default function App() {
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/tools" element={<ToolsPage />} />
             <Route path="/math" element={<MathPage />} />
+            <Route path="/python" element={<PythonPage />} />
+            <Route path="/python/:chapterKey" element={<PythonChapterPage />} />
             <Route path="/graph" element={<GraphPage />} />
             <Route path="/cheatsheet" element={<CheatSheetPage />} />
             <Route path="/learn/:topicKey" element={<TopicLearnPage />} />
