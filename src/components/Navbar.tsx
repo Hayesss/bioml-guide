@@ -41,11 +41,11 @@ export default function Navbar({ onSearch }: NavbarProps) {
           BioML Guide
         </Link>
 
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden md:flex items-center gap-3">
           {navGroups.map((group, gi) => (
-            <div key={gi} className="flex items-center gap-5">
+            <div key={gi} className="flex items-center gap-3">
               {gi > 0 && (
-                <div className="w-px h-5 bg-brand-border-light" />
+                <div className="w-px h-4 bg-brand-border-light" />
               )}
               {group.items.map((item) => {
                 const active = location.pathname === item.path;
@@ -53,9 +53,9 @@ export default function Navbar({ onSearch }: NavbarProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`relative flex items-center gap-1.5 text-sm font-medium no-underline transition-colors ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
+                    className={`relative flex items-center gap-1 text-xs font-medium no-underline transition-colors whitespace-nowrap ${active ? 'text-brand-accent' : 'text-brand-ink-light'}`}
                   >
-                    <item.icon size={15} />
+                    <item.icon size={13} />
                     {item.label}
                     {active && (
                       <span className="absolute -bottom-4 left-0 right-0 h-0.5 bg-brand-accent" />
@@ -65,14 +65,14 @@ export default function Navbar({ onSearch }: NavbarProps) {
               })}
             </div>
           ))}
-          <div className="w-px h-5 bg-brand-border-light" />
+          <div className="w-px h-4 bg-brand-border-light" />
           <button
             onClick={onSearch}
-            className="flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border"
+            className="flex items-center gap-1 text-xs border rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition-colors text-brand-ink-muted border-brand-border whitespace-nowrap"
           >
-            <Search size={14} />
-            <span className="hidden lg:inline">搜索</span>
-            <kbd className="hidden lg:inline text-xs px-1 py-0.5 rounded border font-mono ml-1 border-brand-border bg-brand-off-white">
+            <Search size={13} />
+            <span>搜索</span>
+            <kbd className="hidden lg:inline text-[10px] px-1 py-0.5 rounded border font-mono border-brand-border bg-brand-off-white">
               Ctrl+K
             </kbd>
           </button>
