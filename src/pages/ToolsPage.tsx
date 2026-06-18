@@ -344,6 +344,237 @@ pip install transformers biopython scanpy`}
           </div>
         </div>
       </section>
+
+      {/* Pixi Environment Management */}
+      <section>
+        <h2 className="text-xl font-bold mb-2 text-brand-ink">pixi — 现代生信环境管理</h2>
+        <p className="text-sm text-brand-ink-muted mb-6" style={{ lineHeight: 1.7 }}>
+          pixi 是基于 conda 生态的跨平台包管理器（Rust编写，mamba团队开发）。核心创新：<strong>自动生成锁文件(pixi.lock)</strong>，精确记录每个包的版本和校验和——确保环境在任何机器、任何时间都能完美复现。
+        </p>
+
+        {/* pixi vs conda */}
+        <div className="border rounded-lg overflow-hidden mb-6 border-brand-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-brand-off-white">
+                <th className="text-left px-4 py-2.5 font-semibold text-brand-ink">维度</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-brand-accent">conda / mamba</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-brand-dl">pixi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { dim: '锁文件', conda: '需手动导出 (conda env export)', pixi: '自动生成 pixi.lock，含校验和' },
+                { dim: '解决速度', conda: 'libsolv (conda) / libmamba', pixi: 'resolvo + uv 集成，显著更快' },
+                { dim: '项目隔离', conda: '需手动 activate/deactivate', pixi: 'pixi run 自动使用项目环境' },
+                { dim: 'Python+R混装', conda: 'conda install r-base r-xxx', pixi: 'pixi add r-base r-tidyverse，同等工作流' },
+                { dim: '跨平台', conda: 'environment.yml 不含平台锁', pixi: 'platforms 字段声明，lockfile 跨OS一致' },
+                { dim: '环境复用', conda: 'conda-pack / 手动拷贝', pixi: 'pixi-pack 自解压包 / pixi-docker / pixi build' },
+                { dim: '配置文件', conda: 'environment.yml (YAML)', pixi: 'pixi.toml + pixi.lock (TOML)' },
+              ].map(row => (
+                <tr key={row.dim} className="border-t border-brand-border-light">
+                  <td className="px-4 py-2.5 font-medium text-brand-ink-light text-xs">{row.dim}</td>
+                  <td className="px-4 py-2.5 text-xs text-brand-ink-muted">{row.conda}</td>
+                  <td className="px-4 py-2.5 text-xs text-brand-dl">{row.pixi}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Installation */}
+        <div className="border rounded-lg p-5 mb-6 border-brand-border bg-brand-off-white">
+          <h3 className="text-sm font-semibold mb-3 text-brand-ink">安装</h3>
+          <pre className="p-3 rounded-lg border font-mono text-xs overflow-x-auto bg-white border-brand-border-light">
+{`# Linux / macOS
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# 或通过 conda-forge
+conda install pixi -c conda-forge
+
+# 验证
+pixi --version`}
+          </pre>
+        </div>
+
+        {/* 工作流1: 初始化生信项目 */}
+        <div className="border rounded-lg p-5 mb-4 border-brand-border">
+          <h3 className="text-sm font-semibold mb-2 text-brand-ink">工作流一：初始化生信项目 (Python + R)</h3>
+          <p className="text-xs text-brand-ink-muted mb-3">创建包含 Python 和 R 依赖的生信分析项目，自动生成锁文件</p>
+          <pre className="p-3 rounded-lg border font-mono text-xs overflow-x-auto bg-brand-off-white border-brand-border-light mb-2">
+{`# 1. 创建项目
+pixi init scrna-analysis
+cd scrna-analysis
+
+# 2. 声明目标平台（跨OS复现的关键！）
+# 编辑 pixi.toml，确保 platforms 包含所需平台：
+# platforms = ["linux-64", "osx-arm64", "osx-64"]
+
+# 3. 添加 Python 数据科学栈
+pixi add python=3.10 scanpy scvi-tools numpy pandas matplotlib
+pixi add pytorch pytorch-cuda=11.8 -c pytorch
+
+# 4. 添加 R 生物信息学栈
+pixi add r-base r-essentials r-tidyverse r-deseq2
+pixi add r-seurat r-harmony r-scran
+
+# 5. 添加命令行生信工具
+pixi add samtools bwa fastqc multiqc bowtie2 bedtools
+
+# 6. 添加开发工具
+pixi add jupyterlab ipykernel
+pixi add pytest black ruff`}
+          </pre>
+          <p className="text-xs text-brand-ink-muted">
+            执行完成后，pixi.toml 记录所有依赖，pixi.lock 锁定精确版本 —— 分享项目只需这两个文件
+          </p>
+        </div>
+
+        {/* 工作流2: 日常使用 */}
+        <div className="border rounded-lg p-5 mb-4 border-brand-border">
+          <h3 className="text-sm font-semibold mb-2 text-brand-ink">工作流二：日常开发与运行</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-medium text-brand-ink-light mb-2">运行命令</p>
+              <pre className="p-2 rounded-lg border font-mono text-[11px] bg-brand-off-white border-brand-border-light">
+{`# 在项目环境中执行任意命令
+pixi run python analysis.py
+pixi run Rscript deseq2_analysis.R
+pixi run jupyter lab
+
+# 进入交互式 shell
+pixi shell
+
+# 在 shell 中直接使用 Python / R
+python -c "import scanpy; print(scanpy.__version__)"
+Rscript -e "library(Seurat); sessionInfo()"`}
+              </pre>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-brand-ink-light mb-2">定义快捷任务 (pixi.toml)</p>
+              <pre className="p-2 rounded-lg border font-mono text-[11px] bg-brand-off-white border-brand-border-light">
+{`[tasks]
+# 一键运行完整分析管线
+qc = "python scripts/qc.py"
+cluster = "python scripts/cluster.py"
+annotation = "python scripts/annotation.py"
+all = { cmd = "pixi run qc && pixi run cluster && pixi run annotation", depends_on = ["qc", "cluster", "annotation"] }
+
+# R 任务
+deseq2 = "Rscript scripts/deseq2_analysis.R"
+
+# 启动 notebook
+lab = "jupyter lab --port=8888"`}
+              </pre>
+            </div>
+          </div>
+        </div>
+
+        {/* 工作流3: 环境转移复用 */}
+        <div className="border rounded-lg p-5 mb-4 border-brand-border">
+          <h3 className="text-sm font-semibold mb-2 text-brand-ink">工作流三：环境转移与复用（三种方式）</h3>
+          <p className="text-xs text-brand-ink-muted mb-3">
+            生信分析最常见的场景：在服务器上配置好环境，需要搬到另一台机器或分享给合作者
+          </p>
+          <div className="space-y-3">
+            {[
+              { title: '方式A：Git 共享（推荐——最简单）', code: '# 开发者：提交配置文件\ngit add pixi.toml pixi.lock\ngit commit -m "更新生信环境配置"\ngit push\n\n# 合作者：克隆后一键安装\npixi install  # 读取 pixi.lock，精确复现所有包版本', desc: 'pixi.lock 记录了每个包的 URL + SHA256 校验和。只要锁文件在，环境就能100%复现。' },
+              { title: '方式B：pixi-pack — 自解压离线包（适合服务器无网环境）', code: '# 源机器：打包环境\npixi pack   # 生成 .tar.gz 自解压包\n\n# 目标机器：解压即用\ntar xzf project.tar.gz\n./pixi-pack unpack', desc: '将完整环境（含解释器和所有依赖）打包为单个文件。无需目标机器安装任何包管理器。适合HPC集群离线节点。' },
+              { title: '方式C：pixi build + 私有频道（适合团队级复用）', code: '# 构建 conda 包\npixi build  # 生成 .conda 二进制包\n\n# 发布到私有频道\npixi upload my-channel project-0.1.0.conda\n\n# 团队成员安装\npixi add project -c my-channel', desc: '将分析环境封装为可分发的 conda 包。适合有统一分析管线的实验室——所有成员用同一版本。' },
+            ].map((item, i) => (
+              <div key={i} className="border rounded-lg p-4 border-brand-border-light bg-brand-off-white">
+                <h4 className="text-xs font-semibold mb-2 text-brand-accent">{item.title}</h4>
+                <pre className="p-2 rounded border font-mono text-[11px] overflow-x-auto bg-white border-brand-border-light mb-2">
+                  {item.code}
+                </pre>
+                <p className="text-[11px] text-brand-ink-muted">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 工作流4: Docker 部署 */}
+        <div className="border rounded-lg p-5 mb-4 border-brand-border">
+          <h3 className="text-sm font-semibold mb-2 text-brand-ink">工作流四：Docker / CI 集成</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-medium text-brand-ink-light mb-2">生成 Docker 镜像</p>
+              <pre className="p-2 rounded-lg border font-mono text-[11px] bg-brand-off-white border-brand-border-light">
+{`# 从 pixi 项目生成 Dockerfile
+pixi docker init
+
+# 构建镜像
+docker build -t scrna-pipeline .
+
+# 运行
+docker run -v $(pwd)/data:/data scrna-pipeline \\
+  pixi run all`}
+              </pre>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-brand-ink-light mb-2">GitHub Actions CI</p>
+              <pre className="p-2 rounded-lg border font-mono text-[11px] bg-brand-off-white border-brand-border-light">
+{`# .github/workflows/test.yml
+- uses: prefix-dev/setup-pixi@v0.8.0
+  with:
+    pixi-version: "latest"
+    cache: true
+- run: pixi run test
+- run: pixi run lint`}
+              </pre>
+            </div>
+          </div>
+        </div>
+
+        {/* 生信环境模板集 */}
+        <div className="border rounded-lg p-5 mb-4 border-brand-border">
+          <h3 className="text-sm font-semibold mb-3 text-brand-ink">生信环境模板集</h3>
+          <p className="text-xs text-brand-ink-muted mb-3">
+            以下是常见生信分析场景的 pixi.toml 配置，可直接复制使用
+          </p>
+          <div className="space-y-3">
+            {[
+              { name: '单细胞分析 (Python)', deps: 'python=3.10\nscanpy\nscvi-tools\nscikit-learn\nnumpy\npandas\nmatplotlib\njupyterlab\npytest', desc: '标准 scRNA-seq 分析环境' },
+              { name: 'Bulk RNA-seq (R)', deps: 'r-base\nr-deseq2\nr-edger\nr-limma\nr-pheatmap\nr-ggplot2\nr-tidyverse\nbioconductor-org.hs.eg.db', desc: '差异表达 + 通路富集' },
+              { name: '深度学习蛋白分析', deps: 'python=3.10\npytorch\npytorch-cuda=11.8\nbiopython\nhuggingface-hub\ntransformers\njupyterlab\nwandb', desc: 'PyTorch + HuggingFace 蛋白模型' },
+              { name: '空间转录组', deps: 'python=3.10\nscanpy\nsquidpy\nspatialdata\nnapari\njupyterlab\nnumpy\npandas\nmatplotlib', desc: 'squidpy + napari 可视化' },
+              { name: '全栈生信 (Python+R+CLI)', deps: 'python=3.10\nscanpy\nr-base\nr-seurat\nr-deseq2\nsamtools\nbowtie2\nfastqc\nbedtools\njupyterlab', desc: '一个环境搞定 Python/R/CLI 工具' },
+            ].map((tpl, i) => (
+              <div key={i} className="border rounded-lg p-3 border-brand-border-light bg-brand-off-white">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-brand-ink">{tpl.name}</span>
+                  <span className="text-[10px] text-brand-ink-muted">{tpl.desc}</span>
+                </div>
+                <pre className="p-2 rounded border font-mono text-[10px] bg-white border-brand-border-light">
+{`pixi init ${tpl.name.toLowerCase().replace(/[() ]/g, '-')}
+pixi add ${tpl.deps.replace(/\n/g, ' ')}`}
+                </pre>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 最佳实践 */}
+        <div className="border rounded-lg p-5 border-brand-border bg-brand-accent-light">
+          <h3 className="text-sm font-semibold mb-3 text-brand-accent">生信环境管理最佳实践</h3>
+          <div className="space-y-2 text-xs text-brand-ink-light">
+            {[
+              '<strong>永远提交 pixi.lock：</strong>这是环境可复现的唯一保证。.gitignore 中保留 pixi.lock，忽略 .pixi/ 目录。',
+              '<strong>为每个项目独立建环境：</strong>不要在全局装包。scRNA分析和Bulk RNA分析用不同的 pixi 项目。',
+              '<strong>声明 platforms：</strong>在 pixi.toml 中明确列出目标平台，避免跨OS依赖解析失败。',
+              '<strong>PyPI 包用 uv 集成：</strong>conda-forge 没有的 Python 包，用 <code>pixi add --pypi package</code>，pixi 会用 uv 解析并锁定。',
+              '<strong>R 包优先 conda-forge：</strong>conda-forge 的 R 包生态已非常完善（Bioconductor 全覆盖），优先用 <code>pixi add r-xxx</code> 而非 R 内部的 install.packages()。',
+              '<strong>任务脚本化：</strong>把所有分析步骤写成 pixi.toml 中的 tasks，新成员 <code>pixi run all</code> 一键复现全部分析。',
+              '<strong>环境迁移用 pixi-pack：</strong>计算集群节点通常无外网，用 pixi-pack 打包后在节点上解压即可使用。',
+            ].map((tip, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-brand-accent font-bold shrink-0 mt-0.5">{i+1}.</span>
+                <span dangerouslySetInnerHTML={{ __html: tip }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
