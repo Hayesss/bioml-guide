@@ -5,10 +5,10 @@ import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna
 const navGroups = [
   {
     items: [
+      { path: '/intro', label: '背景', icon: Glasses },
       { path: '/roadmap', label: '路径', icon: BookOpen },
       { path: '/ngs', label: 'NGS', icon: Dna },
       { path: '/applications', label: '应用', icon: Microscope },
-      { path: '/intro', label: '背景', icon: Glasses },
     ],
   },
   {
