@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna, Glasses, Code } from 'lucide-react';
+import { BookOpen, Microscope, Library, Wrench, Sigma, Zap, Menu, X, Search, Dna, Glasses } from 'lucide-react';
 
 const navGroups = [
   {
@@ -13,7 +13,6 @@ const navGroups = [
   },
   {
     items: [
-      { path: '/python', label: 'Python', icon: Code },
       { path: '/math', label: '数学', icon: Sigma },
       { path: '/tools', label: '工具', icon: Wrench },
       { path: '/resources', label: '资源', icon: Library },

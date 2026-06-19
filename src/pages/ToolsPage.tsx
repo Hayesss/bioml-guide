@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../hooks/useData';
-import { Copy, Check, FlaskConical, BookOpen, Terminal } from 'lucide-react';
+import { Copy, Check, FlaskConical, BookOpen, Terminal, Code } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
 interface Tool {
@@ -62,6 +62,62 @@ export default function ToolsPage() {
           生物信息学ML/DL工作流中常用的框架、库和平台
         </p>
       </div>
+
+      {/* Python + R 编程语言入口 */}
+      <section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Link
+            to="/python"
+            className="border rounded-xl p-5 no-underline hover:shadow-md transition-all border-brand-border bg-white group"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#3776AB] text-white font-bold text-sm">Py</div>
+              <div>
+                <h2 className="text-base font-bold text-brand-ink">Python 编程</h2>
+                <p className="text-xs text-brand-ink-muted">基于《Python编程：从入门到实践》</p>
+              </div>
+            </div>
+            <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
+              基础语法 → 进阶编程 → 数据可视化。每章配有生信场景代码示例，学完即可处理基因表达矩阵、FASTA解析、火山图绘制。
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {['14章', '入门→中级', 'Matplotlib/Plotly'].map(t => (
+                <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-brand-off-white border border-brand-border-light text-brand-ink-muted">{t}</span>
+              ))}
+            </div>
+          </Link>
+
+          <div className="border rounded-xl p-5 border-brand-border bg-white">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#276DC3] text-white font-bold text-sm">R</div>
+              <div>
+                <h2 className="text-base font-bold text-brand-ink">R 语言</h2>
+                <p className="text-xs text-brand-ink-muted">生信分析的标准语言</p>
+              </div>
+            </div>
+            <p className="text-xs text-brand-ink-light mb-3" style={{ lineHeight: 1.6 }}>
+              DESeq2差异分析、Seurat单细胞、WGCNA共表达网络、ggplot2出版级绘图——R是生物信息学的母语，尤其在统计分析和可视化领域无可替代。
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {['Bioconductor', 'tidyverse', 'Seurat', 'DESeq2', 'ggplot2'].map(t => (
+                <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-brand-off-white border border-brand-border-light text-brand-ink-muted">{t}</span>
+              ))}
+            </div>
+            <div className="space-y-1.5">
+              {[
+                { label: 'R 官方文档', url: 'https://cran.r-project.org/manuals.html' },
+                { label: 'Bioconductor', url: 'https://www.bioconductor.org/' },
+                { label: 'R for Data Science (免费书)', url: 'https://r4ds.hadley.nz/' },
+              ].map(link => (
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
+                  className="block text-[11px] text-brand-accent hover:underline no-underline">
+                  {link.label} →
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section>
         <h2 className="text-lg font-bold mb-5 text-brand-ink">ML 与 DL 框架对比</h2>
