@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
-import { Copy, Check, FlaskConical, BookOpen, Terminal, Code } from 'lucide-react';
+import { Copy, Check, FlaskConical, BookOpen, Terminal } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
 interface Tool {
