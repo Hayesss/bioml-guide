@@ -10,7 +10,8 @@
     "数据",
     "平台",
     "R语言",
-    "NGS流程"
+    "NGS流程",
+    "环境管理"
   ],
   "tools": [
     {
@@ -937,6 +938,25 @@
         "annotation"
       ],
       "quickExample": "findMotifsGenome.pl peaks.bed hg38 homer_out -size 200"
+    },
+    {
+      "id": "pixi",
+      "name": "pixi",
+      "description": "基于conda生态的跨平台包管理器(Rust/mamba团队)。自动生成pixi.lock锁文件精确复现环境。支持Python+R+C++混合项目，pixi-pack离线分发，Docker/CI集成。生信环境管理首选工具。",
+      "category": "环境管理",
+      "installCommand": "curl -fsSL https://pixi.sh/install.sh | bash",
+      "difficulty": "中级",
+      "mlRelevant": false,
+      "dlRelevant": false,
+      "url": "https://prefix.dev/tools/pixi",
+      "tags": [
+        "环境管理",
+        "锁文件",
+        "跨平台",
+        "Python+R",
+        "Docker",
+        "conda生态"
+      ]
     }
   ]
 }

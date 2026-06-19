@@ -164,6 +164,7 @@ export default function ToolsPage() {
           ))}
         </div>
 
+        {activeCat !== '环境管理' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((tool) => (
             <div
@@ -238,6 +239,7 @@ export default function ToolsPage() {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       <section>
@@ -402,7 +404,8 @@ pip install transformers biopython scanpy`}
         </div>
       </section>
 
-      {/* Pixi Environment Management */}
+      {/* Pixi Environment Management — only show when 环境管理 category selected */}
+      {activeCat === '环境管理' && (
       <section>
         <h2 className="text-xl font-bold mb-2 text-brand-ink">pixi — 现代生信环境管理</h2>
         <p className="text-sm text-brand-ink-muted mb-6" style={{ lineHeight: 1.7 }}>
@@ -632,6 +635,7 @@ pixi add ${tpl.deps.replace(/\n/g, ' ')}`}
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
